@@ -1,0 +1,8 @@
+.grunt
+.idea
+.vagrant
+*.iml
+bower_components
+build
+dist
+node_modules
