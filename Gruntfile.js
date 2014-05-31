@@ -23,7 +23,7 @@ module.exports = function(grunt) {
                 banner: '<%= config.banner %>\n'
             },
             dist: {
-                src: 'src/**/*.js',
+                src: ['src/intro.js', 'src/*/*.js', 'src/outro.js'],
                 dest: 'dist/techan.js'
             }
         },
@@ -95,6 +95,6 @@ module.exports = function(grunt) {
     grunt.registerTask('lint:dist', ['jshint:dist', 'jscs:dist']);
     grunt.registerTask('dev', ['lint:dev', 'concat', 'lint:dist', 'test']);
     grunt.registerTask('test', ['jasmine']);
-    // TODO Add bower
+
     grunt.registerTask('default', ['bower', 'clean', 'dev', 'uglify']);
 };

@@ -1,6 +1,8 @@
-/**
- * Created by andredumas on 29/05/2014.
- */
-var testVar = {};
-
-testVar.another = "Some value";
+  if (typeof define === "function" && define.amd) {
+    define(techan);
+  } else if (typeof module === "object" && module.exports) {
+    module.exports = techan;
+  } else {
+    this.techan = techan;
+  }
+})(d3);
