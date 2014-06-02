@@ -17,15 +17,39 @@ module.exports = function(grunt) {
             build: ['build']
         },
 
-        concat: {
-            options: {
-                // TODO Strip comments
-                banner: '<%= config.banner %>\n'
-            },
-            dist: {
-                src: ['src/intro.js', 'src/*/*.js', 'src/outro.js'],
-                dest: 'dist/techan.js'
+        browserify: {
+          options: {
+            bundleOptions: {
+              standalone: 'techan'
             }
+          },
+          dev: {
+            options: {
+              bundleOptions: {
+                debug: true,
+                standalone: '<%= browserify.options.bundleOptions.standalone %>'
+              }
+            },
+            src: 'src/techan.js',
+            dest: 'build/techan.js'
+          },
+          dist: {
+              src: 'src/techan.js',
+              dest: 'dist/techan.js'
+          }
+        },
+
+        usebanner: {
+          options: {
+            position: 'top',
+            banner: '<%= config.banner %>',
+            linebreak: true
+          },
+          dist: {
+            files: {
+              src: '<%= browserify.dist.dest %>'
+            }
+          }
         },
 
         jsonlint: {
@@ -38,11 +62,14 @@ module.exports = function(grunt) {
         },
 
         jshint: {
+            options: {
+                jshintrc: ".jshintrc"
+            },
             dev: {
                 src: ['src/**/*.js', 'lib/**/*.js', 'Gruntfile.js', 'test/**/*.js']
             },
             dist: {
-                src: '<%= concat.dist.dest %>'
+                src: '<%= browserify.dist.dest %>'
             }
         },
 
@@ -70,7 +97,7 @@ module.exports = function(grunt) {
                 }
             },
             test: {
-                src: '<%= concat.dist.dest %>'
+                src: '<%= browserify.dev.dest %>'
             }
         },
 
@@ -82,7 +109,7 @@ module.exports = function(grunt) {
             },
             dist: {
                 files: {
-                    'dist/techan.min.js': '<%= concat.dist.dest %>'
+                    'dist/techan.min.js': '<%= browserify.dist.dest %>'
                 }
             }
         }
@@ -93,8 +120,8 @@ module.exports = function(grunt) {
 
     grunt.registerTask('lint:dev', ['jshint:dev', 'jscs:dev']);
     grunt.registerTask('lint:dist', ['jshint:dist', 'jscs:dist']);
-    grunt.registerTask('dev', ['lint:dev', 'concat', 'lint:dist', 'test']);
+    grunt.registerTask('dev', ['lint:dev', 'browserify:dev', 'test']);
     grunt.registerTask('test', ['jasmine']);
 
-    grunt.registerTask('default', ['bower', 'clean', 'dev', 'uglify']);
+    grunt.registerTask('default', ['bower', 'clean', 'dev', 'browserify:dist', 'usebanner', 'uglify']);
 };
