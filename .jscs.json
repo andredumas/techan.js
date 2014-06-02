@@ -1,7 +1,6 @@
 {
-    "disallowKeywords": ["with"],
-    "disallowTrailingWhitespace": true,
-    "requireRightStickedOperators": ["!"],
-    "requireLeftStickedOperators": [","],
-    "excludeFiles": [ "src/intro.js", "src/outro.js"]
+  "disallowKeywords": ["with"],
+  "disallowTrailingWhitespace": true,
+  "requireRightStickedOperators": ["!"],
+  "requireLeftStickedOperators": [","]
 }

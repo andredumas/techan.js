@@ -1,3 +1,3 @@
 /*
-  Support and resistance analysis line (substance)
+ Support and resistance analysis line (substance)
  */
