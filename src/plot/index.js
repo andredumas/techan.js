@@ -1,4 +1,7 @@
-"use strict";
+'use strict';
 
-var plot = require("./plot");
-module.exports = plot;
+module.exports = function() {
+  return {
+    candlestick: require('./candlestick')
+  };
+};

@@ -17,22 +17,33 @@ module.exports = function(grunt) {
     },
 
     browserify: {
-      options: {
-        bundleOptions: {
-          standalone: 'techan'
-        }
-      },
       dev: {
         options: {
+          // Thanks https://github.com/amitayd/grunt-browserify-jasmine-node-example/blob/2488181e29b09226f2a87202a851f996820eafb6/Gruntfile.js#L51
+          require: grunt.file.expand({filter: 'isFile'}, './src/**/*.js'),
           bundleOptions: {
-            debug: true,
-            standalone: '<%= browserify.options.bundleOptions.standalone %>'
+            debug: true
           }
         },
         src: 'src/techan.js',
-        dest: 'build/techan.js'
+        dest: 'build/techan-bundle.js'
+      },
+      test: {
+        options: {
+          external: ['src/**/*.js'],
+          bundleOptions: {
+            debug: true
+          }
+        },
+        src: ['test/spec/**/*.js'],
+        dest: 'build/specs-bundle.js'
       },
       dist: {
+        options: {
+          bundleOptions: {
+            standalone: 'techan'
+          }
+        },
         src: 'src/techan.js',
         dest: 'dist/techan.js'
       }
@@ -52,11 +63,11 @@ module.exports = function(grunt) {
     },
 
     jsonlint: {
-      dist: {
-        src: ['package.json']
-      },
       bower: {
         src: ['bower.json']
+      },
+      dist: {
+        src: ['package.json']
       }
     },
 
@@ -87,7 +98,7 @@ module.exports = function(grunt) {
 
     jasmine: {
       options: {
-        specs: 'test/spec/**/*Spec.js',
+        specs: '<%= browserify.test.dest %>',
         vendor: ['bower_components/d3/d3.min.js'],
         keepRunner: true,
         outfile: 'build/SpecRunner.html',
@@ -119,7 +130,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('lint:dev', ['jshint:dev', 'jscs:dev']);
   grunt.registerTask('lint:dist', ['jshint:dist', 'jscs:dist']);
-  grunt.registerTask('dev', ['lint:dev', 'browserify:dev', 'test']);
+  grunt.registerTask('dev', ['lint:dev', 'browserify:dev', 'browserify:test', 'test']);
   grunt.registerTask('test', ['jasmine']);
 
   grunt.registerTask('default', ['bower', 'clean', 'dev', 'browserify:dist', 'usebanner', 'uglify']);

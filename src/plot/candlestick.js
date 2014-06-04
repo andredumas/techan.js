@@ -1,3 +1,9 @@
-//techan.plot.candlestick = function() {
-//
-//};
+'use strict';
+
+module.exports = function() {
+  function CandleStick() {
+
+  }
+
+  return CandleStick;
+};
