@@ -7,7 +7,7 @@ describe('techan.analysis', function() {
     }
   };
 
-  var analysis = require('../../../src/analysis')(mockD3);
+  var analysis = require('../../../../src/analysis')(mockD3);
 
   it('.supstance should be defined', function() {
     expect(analysis.supstance).toBeDefined(mockD3);

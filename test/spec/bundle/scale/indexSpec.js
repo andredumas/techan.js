@@ -8,7 +8,7 @@ describe('techan.scale', function() {
     }
   };
 
-  var scale = require('../../../src/scale')(mockD3);
+  var scale = require('../../../../src/scale')(mockD3);
 
   it('.financetime should be defined', function() {
     expect(scale.financetime).toBeDefined();

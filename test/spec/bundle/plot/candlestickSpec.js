@@ -3,7 +3,7 @@ describe('techan.plot.candlestick', function() {
 
   var mockLinear = function() {};
   var mockOrdinal = function() {};
-  var candlestick = require('../../../src/plot/candlestick')(mockLinear, mockOrdinal);
+  var candlestick = require('../../../../src/plot/candlestick')(mockLinear, mockOrdinal);
 
   it('should be defined', function() {
     expect(candlestick).toBeDefined();

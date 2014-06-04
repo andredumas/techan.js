@@ -1,7 +1,7 @@
-describe('Given the standalone module entry point, techan', function() {
+describe('Given the CommonJS module entry point, techan', function() {
   'use strict';
 
-  var techan = require('../../src/techan.js');
+  var techan = require('../../../src/techan.js');
 
   it('should be defined', function () {
     expect(techan).toBeDefined();

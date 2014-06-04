@@ -7,7 +7,7 @@ module.exports = function(grunt) {
     config: {
       banner: '/*\n' +
         ' TechanJS v<%= pkg.version %>\n' +
-        " (c) 2014 - <%= grunt.template.today('yyyy') %> André Dumas | https://github.com/andredumas/techan.js\n" +
+        " (c) 2014 - <%= grunt.template.today('yyyy') %> Andre Dumas | https://github.com/andredumas/techan.js\n" +
         '*/'
     },
 
@@ -35,7 +35,7 @@ module.exports = function(grunt) {
             debug: true
           }
         },
-        src: ['test/spec/**/*.js'],
+        src: ['test/spec/bundle/**/*.js'],
         dest: 'build/specs-bundle.js'
       },
       dist: {
@@ -77,9 +77,6 @@ module.exports = function(grunt) {
       },
       dev: {
         src: ['src/**/*.js', 'lib/**/*.js', 'Gruntfile.js', 'test/**/*.js']
-      },
-      dist: {
-        src: '<%= browserify.dist.dest %>'
       }
     },
 
@@ -87,8 +84,7 @@ module.exports = function(grunt) {
       options: {
         config: '.jscs.json'
       },
-      dev: ['src/**/*.js', 'Gruntfile.js', 'test/**/*.js'],
-      dist: 'dist/*.js'
+      dev: ['src/**/*.js', 'Gruntfile.js', 'test/**/*.js']
     },
 
     watch: {
@@ -98,16 +94,29 @@ module.exports = function(grunt) {
 
     jasmine: {
       options: {
-        specs: '<%= browserify.test.dest %>',
-        vendor: ['bower_components/d3/d3.min.js'],
-        keepRunner: true,
-        outfile: 'build/SpecRunner.html',
-        junit: {
-          path: 'build/reports/test'
-        }
+        vendor: ['bower_components/d3/d3.min.js', 'test/spec/common/**/*.js'],
+        keepRunner: true
       },
       test: {
+        options: {
+          specs: '<%= browserify.test.dest %>',
+          outfile: 'build/bundleSpecRunner.html'
+        },
         src: '<%= browserify.dev.dest %>'
+      },
+      dist: {
+        options: {
+          specs: 'test/spec/standalone/**/*.js',
+          outfile: 'build/standaloneSpecRunner.html'
+        },
+        src: '<%= browserify.dist.dest %>'
+      },
+      minify: {
+        options: {
+          specs: 'test/spec/standalone/**/*.js',
+          outfile: 'build/standaloneMinSpecRunner.html'
+        },
+        src: '<%= uglify.dist.dest %>'
       }
     },
 
@@ -118,9 +127,8 @@ module.exports = function(grunt) {
         report: 'min'
       },
       dist: {
-        files: {
-          'dist/techan.min.js': '<%= browserify.dist.dest %>'
-        }
+        src: '<%= browserify.dist.dest %>',
+        dest: 'dist/techan.min.js'
       }
     }
   });
@@ -128,10 +136,10 @@ module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
   grunt.loadTasks('lib/grunt');
 
-  grunt.registerTask('lint:dev', ['jshint:dev', 'jscs:dev']);
-  grunt.registerTask('lint:dist', ['jshint:dist', 'jscs:dist']);
-  grunt.registerTask('dev', ['lint:dev', 'browserify:dev', 'browserify:test', 'test']);
-  grunt.registerTask('test', ['jasmine']);
+  grunt.registerTask('lint', ['jshint', 'jscs']);
+  grunt.registerTask('dev', ['lint', 'browserify:dev', 'browserify:test', 'jasmine:test']);
+  grunt.registerTask('dist', ['browserify:dist', 'usebanner', 'jasmine:dist']);
+  grunt.registerTask('minify', ['uglify', 'jasmine:minify']);
 
-  grunt.registerTask('default', ['bower', 'clean', 'dev', 'browserify:dist', 'usebanner', 'uglify']);
+  grunt.registerTask('default', ['jsonlint', 'bower', 'clean', 'dev', 'dist', 'minify']);
 };

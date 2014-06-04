@@ -4,7 +4,7 @@ describe('techan.scale.financetime', function() {
   describe('with mocked dependencies', function() {
     var linear = function() {};
     var ordinal = function() {};
-    var financetime = require('../../../src/scale/financetime')(linear, ordinal);
+    var financetime = require('../../../../src/scale/financetime')(linear, ordinal);
 
     it('.financetime should be defined', function() {
       expect(financetime).toBeDefined();
@@ -18,7 +18,7 @@ describe('techan.scale.financetime', function() {
   describe('with actual dependencies', function() {
     var linear = d3.scale.linear;
     var ordinal = d3.scale.ordinal;
-    var financetime = require('../../../src/scale/financetime')(linear, ordinal);
+    var financetime = require('../../../../src/scale/financetime')(linear, ordinal);
 
     it('.financetime should be defined', function() {
       expect(financetime).toBeDefined();
