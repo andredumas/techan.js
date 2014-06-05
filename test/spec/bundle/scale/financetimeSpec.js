@@ -16,7 +16,6 @@ techanModule('scale/financetime', function(specBuilder) {
   };
 
   var data = ohlc.facebook.slice(0, 10).map(function(d) { return new Date(d[0]); });
-  console.log(data);
 
   specBuilder.require(require('../../../../src/scale/financetime'), function(instanceBuilder) {
     instanceBuilder.instance('mocked', mockInit);
