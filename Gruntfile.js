@@ -94,7 +94,7 @@ module.exports = function(grunt) {
 
     jasmine: {
       options: {
-        vendor: ['bower_components/d3/d3.min.js', 'test/spec/common/**/*.js'],
+        vendor: ['bower_components/d3/d3.js', 'test/spec/common/**/*.js'],
         keepRunner: true
       },
       test: {
