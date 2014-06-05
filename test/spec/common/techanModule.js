@@ -5,6 +5,8 @@ function techanModule(moduleName, moduleSpec) {
   var specBuilder = {};
   var instanceBuilder = {};
 
+  var actualModuleName = moduleName.split('/').reduce(function(previous, next) { return next; });
+
   specBuilder.require = function(theModule, requireSpec) {
     module = theModule;
 
@@ -33,11 +35,11 @@ function techanModule(moduleName, moduleSpec) {
         var bucket = {};
 
         beforeEach(function () {
-          bucket[moduleName] = constructor();
+          bucket[actualModuleName] = constructor();
         });
 
         it('Then a new default instance should be defined', function () {
-          expect(bucket[moduleName]).toBeDefined();
+          expect(bucket[actualModuleName]).toBeDefined();
         });
 
         if(instanceSpec) {
@@ -52,11 +54,11 @@ function techanModule(moduleName, moduleSpec) {
       var bucket = {};
 
       beforeEach(function() {
-        bucket[moduleName] = moduleInit(module);
+        bucket[actualModuleName] = moduleInit(module);
       });
 
       it('Then the instance should be obtained', function () {
-        expect(bucket[moduleName]).toBeDefined();
+        expect(bucket[actualModuleName]).toBeDefined();
       });
 
       if(instanceSpec) {
