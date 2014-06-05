@@ -1,39 +1,22 @@
-describe('techan.scale.financetime', function() {
+techanModule('scale/financetime', function(specBuilder) {
   'use strict';
 
-  describe('with mocked dependencies', function() {
+  var mockInit = function(module) {
     var linear = function() {};
     var ordinal = function() {};
-    var financetime = require('../../../../src/scale/financetime')(linear, ordinal);
 
-    it('.financetime should be defined', function() {
-      expect(financetime).toBeDefined();
-    });
+    return module(linear, ordinal);
+  };
 
-    it('should be able to be constructed', function() {
-      var value = financetime();
-    });
-  });
-
-  describe('with actual dependencies', function() {
+  var actualInit = function(module) {
     var linear = d3.scale.linear;
     var ordinal = d3.scale.ordinal;
-    var financetime = require('../../../../src/scale/financetime')(linear, ordinal);
 
-    it('.financetime should be defined', function() {
-      expect(financetime).toBeDefined();
-    });
+    return module(linear, ordinal);
+  };
 
-    describe('and constructed', function() {
-      var scale = null;
-
-      beforeEach(function() {
-        scale = financetime();
-      });
-
-      it('should be defined', function() {
-        expect(scale).toBeDefined();
-      });
-    });
+  specBuilder.require(require('../../../../src/scale/financetime'), function(instanceBuilder) {
+    instanceBuilder.instance('mocked', mockInit);
+    instanceBuilder.instance('actual', actualInit);
   });
 });

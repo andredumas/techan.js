@@ -1,9 +1,15 @@
-describe('techan.plot', function() {
+techanModule('plot', function(specBuilder) {
   'use strict';
 
-  var plot = require('../../../../src/plot')();
+  var mockInit = function(module) {
+    return module();
+  };
 
-  it('.candlestick should be defined', function() {
-    expect(plot.candlestick).toBeDefined();
+  specBuilder.require(require('../../../../src/plot'), function(instanceBuilder) {
+    instanceBuilder.index('mocked', mockInit, function(bucket) {
+      it('Then plot.candlestick should be defined', function() {
+        expect(bucket.plot.candlestick).toBeDefined();
+      });
+    });
   });
 });

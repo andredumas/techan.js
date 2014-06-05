@@ -1,2 +1,6 @@
-describe('Given the CommonJS module entry point, techan',
-  techanSpec(require('../../../src/techan.js')));
+describe('Given I have the module "techan" available', function() {
+  'use strict';
+
+  describe('When I require() it',
+    techanSpec(require('../../../src/techan.js')));
+});
