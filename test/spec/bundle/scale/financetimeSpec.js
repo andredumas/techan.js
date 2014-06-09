@@ -1,13 +1,6 @@
 techanModule('scale/financetime', function(specBuilder) {
   'use strict';
 
-  var mockInit = function(module) {
-    var linear = function() {};
-    var ordinal = function() {};
-
-    return module(linear, ordinal);
-  };
-
   var actualInit = function(module) {
     var linear = d3.scale.linear;
     var ordinal = d3.scale.ordinal;
@@ -18,14 +11,13 @@ techanModule('scale/financetime', function(specBuilder) {
   var data = ohlc.facebook.slice(0, 10).map(function(d) { return new Date(d[0]); });
 
   specBuilder.require(require('../../../../src/scale/financetime'), function(instanceBuilder) {
-    instanceBuilder.instance('mocked', mockInit);
     instanceBuilder.instance('actual', actualInit, function(bucket) {
       var financetime = null;
 
       describe('And domain and range is initialised', function() {
         beforeEach(function() {
           financetime = bucket.financetime;
-          financetime.domain(data).range([100, 110]);
+          financetime.domain(data).range([100, 120]);
         });
 
         it('Then domain should equal the domain set', function() {
@@ -33,28 +25,27 @@ techanModule('scale/financetime', function(specBuilder) {
         });
 
         it('Then range should return the range set', function() {
-          expect(financetime.range()).toEqual([100, 110]);
+          expect(financetime.range()).toEqual([100, 120]);
         });
 
-        xit('Then scale of first index should return min range', function() {
-          expect(financetime(data[0])).toEqual(100);
-        });
-
-        /*
-          Possibly convert from prototype to closure style object to support this
-         */
-        xit('Then scale of last index should return max range', function() {
-          // TODO Module is not function itself
-          expect(financetime(data[data.length-1])).toEqual(110);
-        });
-
-        it('Then invert of min range should return first domain', function() {
-          // TODO Module is not function itself
-          expect(financetime.invert(100)).toEqual(data[0]);
+        it('Then scale of first index should return min range', function() {
+          expect(financetime(data[0])).toEqual(105);
         });
 
         it('Then invert of max range should return last domain', function() {
-          expect(financetime.invert(110)).toEqual(data[data.length-1]);
+          expect(financetime.invert(114)).toEqual(data[data.length-1]);
+        });
+
+        it('Then linear(linear.invert(y)) should equal y for each in ordinal range', function() {
+          financetime.ordinal().range().forEach(function(y) {
+            expect(financetime(financetime.invert(y))).toEqual(y);
+          });
+        });
+
+        it('Then linear.invert(linear(x)) should equal x for each in domain', function() {
+            data.forEach(function(x) {
+              expect(financetime.invert(financetime(x))).toEqual(x);
+            });
         });
 
         it('Then invert of value before range, should return first domain', function() {
@@ -65,13 +56,8 @@ techanModule('scale/financetime', function(specBuilder) {
           expect(financetime.invert(150)).toEqual(data[data.length-1]);
         });
 
-        /*
-          Under the bonnet (in zoom) d3 uses Array.map(scale.invert), which doesn't work to nice
-          with 'this' (map passes undefined), which then in turn does not play nice with prototype.
-          Might need to convert prototype to closure style objects.
-         */
-        xit('Then using invert as map function to map an array of a value greater than max range, should return last domain', function() {
-          expect([150].map(financetime.invert)).toEqual([data[data.length-1]]);
+        it('Then using invert as Array.prototyp.map(invert) of a value greater than max range, should return last domain', function() {
+          expect([110].map(financetime.invert)).toEqual([data[5]]);
         });
 
         describe('And copied', function() {
@@ -90,7 +76,7 @@ techanModule('scale/financetime', function(specBuilder) {
           });
 
           it('Then range should return the range set', function() {
-            expect(cloned.range()).toEqual([100, 110]);
+            expect(cloned.range()).toEqual([100, 120]);
           });
         });
 

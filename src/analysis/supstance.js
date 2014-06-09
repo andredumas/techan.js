@@ -1,41 +1,39 @@
 'use strict';
 
 /*
- Support and resistance analysis line (substance)
+ Support and resistance analysis line (supstance)
  */
-module.exports = function(d3_scale_linear) {
-  function Supstance() {
-    if(!(this instanceof Supstance)) return new Supstance();
-    this.xScale = d3_scale_linear();
-    this.yScale = d3_scale_linear();
-    this.y = function() { return 0; };
-    this.self = this;
+module.exports = function(d3_scale_linear, techan_scale_financetime, accessor_supstance) {
+  function supstance() {
+    var xScale = techan_scale_financetime(),
+        yScale = d3_scale_linear(),
+        accessor = accessor_supstance();
 
-    return function(g) {
-      // return the function to draw supstance
+    function analysis(g) {
+    }
+
+    analysis.refresh = function () {
+      refresh(yScale);
     };
+
+    analysis.xScale = function (_) {
+      if (!arguments.length) return xScale;
+      this.xScale = _;
+      return analysis;
+    };
+
+    analysis.yScale = function (_) {
+      if (!arguments.length) return yScale;
+      this.yScale = _;
+      return analysis;
+    };
+
+    return analysis;
   }
 
-  function refresh(yScale) {
-
-  }
-
-  Supstance.prototype.refresh = function() {
-    refresh(this.yScale);
-  };
-
-
-  Supstance.prototype.xScale = function(_) {
-    if(!arguments.length) return this.xScale;
-    this.xScale = _;
-    return this;
-  };
-
-  Supstance.prototype.yScale = function(_) {
-    if(!arguments.length) return this.yScale;
-    this.yScale = _;
-    return this;
-  };
-
-  return Supstance;
+  return supstance;
 };
+
+function refresh(yScale) {
+
+}

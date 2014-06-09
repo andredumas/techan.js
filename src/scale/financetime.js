@@ -5,45 +5,61 @@
  generally contains data points on days where a market is open but no points when closed, such as weekday
  and weekends respectively. When plot, is done so without weekend gaps.
  */
-module.exports = function(d3_scale_linear, d3_scale_ordinal) {
-  function FinanceTime(linear, ordinal) {
-    if(!(this instanceof FinanceTime)) return new FinanceTime(linear, ordinal);
+module.exports = function(d3_scale_linear, d3_scale_ordinal) {  // Injected dependencies
+  function financetime(linear, ordinal) { // Closure function
+    linear = linear || d3_scale_linear();
+    ordinal = ordinal || d3_scale_ordinal();
+    var inverter = d3_scale_linear().clamp(true);
 
-    this.linear = linear || d3_scale_linear();
-    this.ordinal = ordinal || d3_scale_ordinal();
+    function scale(x) {
+      return ordinal(x);
+    }
+
+    scale.invert = function (y) {
+      var domain = ordinal.domain(),
+          index = Math.min(domain.length-1, Math.max(0, Math.round(inverter.invert(y))));
+      return domain[index];
+    };
+
+    scale.linear = function () {
+      return linear;
+    };
+
+    scale.ordinal = function () {
+      return ordinal;
+    };
+
+    scale.domain = function (domain) {
+      if (!arguments.length) return ordinal.domain();
+      linear.domain([0, domain.length]);
+      inverter.domain(linear.domain());
+      ordinal.domain(domain);
+
+      return scale;
+    };
+
+    scale.range = function (range) {
+      if (!arguments.length) return linear.range();
+      linear.range(range);
+      ordinal.rangeRoundBands([linear(0), linear(scale.domain().length)], 0.2);
+      var ordinalRange = ordinal.range();
+      inverter.range([ordinalRange[0], ordinalRange[ordinalRange.length-1]+ordinal.rangeBand()]);
+
+      return scale;
+    };
+
+    scale.point = function(x) {
+      return scale(x) + scale.rangeBand()/2;
+    };
+
+    scale.copy = function () {
+      return financetime(linear.copy(), ordinal.copy());
+    };
+
+    // TODO D3 rebind "rangeBand"
+
+    return scale;
   }
 
-  FinanceTime.prototype.invert = function(y) {
-    var domain = this.ordinal.domain(),
-        index = Math.min(domain.length-1, Math.max(0, this.linear.invert(y)));
-    return domain[index];
-  };
-
-  FinanceTime.prototype.linear = function() {
-    return this.linear;
-  };
-
-  FinanceTime.prototype.ordinal = function() {
-    return this.ordinal;
-  };
-
-  FinanceTime.prototype.domain = function(domain) {
-    if(!arguments.length) return this.ordinal.domain();
-    this.linear.domain([0, domain.length]);
-    this.ordinal.domain(domain);
-    return this;
-  };
-
-  FinanceTime.prototype.range = function(range) {
-    if (!arguments.length) return this.linear.range();
-    this.linear.range(range);
-    this.ordinal.rangeRoundBands([this.linear(0), this.linear(this.domain().length)], 0.2);
-    return this;
-  };
-
-  FinanceTime.prototype.copy = function() {
-    return new FinanceTime(this.linear.copy(), this.ordinal.copy());
-  };
-
-  return FinanceTime;
+  return financetime;
 };

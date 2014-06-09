@@ -2,7 +2,14 @@ techanModule('plot', function(specBuilder) {
   'use strict';
 
   var mockInit = function(module) {
-    return module();
+    var mockD3 = {
+      extent: function() {},
+      scale: {
+        linear: function() {}
+      }
+    };
+
+    return module(mockD3);
   };
 
   specBuilder.require(require('../../../../src/plot'), function(instanceBuilder) {
