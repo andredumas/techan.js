@@ -14,22 +14,12 @@ module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, 
       function volumeOpacity(d) {
         return volumeOpacityScale(accessor.volume()(d));
       }
-      var startMillis = Date.now();
-      dataEntry.append('rect').attr({ class: 'candle body'});
-      dataEntry.append('line').attr({ class: 'candle wick top' });
-      dataEntry.append('line').attr({ class: 'candle wick bottom' });
 
-      dataSelection.selectAll('rect.candle').style('opacity', volumeOpacity);
-      dataSelection.selectAll('line.candle.top').style('stroke-opacity', volumeOpacity );
-      dataSelection.selectAll('line.candle.bottom').style('stroke-opacity', volumeOpacity );
-      dataSelection.selectAll('rect.candle, line.candle').classed(plot.classedUpDown(accessor));
-
-//      dataEntry.append('path').attr({ class: 'candle body' }).classed(plot.classedUpDown(accessor));
-//      dataEntry.append('path').attr({ class: 'candle wick' }).classed(plot.classedUpDown(accessor));
-//      dataSelection.selectAll('path').style('opacity', volumeOpacity);
+      dataEntry.append('path').attr({ class: 'candle body' }).classed(plot.classedUpDown(accessor));
+      dataEntry.append('path').attr({ class: 'candle wick' }).classed(plot.classedUpDown(accessor));
+      dataSelection.selectAll('path').style('opacity', volumeOpacity);
 
       candlestickPlot.refresh(g);
-      console.log("Render: " + (Date.now() - startMillis));
     }
 
     candlestickPlot.refresh = function(g) {
@@ -94,36 +84,8 @@ module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, 
   };
 };
 
-function point(xScale, x) {
-  return xScale(x) + xScale.rangeBand()/2;
-}
-
 function refresh(g, ac, x, y) {
-  candleLineRect(g, ac, x, y);
-//  candlePath(g, ac, x, y);
-}
-
-function candleLineRect(g, ac, x, y) {
-  g.selectAll('rect.candle').attr({
-    height: function(d) { return Math.max(Math.abs(y(ac.close()(d)) - y(ac.open()(d))), 1); },
-    width: x.rangeBand(),
-    x: function(d) { return x(ac.date()(d)); },
-    y: function(d) { return y(Math.max(ac.close()(d), ac.open()(d))); }
-  });
-
-  g.selectAll('line.candle.top').attr({
-    x1: function(d) { return point(x, ac.date()(d)); },
-    x2: function(d) { return point(x, ac.date()(d)); },
-    y1: function(d) { return y(ac.high()(d)); },
-    y2: function(d) { return y(Math.max(ac.open()(d), ac.close()(d))); }
-  });
-
-  g.selectAll('line.candle.bottom').attr({
-    x1: function(d) { return point(x, ac.date()(d)); },
-    x2: function(d) { return point(x, ac.date()(d)); },
-    y1: function(d) { return y(Math.min(ac.open()(d), ac.close()(d))); },
-    y2: function(d) { return y(ac.low()(d)); }
-  });
+  candlePath(g, ac, x, y);
 }
 
 function candlePath(g, ac, x, y) {
@@ -135,16 +97,18 @@ function candleBodyPath(accessor, xScale, yScale) {
   return function(d) {
     var path = [],
         x = xScale(accessor.date()(d)),
+        open = yScale(accessor.open()(d)),
+        close = yScale(accessor.close()(d)),
         rangeBand = xScale.rangeBand();
 
-    // Draw body only if there is a body
-    path.push('M', x, yScale(accessor.open()(d)));
+    path.push('M', x, open);
     path.push('l', rangeBand, 0);
 
-    if(accessor.open()(d) != accessor.close()(d)) {
-      path.push('L', x + rangeBand, yScale(accessor.close()(d)));
+    // Draw body only if there is a body (there is no stroke, so will not appear anyway)
+    if(open != close) {
+      path.push('L', x + rangeBand, close);
       path.push('l', -rangeBand, 0);
-      path.push('L', x, yScale(accessor.open()(d)));
+      path.push('L', x, open);
     }
 
     return path.join(' ');
@@ -155,20 +119,22 @@ function candleWickPath(accessor, xScale, yScale) {
   return function(d) {
     var path = [],
       x = xScale(accessor.date()(d)),
+      open = yScale(accessor.open()(d)),
+      close = yScale(accessor.close()(d)),
       rangeBand = xScale.rangeBand(),
       xPoint = x + rangeBand/2;
 
     // Top
     path.push('M', xPoint, yScale(accessor.high()(d)));
-    path.push('L', xPoint, yScale(Math.max(accessor.open()(d), accessor.close()(d))));
+    path.push('L', xPoint, Math.min(open, close));
 
     // Draw another cross wick if there is no body
-    if(accessor.open()(d) == accessor.close()(d)) {
-      path.push('M', x, yScale(accessor.open()(d)));
+    if(open == close) {
+      path.push('M', x, open);
       path.push('l', rangeBand, 0);
     }
     // Bottom
-    path.push('M', xPoint, yScale(Math.min(accessor.open()(d), accessor.close()(d))));
+    path.push('M', xPoint, Math.max(open, close));
     path.push('L', xPoint, yScale(accessor.low()(d)));
 
     return path.join(' ');
