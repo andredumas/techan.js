@@ -5,7 +5,7 @@
  generally contains data points on days where a market is open but no points when closed, such as weekday
  and weekends respectively. When plot, is done so without weekend gaps.
  */
-module.exports = function(d3_scale_linear, d3_scale_ordinal) {  // Injected dependencies
+module.exports = function(d3_scale_linear, d3_scale_ordinal, d3_rebind) {  // Injected dependencies
   function financetime(linear, ordinal) { // Closure function
     linear = linear || d3_scale_linear();
     ordinal = ordinal || d3_scale_ordinal();
@@ -57,8 +57,7 @@ module.exports = function(d3_scale_linear, d3_scale_ordinal) {  // Injected depe
     };
 
     // TODO D3 rebind "rangeBand"
-
-    return scale;
+    return d3_rebind(scale, ordinal, "rangeBand");
   }
 
   return financetime;

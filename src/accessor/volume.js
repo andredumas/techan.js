@@ -1,7 +1,8 @@
 'use strict';
 
 module.exports = function() {
-  var date, volume;
+  var date = function(d) { return d.date; },
+      volume = function(d) { return d.volume; };
 
   function accessor(d) {
     return volume(d);

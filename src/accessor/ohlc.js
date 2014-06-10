@@ -1,7 +1,12 @@
 'use strict';
 
 module.exports = function() {
-  var date, open, high, low, close, volume;
+  var date = function(d) { return d.date; },
+      open = function(d) { return d.open; },
+      high = function(d) { return d.high; },
+      low = function(d) { return d.low; },
+      close = function(d) { return d.close;},
+      volume = function(d) { return d.volume; };
 
   function accessor(d) {
     return close(d);

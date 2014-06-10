@@ -3,7 +3,7 @@
 module.exports = function() {
   return {
     dataSelection: function(selection, data, accessor_date) {
-      var dataSelection = selection.selectAll('g.data').data(data, function(d) { return accessor_date(d); });
+      var dataSelection = selection.selectAll('g.data').data(data, accessor_date);
       dataSelection.exit().remove();
       return dataSelection;
     },
@@ -12,8 +12,8 @@ module.exports = function() {
     },
     classedUpDown: function(accessor) {
       return {
-        up: function(d) { return accessor.open(d) < accessor.close(d); },
-        down: function(d) { return accessor.open(d) > accessor.close(d); }
+        up: function(d) { return accessor.open()(d) < accessor.close()(d); },
+        down: function(d) { return accessor.open()(d) > accessor.close()(d); }
       };
     }
   };

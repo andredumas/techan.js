@@ -10,6 +10,26 @@ function techanSpec(techan) {
       expect(techan.version).toBeDefined();
     });
 
+    it('Then techan.accessor should be defined', function () {
+      expect(techan.accessor).toBeDefined();
+    });
+
+    it('Then techan.accessor.ohlc should be defined', function () {
+      expect(techan.accessor.ohlc).toBeDefined();
+    });
+
+    it('Then techan.accessor.ohlc can be constructed', function () {
+      expect(techan.accessor.ohlc()).toBeDefined();
+    });
+
+    it('Then techan.accessor.volume should be defined', function () {
+      expect(techan.accessor.volume).toBeDefined();
+    });
+
+    it('Then techan.accessor.volume can be constructed', function () {
+      expect(techan.accessor.volume()).toBeDefined();
+    });
+
     it('Then techan.analysis should be defined', function () {
       expect(techan.analysis).toBeDefined();
     });
@@ -26,12 +46,20 @@ function techanSpec(techan) {
       expect(techan.plot.candlestick).toBeDefined();
     });
 
+    it('Then techan.plot.candlestick can be constructed', function () {
+      expect(techan.plot.candlestick()).toBeDefined();
+    });
+
     it('Then techan.scale should be defined', function () {
       expect(techan.scale).toBeDefined();
     });
 
     it('Then techan.scale.financetime should be defined', function () {
       expect(techan.scale.financetime).toBeDefined();
+    });
+
+    it('Then techan.scale.financetime can be constructed', function () {
+      expect(techan.scale.financetime()).toBeDefined();
     });
 
     it('Then techan.undefinedControl should be undefined', function() {

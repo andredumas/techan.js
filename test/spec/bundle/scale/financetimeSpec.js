@@ -2,10 +2,11 @@ techanModule('scale/financetime', function(specBuilder) {
   'use strict';
 
   var actualInit = function(module) {
-    var linear = d3.scale.linear;
-    var ordinal = d3.scale.ordinal;
+    var linear = d3.scale.linear,
+        ordinal = d3.scale.ordinal,
+        rebind = d3.rebind;
 
-    return module(linear, ordinal);
+    return module(linear, ordinal, rebind);
   };
 
   var data = ohlc.facebook.slice(0, 10).map(function(d) { return new Date(d[0]); });

@@ -89,7 +89,7 @@ module.exports = function(grunt) {
 
     watch: {
       files: '<%= jshint.dev.src %>',
-      tasks: 'dev'
+      tasks: ['dev', 'dist']
     },
 
     jasmine: {
@@ -130,6 +130,10 @@ module.exports = function(grunt) {
         src: '<%= browserify.dist.dest %>',
         dest: 'dist/techan.min.js'
       }
+    },
+
+    connect: {
+      server: {}
     }
   });
 
@@ -140,6 +144,7 @@ module.exports = function(grunt) {
   grunt.registerTask('dev', ['lint', 'browserify:dev', 'browserify:test', 'jasmine:test']);
   grunt.registerTask('dist', ['browserify:dist', 'usebanner', 'jasmine:dist']);
   grunt.registerTask('minify', ['uglify', 'jasmine:minify']);
+  grunt.registerTask('serve', ['connect', 'watch']);
 
   grunt.registerTask('default', ['jsonlint', 'bower', 'clean', 'dev', 'dist', 'minify']);
 };

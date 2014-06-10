@@ -2,7 +2,7 @@
 
 module.exports = function(d3) {
   return {
-    financetime: require('./financetime')(d3.scale.linear, d3.scale.ordinal),
+    financetime: require('./financetime')(d3.scale.linear, d3.scale.ordinal, d3.rebind),
     analysis: {
       supstance: function(accessor, data) {
         return d3.scale.linear();
@@ -18,7 +18,7 @@ module.exports = function(d3) {
       },
       ohlc: function (accessor, data) {
         return d3.scale.linear()
-          .domain([d3.min(data.map(accessor.low)) * 0.98, d3.max(data.map(accessor.high)) * 1.03])
+          .domain([d3.min(data.map(accessor.low())) * 0.98, d3.max(data.map(accessor.high())) * 1.03])
           .range([1, 0]);
       },
       volume: function (accessor, data) {
