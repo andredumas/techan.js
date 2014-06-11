@@ -1,0 +1,9 @@
+[submodule "test/html/plot/plots"]
+	path = test/html/plot/plots
+	url = git@gist.github.com:edf630690c10b89be390.git
+[submodule "test/html/plot/candlestick"]
+	path = test/html/plot/candlestick
+	url = git@gist.github.com:27c4a333b0e0813e093d.git
+[submodule "test/html/plot/volume"]
+	path = test/html/plot/volume
+	url = git@gist.github.com:f9cb47fa9e32ce34011a.git
