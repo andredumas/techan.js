@@ -8,7 +8,7 @@ module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, 
 
     function volumePlot(g, data) {
       var volume = plot.groupSelect(g, data, accessor.date())
-        .entry.append('rect')
+        .entry.append('path')
           .attr({ class: 'volume' });
 
         if(accessor.o && accessor.c) {
@@ -18,7 +18,6 @@ module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, 
       volumePlot.refresh(g);
     }
 
-    // Simply used for scale updates, no enter/exit functions
     volumePlot.refresh = function(g) {
       refresh(g, accessor, xScale, yScale);
     };
@@ -48,11 +47,22 @@ module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, 
 };
 
 function refresh(g, accessor, x, y) {
-  g.selectAll('rect.volume')
-    .attr({
-      x: function(d) { return x(accessor.d(d)); },
-      y: function(d) { return y(accessor.v(d)); },
-      width: x.rangeBand(),
-      height: function(d) { return y(0) - y(accessor.v(d)); }
-    });
+  g.selectAll('path.volume').attr({ d: volumePath(accessor, x, y) });
+}
+
+function volumePath(accessor, x, y) {
+  return function(d) {
+    var path = [],
+        xValue = x(accessor.d(d)),
+        zero = y(0),
+        height = y(accessor.v(d)) - zero,
+        rangeBand = x.rangeBand();
+
+    path.push('M', xValue, zero);
+    path.push('l', 0, height);
+    path.push('l', rangeBand, 0);
+    path.push('l', 0, -height);
+
+    return path.join(' ');
+  };
 }
