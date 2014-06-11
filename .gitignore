@@ -6,3 +6,4 @@ bower_components
 build
 dist
 node_modules
+test/html/gist
