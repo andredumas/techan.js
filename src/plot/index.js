@@ -6,6 +6,7 @@ module.exports = function(d3) {
       plot = require('./plot')();
 
   return {
-    candlestick: require('./candlestick')(d3.scale.linear, d3.extent, scale.financetime, accessor.ohlc, plot)
+    candlestick: require('./candlestick')(d3.scale.linear, d3.extent, scale.financetime, accessor.ohlc, plot),
+    volume: require('./volume')(d3.scale.linear, d3.extent, scale.financetime, accessor.volume, plot)
   };
 };

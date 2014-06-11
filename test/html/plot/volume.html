@@ -1,10 +1,107 @@
 <!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+<meta charset="utf-8">
+<style>
 
-</body>
-</html>
+    body {
+        font: 10px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    rect.volume {
+        fill: #BBBBBB; opacity: 0.5;
+    }
+
+    rect.volume.up {
+        fill: #00AA00;
+    }
+
+    rect.volume.down {
+        fill: #FF0000;
+    }
+
+</style>
+<body>
+<script src="../../../bower_components/d3/d3.js"></script>
+<script src="../../../dist/techan.js"></script>
+<script>
+
+    var margin = {top: 20, right: 20, bottom: 30, left: 50},
+            width = 960 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+    var parseDate = d3.time.format("%d-%b-%y").parse;
+
+    //    var x = techan.scale.financetime()
+    //            .range([0, width]);
+    var x = d3.scale.ordinal()
+            .rangeRoundBands([0, width], 0.2);
+
+    var y = d3.scale.linear()
+            .range([height, 0]);
+
+    var volume = techan.plot.volume()
+            .accessor(techan.accessor.ohlc())   // For volume bar highlighting
+            .xScale(x)
+            .yScale(y);
+
+    var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom")
+            .tickValues([]);
+
+    var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
+
+    var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var result = d3.csv("data.csv", function(error, data) {
+        var accessor = volume.accessor();
+
+        data = data.slice(0, 200).map(function(d) {
+            // Open, high, low, close generally not required, is being used here to demonstrate colored volume
+            // bars
+            return {
+                date: parseDate(d.Date),
+                volume: +d.Volume,
+                open: +d.Open,
+                high: +d.High,
+                low: +d.Low,
+                close: +d.Close
+            };
+        }).sort(function(a, b) { return d3.ascending(accessor.d(a), accessor.d(b)); });
+
+        x.domain(data.map(accessor.d));
+        y.domain(techan.scale.plot.volume(accessor.v, data).domain());
+
+        svg.append("g")
+                .attr("class", "volume")
+                .call(volume, data);
+
+        svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+        svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Price ($)");
+    });
+
+</script>

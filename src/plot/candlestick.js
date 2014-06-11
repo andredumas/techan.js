@@ -7,23 +7,29 @@ module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, 
         accessor = accessor_ohlc();
 
     function candlestickPlot(g, data) {
-      var dataSelection = plot.dataSelection(g, data, accessor.date()),
-          dataEntry = plot.dataEntry(dataSelection),
-          volumeOpacityScale = d3_scale_linear().domain(d3_extent(data.map(accessor.volume()))).range([0.2, 1]);
+      var group = plot.groupSelect(g, data, accessor.date()),
+          volumeOpacityScale = d3_scale_linear().domain(d3_extent(data.map(accessor.v))).range([0.2, 1]);
 
       function volumeOpacity(d) {
-        return volumeOpacityScale(accessor.volume()(d));
+        return volumeOpacityScale(accessor.v(d));
       }
 
-      dataEntry.append('path').attr({ class: 'candle body' }).classed(plot.classedUpDown(accessor));
-      dataEntry.append('path').attr({ class: 'candle wick' }).classed(plot.classedUpDown(accessor));
-      dataSelection.selectAll('path').style('opacity', volumeOpacity);
+      // Two path's as wick and body can be styled slightly differently (stroke and fills)
+      group.entry.append('path').attr({ class: 'candle body' }).classed(plot.classedUpDown(accessor));
+      group.entry.append('path').attr({ class: 'candle wick' }).classed(plot.classedUpDown(accessor));
+      group.selection.selectAll('path').style('opacity', volumeOpacity);
 
       candlestickPlot.refresh(g);
     }
 
     candlestickPlot.refresh = function(g) {
       refresh(g, accessor, xScale, yScale);
+    };
+
+    candlestickPlot.accessor = function(_) {
+      if (!arguments.length) return accessor;
+      accessor = _;
+      return candlestickPlot;
     };
 
     candlestickPlot.xScale = function(_) {
@@ -38,104 +44,58 @@ module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, 
       return candlestickPlot;
     };
 
-    candlestickPlot.accessor = function(_) {
-      if (!arguments.length) return accessor;
-      accessor = _;
-      return candlestickPlot;
-    };
-
-    candlestickPlot.date = function(_) {
-      accessor.date(_);
-      return accessor;
-    };
-
-    candlestickPlot.open = function(_) {
-      accessor.open(_);
-      return accessor;
-    };
-
-    candlestickPlot.high = function(_) {
-      accessor.high(_);
-      return accessor;
-    };
-
-    candlestickPlot.low = function(_) {
-      accessor.low(_);
-      return accessor;
-    };
-
-    candlestickPlot.close = function(_) {
-      accessor.close(_);
-      return accessor;
-    };
-
-    candlestickPlot.volume = function(_) {
-      accessor.volume(_);
-      return accessor;
-    };
-
-    candlestickPlot.xScale = function(_) {
-      if (!arguments.length) return xScale;
-      xScale = _;
-      return candlestickPlot;
-    };
-
     return candlestickPlot;
   };
 };
 
-function refresh(g, ac, x, y) {
-  candlePath(g, ac, x, y);
+function refresh(g, accessor, x, y) {
+  g.selectAll('path.candle.body').attr({ d: candleBodyPath(accessor, x, y) });
+  g.selectAll('path.candle.wick').attr({ d: candleWickPath(accessor, x, y) });
 }
 
-function candlePath(g, ac, x, y) {
-  g.selectAll('path.candle.body').attr({ d: candleBodyPath(ac, x, y) });
-  g.selectAll('path.candle.wick').attr({ d: candleWickPath(ac, x, y) });
-}
-
-function candleBodyPath(accessor, xScale, yScale) {
+function candleBodyPath(accessor, x, y) {
   return function(d) {
     var path = [],
-        x = xScale(accessor.date()(d)),
-        open = yScale(accessor.open()(d)),
-        close = yScale(accessor.close()(d)),
-        rangeBand = xScale.rangeBand();
+        xValue = x(accessor.d(d)),
+        open = y(accessor.o(d)),
+        close = y(accessor.c(d)),
+        rangeBand = x.rangeBand();
 
-    path.push('M', x, open);
+    path.push('M', xValue, open);
     path.push('l', rangeBand, 0);
 
     // Draw body only if there is a body (there is no stroke, so will not appear anyway)
     if(open != close) {
-      path.push('L', x + rangeBand, close);
+      path.push('L', xValue + rangeBand, close);
       path.push('l', -rangeBand, 0);
-      path.push('L', x, open);
+      path.push('L', xValue, open);
     }
 
     return path.join(' ');
   };
 }
 
-function candleWickPath(accessor, xScale, yScale) {
+function candleWickPath(accessor, x, y) {
   return function(d) {
     var path = [],
-      x = xScale(accessor.date()(d)),
-      open = yScale(accessor.open()(d)),
-      close = yScale(accessor.close()(d)),
-      rangeBand = xScale.rangeBand(),
-      xPoint = x + rangeBand/2;
+        xValue = x(accessor.d(d)),
+        open = y(accessor.o(d)),
+        close = y(accessor.c(d)),
+        rangeBand = x.rangeBand(),
+        xPoint = xValue + rangeBand/2;
 
     // Top
-    path.push('M', xPoint, yScale(accessor.high()(d)));
+    path.push('M', xPoint, y(accessor.h(d)));
     path.push('L', xPoint, Math.min(open, close));
 
     // Draw another cross wick if there is no body
     if(open == close) {
-      path.push('M', x, open);
+      path.push('M', xValue, open);
       path.push('l', rangeBand, 0);
     }
     // Bottom
     path.push('M', xPoint, Math.max(open, close));
-    path.push('L', xPoint, yScale(accessor.low()(d)));
+    path.push('L', xPoint, y(accessor.l(d)));
 
     return path.join(' ');
   };

@@ -17,7 +17,7 @@
         shape-rendering: crispEdges;
     }
 
-    line.candle, path.candle {
+    path.candle {
         stroke: #000000;
     }
 
@@ -25,29 +25,18 @@
         stroke-width: 0;
     }
 
-    rect.candle.up, rect.volume.up, path.candle.up {
-        fill: #00AA00;
+    path.candle.wick {
+        stroke-width: 1;
     }
 
-    line.candle.up, path.candle.up {
+    path.candle.up {
+        fill: #00AA00;
         stroke: #00AA00;
     }
 
-    rect.candle.down, rect.volume.down, path.candle.down {
+    path.candle.down {
         fill: #FF0000;
-    }
-
-    line.candle.down, path.candle.down {
         stroke: #FF0000;
-    }
-
-    rect.volume {
-        fill: #BBBBBB; opacity: 0.5;
-    }
-
-
-    .area {
-        fill: steelblue;
     }
 
 </style>
@@ -101,12 +90,13 @@
                 close: +d.Close,
                 volume: +d.Volume
             };
-        }).sort(function(a, b) { return d3.ascending(accessor.date()(a), accessor.date()(b)); });
+        }).sort(function(a, b) { return d3.ascending(accessor.d(a), accessor.d(b)); });
 
-        x.domain(data.map(accessor.date()));
+        x.domain(data.map(accessor.d));
         y.domain(techan.scale.plot.ohlc(accessor, data).domain());
 
         svg.append("g")
+                .attr("class", "candlestick")
                 .call(candlestick, data);
 
         svg.append("g")

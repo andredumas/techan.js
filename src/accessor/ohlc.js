@@ -9,45 +9,57 @@ module.exports = function() {
       volume = function(d) { return d.volume; };
 
   function accessor(d) {
-    return close(d);
+    return accessor.c(d);
   }
 
   // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
-    return accessor;
+    return bind();
   };
 
   accessor.open = function(_) {
     if (!arguments.length) return open;
     open = _;
-    return accessor;
+    return bind();
   };
 
   accessor.high = function(_) {
     if (!arguments.length) return high;
     high = _;
-    return accessor;
+    return bind();
   };
 
   accessor.low = function(_) {
     if (!arguments.length) return low;
     low = _;
-    return accessor;
+    return bind();
   };
 
   accessor.close = function(_) {
     if (!arguments.length) return close;
     close = _;
-    return accessor;
+    return bind();
   };
 
   accessor.volume = function(_) {
     if (!arguments.length) return volume;
     volume = _;
-    return accessor;
+    return bind();
   };
 
-  return accessor;
+  function bind() {
+    // TODO These methods will need to know if the variables are functions or values and execute as such
+    accessor.d = date;
+    accessor.o = open;
+    accessor.h = high;
+    accessor.l = low;
+    accessor.c = close;
+    accessor.v = volume;
+
+    return accessor;
+  }
+
+  return bind();
 };

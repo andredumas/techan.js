@@ -50,6 +50,14 @@ function techanSpec(techan) {
       expect(techan.plot.candlestick()).toBeDefined();
     });
 
+    it('Then techan.plot.volume should be defined', function () {
+      expect(techan.plot.volume).toBeDefined();
+    });
+
+    it('Then techan.plot.volume can be constructed', function () {
+      expect(techan.plot.volume()).toBeDefined();
+    });
+
     it('Then techan.scale should be defined', function () {
       expect(techan.scale).toBeDefined();
     });

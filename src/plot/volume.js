@@ -1,30 +1,26 @@
 'use strict';
 
-module.exports = function(techan_scale_financetime, accessor_ohlc, d3_scale_linear, d3_extent, plot) {  // Injected dependencies
+module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, accessor_volume, plot) {  // Injected dependencies
   function volume() { // Closure function
     var xScale = techan_scale_financetime(),
-      yScale = d3_scale_linear(),
-      accessor = accessor_ohlc();
+        yScale = d3_scale_linear(),
+        accessor = accessor_volume();
 
-    function volumePlot(g) {
-      plot.dataSelection(g, g.data, accessor.date);
-      plot.dataEntry(g, g.data, accessor.date)
-        .append('rect')
-          .attr({ class: 'volume' })
-          .classed(plot.classedUpDown(accessor));
+    function volumePlot(g, data) {
+      var volume = plot.groupSelect(g, data, accessor.date())
+        .entry.append('rect')
+          .attr({ class: 'volume' });
 
-      refresh();
+        if(accessor.o && accessor.c) {
+          volume.classed(plot.classedUpDown(accessor));
+        }
+
+      volumePlot.refresh(g);
     }
 
     // Simply used for scale updates, no enter/exit functions
     volumePlot.refresh = function(g) {
-      refresh(accessor, g, xScale, yScale);
-    };
-
-    volumePlot.xScale = function(_) {
-      if (!arguments.length) return xScale;
-      xScale = _;
-      return volumePlot;
+      refresh(g, accessor, xScale, yScale);
     };
 
     volumePlot.accessor = function(_) {
@@ -33,19 +29,15 @@ module.exports = function(techan_scale_financetime, accessor_ohlc, d3_scale_line
       return volumePlot;
     };
 
-    accessor.date = function(_) {
-      accessor.date(_);
-      return accessor;
-    };
-
-    accessor.volume = function(_) {
-      accessor.volume(_);
-      return accessor;
-    };
-
     volumePlot.xScale = function(_) {
       if (!arguments.length) return xScale;
       xScale = _;
+      return volumePlot;
+    };
+
+    volumePlot.yScale = function(_) {
+      if (!arguments.length) return yScale;
+      yScale = _;
       return volumePlot;
     };
 
@@ -55,12 +47,12 @@ module.exports = function(techan_scale_financetime, accessor_ohlc, d3_scale_line
   return volume;
 };
 
-function refresh(accessor, g, xScale, yScale) {
+function refresh(g, accessor, x, y) {
   g.selectAll('rect.volume')
     .attr({
-      x: function(d) { return xScale(accessor.date(d)); },
-      y: function(d) { return yScale(accessor.volume(d)); },
-      width: xScale.rangeBand(),
-      height: function(d) { return yScale(0) - yScale(accessor.volume(d)); }
+      x: function(d) { return x(accessor.d(d)); },
+      y: function(d) { return y(accessor.v(d)); },
+      width: x.rangeBand(),
+      height: function(d) { return y(0) - y(accessor.v(d)); }
     });
 }

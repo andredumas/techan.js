@@ -1,19 +1,31 @@
 'use strict';
 
 module.exports = function() {
+  function dataSelection(g, data, accessor_date) {
+    var selection = g.selectAll('g.data').data(data, accessor_date);
+    selection.exit().remove();
+    return selection;
+  }
+
+  function dataEntry(dataSelection) {
+    return dataSelection.enter().append('g').attr({ class: 'data' });
+  }
+
   return {
-    dataSelection: function(selection, data, accessor_date) {
-      var dataSelection = selection.selectAll('g.data').data(data, accessor_date);
-      dataSelection.exit().remove();
-      return dataSelection;
-    },
-    dataEntry: function(dataSelection) {
-      return dataSelection.enter().append('g').attr({ class: 'data' });
+    dataSelection: dataSelection,
+    dataEntry: dataEntry,
+    groupSelect: function(g, data, accessor_date) {
+      var selection = dataSelection(g, data, accessor_date),
+          entry = dataEntry(selection);
+      return {
+        selection: selection,
+        entry: entry
+      };
     },
     classedUpDown: function(accessor) {
       return {
-        up: function(d) { return accessor.open()(d) < accessor.close()(d); },
-        down: function(d) { return accessor.open()(d) > accessor.close()(d); }
+        up: function(d) { return accessor.o(d) < accessor.c(d); },
+        down: function(d) { return accessor.o(d) > accessor.c(d); }
       };
     }
   };
