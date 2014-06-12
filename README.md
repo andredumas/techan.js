@@ -4,4 +4,4 @@
 
 A visual, technical trade analysis library built on d3. Build interactive financial charts for modern and mobile browsers. 
 
-[See examples](https://github.com/andredumas/techan.js/wiki/Gallery)
+[Examples](https://github.com/andredumas/techan.js/wiki/Gallery)
