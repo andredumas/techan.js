@@ -9,7 +9,7 @@ techanModule('scale/financetime', function(specBuilder) {
     return module(linear, ordinal, rebind);
   };
 
-  var data = ohlc.facebook.slice(0, 10).map(function(d) { return new Date(d[0]); });
+  var data = ohlc.facebook.slice(0, 10).map(function(d) { return d.date; });
 
   specBuilder.require(require('../../../../src/scale/financetime'), function(instanceBuilder) {
     instanceBuilder.instance('actual', actualInit, function(bucket) {

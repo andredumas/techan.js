@@ -2,7 +2,17 @@
 
 module.exports = function(d3) {
   return {
-    financetime: require('./financetime')(d3.scale.linear, d3.scale.ordinal, d3.rebind),
+    // Temporarily disabled until the scale implementation is fixed
+    //financetime: require('./financetime')(d3.scale.linear, d3.scale.ordinal, d3.rebind),
+    financetime: function() {
+      var ordinal = d3.scale.ordinal();
+      var originalRange = ordinal.range;
+      ordinal.range = function(range) {
+        if(!arguments.length) return originalRange();
+        return ordinal.rangeRoundBands(range, 0.2);
+      };
+      return ordinal;
+    },
     analysis: {
       supstance: function(accessor, data) {
         return d3.scale.linear();

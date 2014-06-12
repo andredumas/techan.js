@@ -22,6 +22,22 @@ function techanSpec(techan) {
       expect(techan.accessor.ohlc()).toBeDefined();
     });
 
+    it('Then techan.accessor.macd should be defined', function () {
+      expect(techan.accessor.macd).toBeDefined();
+    });
+
+    it('Then techan.accessor.macd can be constructed', function () {
+      expect(techan.accessor.macd()).toBeDefined();
+    });
+
+    it('Then techan.accessor.rsi should be defined', function () {
+      expect(techan.accessor.rsi).toBeDefined();
+    });
+
+    it('Then techan.accessor.rsi can be constructed', function () {
+      expect(techan.accessor.rsi()).toBeDefined();
+    });
+
     it('Then techan.accessor.volume should be defined', function () {
       expect(techan.accessor.volume).toBeDefined();
     });
@@ -48,6 +64,22 @@ function techanSpec(techan) {
 
     it('Then techan.plot.candlestick can be constructed', function () {
       expect(techan.plot.candlestick()).toBeDefined();
+    });
+
+    it('Then techan.plot.macd should be defined', function () {
+      expect(techan.plot.macd).toBeDefined();
+    });
+
+    it('Then techan.plot.macd can be constructed', function () {
+      expect(techan.plot.macd()).toBeDefined();
+    });
+
+    it('Then techan.plot.rsi should be defined', function () {
+      expect(techan.plot.rsi).toBeDefined();
+    });
+
+    it('Then techan.plot.rsi can be constructed', function () {
+      expect(techan.plot.rsi()).toBeDefined();
     });
 
     it('Then techan.plot.volume should be defined', function () {

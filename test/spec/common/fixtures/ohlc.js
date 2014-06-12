@@ -1,5 +1,13 @@
 var ohlc = {};
 
+ohlc.alternating = {
+  up: { date: new Date("2014-03-05"), open: 1, high: 1.5, low: 0.5, close: 1.1, volume: 10},
+  down: { date: new Date("2014-03-06"), open: 1.1, high: 1.5, low: 0.5, close: 1, volume: 100},
+  even: { date: new Date("2014-03-07"), open: 1, high: 1.5, low: 0.5, close: 1, volume: 1}
+};
+
+ohlc.alternating.array = [ohlc.alternating.up, ohlc.alternating.down, ohlc.alternating.even];
+
 ohlc.facebook = [
   ["2014-03-07",71.08,71.18,69.47,69.8,38927000],
   ["2014-03-06",71.88,71.89,70.25,70.84,46026500],
@@ -453,4 +461,16 @@ ohlc.facebook = [
   ["2012-05-22",32.61,33.59,30.94,31,101786600],
   ["2012-05-21",36.53,36.66,33,34.03,168192700],
   ["2012-05-18",42.05,45,38,38.23,573576400]
-];
+].map(function(d) {
+    'use strict';
+    return {
+      date: new Date(d[0]),
+      open: d[0],
+      high: d[1],
+      low: d[2],
+      close: d[3],
+      volume: d[4]
+    };
+  });
+
+//console.log(JSON.stringify(ohlc.facebook, null, '  '));

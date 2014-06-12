@@ -4,6 +4,8 @@
 module.exports = function() {
   return {
     ohlc: require('./ohlc'),
-    volume: require('./volume')
+    volume: require('./volume'),
+    macd: require('./macd'),
+    rsi: require('./rsi')
   };
 };
