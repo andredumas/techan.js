@@ -9,10 +9,64 @@
 module.exports = function() {
   return {
     ohlc: _dereq_('./ohlc'),
-    volume: _dereq_('./volume')
+    volume: _dereq_('./volume'),
+    macd: _dereq_('./macd'),
+    rsi: _dereq_('./rsi')
   };
 };
-},{"./ohlc":2,"./volume":3}],2:[function(_dereq_,module,exports){
+},{"./macd":2,"./ohlc":3,"./rsi":4,"./volume":5}],2:[function(_dereq_,module,exports){
+'use strict';
+
+module.exports = function() {
+  var date = function(d) { return d.date; },
+      macd = function(d) { return d.macd; },
+      zero = function(d) { return 0; },
+      signal = function(d) { return d.signal;},
+      difference = function(d) { return d.difference;};
+
+  function accessor(d) {
+    return accessor.m(d);
+  }
+
+  // TODO use d3.rebind to obtain this from 'super class'
+  accessor.date = function(_) {
+    if (!arguments.length) return date;
+    date = _;
+    return bind();
+  };
+
+  accessor.macd = function(_) {
+    if (!arguments.length) return macd;
+    macd = _;
+    return bind();
+  };
+
+  accessor.signal = function(_) {
+    if (!arguments.length) return signal;
+    signal = _;
+    return bind();
+  };
+
+  accessor.difference = function(_) {
+    if (!arguments.length) return difference;
+    difference = _;
+    return bind();
+  };
+
+  function bind() {
+    // TODO These methods will need to know if the variables are functions or values and execute as such
+    accessor.d = date;
+    accessor.m = macd;
+    accessor.s = signal;
+    accessor.dif = difference;
+    accessor.z = zero;
+
+    return accessor;
+  }
+
+  return bind();
+};
+},{}],3:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -78,7 +132,65 @@ module.exports = function() {
 
   return bind();
 };
-},{}],3:[function(_dereq_,module,exports){
+},{}],4:[function(_dereq_,module,exports){
+'use strict';
+
+module.exports = function() {
+  var date = function(d) { return d.date; },
+      rsi = function(d) { return d.rsi; },
+      overbought = function(d) { return 70; },
+      oversold = function(d) { return 30; },
+      middle = function(d) { return 50; };
+
+  function accessor(d) {
+    return accessor.r(d);
+  }
+
+  // TODO use d3.rebind to obtain this from 'super class'
+  accessor.date = function(_) {
+    if (!arguments.length) return date;
+    date = _;
+    return bind();
+  };
+
+  accessor.rsi = function(_) {
+    if (!arguments.length) return rsi;
+    rsi = _;
+    return bind();
+  };
+
+  accessor.overbought = function(_) {
+    if (!arguments.length) return overbought;
+    overbought = _;
+    return bind();
+  };
+
+  accessor.oversold = function(_) {
+    if (!arguments.length) return oversold;
+    oversold = _;
+    return bind();
+  };
+
+  accessor.middle = function(_) {
+    if (!arguments.length) return middle;
+    middle = _;
+    return bind();
+  };
+
+  function bind() {
+    // TODO These methods will need to know if the variables are functions or values and execute as such
+    accessor.d = date;
+    accessor.r = rsi;
+    accessor.ob = overbought;
+    accessor.os = oversold;
+    accessor.m = middle;
+
+    return accessor;
+  }
+
+  return bind();
+};
+},{}],5:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -112,7 +224,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],4:[function(_dereq_,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -120,7 +232,7 @@ module.exports = function(d3) {
     supstance: _dereq_('./supstance')(d3.scale.linear)
   };
 };
-},{"./supstance":5}],5:[function(_dereq_,module,exports){
+},{"./supstance":7}],7:[function(_dereq_,module,exports){
 'use strict';
 
 /*
@@ -160,7 +272,7 @@ module.exports = function(d3_scale_linear, techan_scale_financetime, accessor_su
 function refresh(yScale) {
 
 }
-},{}],6:[function(_dereq_,module,exports){
+},{}],8:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, accessor_ohlc, plot) {  // Injected dependencies
@@ -263,23 +375,101 @@ function candleWickPath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],7:[function(_dereq_,module,exports){
+},{}],9:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
   var scale = _dereq_('../scale')(d3),
       accessor = _dereq_('../accessor')(),
-      plot = _dereq_('./plot')();
+      plot = _dereq_('./plot')(d3);
 
   return {
     candlestick: _dereq_('./candlestick')(d3.scale.linear, d3.extent, scale.financetime, accessor.ohlc, plot),
-    volume: _dereq_('./volume')(d3.scale.linear, d3.extent, scale.financetime, accessor.volume, plot)
+    volume: _dereq_('./volume')(d3.scale.linear, d3.extent, scale.financetime, accessor.volume, plot),
+    rsi: _dereq_('./rsi')(d3.scale.linear, d3.extent, scale.financetime, accessor.rsi, plot),
+    macd: _dereq_('./macd')(d3.scale.linear, d3.extent, scale.financetime, accessor.macd, plot)
   };
 };
-},{"../accessor":1,"../scale":11,"./candlestick":6,"./plot":8,"./volume":9}],8:[function(_dereq_,module,exports){
+},{"../accessor":1,"../scale":14,"./candlestick":8,"./macd":10,"./plot":11,"./rsi":12,"./volume":13}],10:[function(_dereq_,module,exports){
 'use strict';
 
-module.exports = function() {
+module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, accessor_macd, plot) {  // Injected dependencies
+  function macd() { // Closure function
+    var xScale = techan_scale_financetime(),
+      yScale = d3_scale_linear(),
+      accessor = accessor_macd();
+
+    function macdPlot(g, data) {
+      var group = plot.groupSelect(g, [data], accessor.date());
+
+      var histogramSelection = group.selection
+        .append('g').attr({ class: 'difference' })
+        .selectAll('g.difference').data(function(data) { return data; });
+
+      histogramSelection.append('path').attr({ class: 'difference' });
+
+      group.selection.append('path').attr({ class: 'zero' });
+      group.selection.append('path').attr({ class: 'macd' });
+      group.selection.append('path').attr({ class: 'signal' });
+
+      macdPlot.refresh(g);
+    }
+
+    macdPlot.refresh = function(g) {
+      refresh(g, accessor, xScale, yScale, plot);
+    };
+
+    macdPlot.accessor = function(_) {
+      if (!arguments.length) return accessor;
+      accessor = _;
+      return macdPlot;
+    };
+
+    macdPlot.xScale = function(_) {
+      if (!arguments.length) return xScale;
+      xScale = _;
+      return macdPlot;
+    };
+
+    macdPlot.yScale = function(_) {
+      if (!arguments.length) return yScale;
+      yScale = _;
+      return macdPlot;
+    };
+
+    return macdPlot;
+  }
+
+  return macd;
+};
+
+function refresh(g, accessor, x, y, plot) {
+  g.selectAll('path.difference').attr({ d: differencePath(accessor, x, y) });
+  g.selectAll('path.zero').attr({ d: plot.horizontalPathLine(x, accessor.z, y) });
+  g.selectAll('path.macd').attr({ d: plot.pathLine(accessor.d, x, accessor.m, y) });
+  g.selectAll('path.signal').attr({ d: plot.pathLine(accessor.d, x, accessor.s, y) });
+}
+
+function differencePath(accessor, x, y) {
+  return function(d) {
+    var path = [],
+        xValue = x(accessor.d(d)),
+        zero = y(0),
+        height = y(accessor.dif(d)) - zero,
+        rangeBand = x.rangeBand();
+
+    path.push('M', xValue, zero);
+    path.push('l', 0, height);
+    path.push('l', rangeBand, 0);
+    path.push('l', 0, -height);
+
+    return path.join(' ');
+  };
+}
+},{}],11:[function(_dereq_,module,exports){
+'use strict';
+
+module.exports = function(d3) {
   function dataSelection(g, data, accessor_date) {
     var selection = g.selectAll('g.data').data(data, accessor_date);
     selection.exit().remove();
@@ -306,10 +496,80 @@ module.exports = function() {
         up: function(d) { return accessor.o(d) < accessor.c(d); },
         down: function(d) { return accessor.o(d) > accessor.c(d); }
       };
+    },
+    horizontalPathLine: function(x, accessor_value, y) {
+      return function(d) {
+        var path = [],
+            rangeExtent = x.rangeExtent();
+
+        path.push('M', rangeExtent[0], y(accessor_value(d)));
+        path.push('l', rangeExtent[1]-rangeExtent[1], 0);
+
+        return path.join(' ');
+      };
+    },
+    pathLine: function(accessor_date, x, accessor_value, y) {
+      return d3.svg.line().interpolate('monotone')
+        .x(function(d) { return x(accessor_date(d)); } )
+        .y(function(d) { return y(accessor_value(d)); } );
     }
   };
 };
-},{}],9:[function(_dereq_,module,exports){
+},{}],12:[function(_dereq_,module,exports){
+'use strict';
+
+module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, accessor_rsi, plot) {  // Injected dependencies
+  function rsi() { // Closure function
+    var xScale = techan_scale_financetime(),
+        yScale = d3_scale_linear(),
+        accessor = accessor_rsi();
+
+    function rsiPlot(g, data) {
+      var group = plot.groupSelect(g, [data], accessor.date());
+
+      group.entry.append('path').attr({ class: 'overbought' });
+      group.entry.append('path').attr({ class: 'middle' });
+      group.entry.append('path').attr({ class: 'oversold' });
+      group.entry.append('path').attr({ class: 'rsi' });
+
+      rsiPlot.refresh(g);
+    }
+
+    rsiPlot.refresh = function(g) {
+      refresh(g, accessor, xScale, yScale, plot);
+    };
+
+    rsiPlot.accessor = function(_) {
+      if (!arguments.length) return accessor;
+      accessor = _;
+      return rsiPlot;
+    };
+
+    rsiPlot.xScale = function(_) {
+      if (!arguments.length) return xScale;
+      xScale = _;
+      return rsiPlot;
+    };
+
+    rsiPlot.yScale = function(_) {
+      if (!arguments.length) return yScale;
+      yScale = _;
+      return rsiPlot;
+    };
+
+    return rsiPlot;
+  }
+
+  return rsi;
+};
+
+function refresh(g, accessor, x, y, plot) {
+  g.selectAll('path.overbought').attr({ d: plot.horizontalPathLine(x, accessor.ob, y) });
+  g.selectAll('path.middle').attr({ d: plot.horizontalPathLine(x, accessor.m, y) });
+  g.selectAll('path.oversold').attr({ d: plot.horizontalPathLine(x, accessor.os, y) });
+  g.selectAll('path.rsi').attr({ d: plot.pathLine(accessor.d, x, accessor.r, y) });
+}
+},{}],13:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, accessor_volume, plot) {  // Injected dependencies
@@ -378,77 +638,22 @@ function volumePath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],10:[function(_dereq_,module,exports){
-'use strict';
-
-/*
- Finance time scale which is not necessarily continuous, is required to be plot continuous. Finance scale
- generally contains data points on days where a market is open but no points when closed, such as weekday
- and weekends respectively. When plot, is done so without weekend gaps.
- */
-module.exports = function(d3_scale_linear, d3_scale_ordinal, d3_rebind) {  // Injected dependencies
-  function financetime(linear, ordinal) { // Closure function
-    linear = linear || d3_scale_linear();
-    ordinal = ordinal || d3_scale_ordinal();
-    var inverter = d3_scale_linear().clamp(true);
-
-    function scale(x) {
-      return ordinal(x);
-    }
-
-    scale.invert = function (y) {
-      var domain = ordinal.domain(),
-          index = Math.min(domain.length-1, Math.max(0, Math.round(inverter.invert(y))));
-      return domain[index];
-    };
-
-    scale.linear = function () {
-      return linear;
-    };
-
-    scale.ordinal = function () {
-      return ordinal;
-    };
-
-    scale.domain = function (domain) {
-      if (!arguments.length) return ordinal.domain();
-      linear.domain([0, domain.length]);
-      inverter.domain(linear.domain());
-      ordinal.domain(domain);
-
-      return scale;
-    };
-
-    scale.range = function (range) {
-      if (!arguments.length) return linear.range();
-      linear.range(range);
-      ordinal.rangeRoundBands([linear(0), linear(scale.domain().length)], 0.2);
-      var ordinalRange = ordinal.range();
-      inverter.range([ordinalRange[0], ordinalRange[ordinalRange.length-1]+ordinal.rangeBand()]);
-
-      return scale;
-    };
-
-    scale.point = function(x) {
-      return scale(x) + scale.rangeBand()/2;
-    };
-
-    scale.copy = function () {
-      return financetime(linear.copy(), ordinal.copy());
-    };
-
-    // TODO D3 rebind "rangeBand"
-    return d3_rebind(scale, ordinal, "rangeBand");
-  }
-
-  return financetime;
-};
-},{}],11:[function(_dereq_,module,exports){
+},{}],14:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
   return {
-    financetime: _dereq_('./financetime')(d3.scale.linear, d3.scale.ordinal, d3.rebind),
+    // Temporarily disabled until the scale implementation is fixed
+    //financetime: require('./financetime')(d3.scale.linear, d3.scale.ordinal, d3.rebind),
+    financetime: function() {
+      var ordinal = d3.scale.ordinal();
+      var originalRange = ordinal.range;
+      ordinal.range = function(range) {
+        if(!arguments.length) return originalRange();
+        return ordinal.rangeRoundBands(range, 0.2);
+      };
+      return ordinal;
+    },
     analysis: {
       supstance: function(accessor, data) {
         return d3.scale.linear();
@@ -503,7 +708,7 @@ function pathScale(d3, accessor, data) {
   return d3.scale.linear().domain(pathDomain(d3, accessor, data))
     .range([1, 0]);
 }
-},{"./financetime":10}],12:[function(_dereq_,module,exports){
+},{}],15:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = (function(d3) {
@@ -515,6 +720,6 @@ module.exports = (function(d3) {
     scale: _dereq_('./scale')(d3)
   };
 })(d3);
-},{"./accessor":1,"./analysis":4,"./plot":7,"./scale":11}]},{},[12])
-(12)
+},{"./accessor":1,"./analysis":6,"./plot":9,"./scale":14}]},{},[15])
+(15)
 });
