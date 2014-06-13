@@ -11,6 +11,10 @@ techanModule('plot', function(specBuilder) {
         expect(bucket.plot.candlestick).toBeDefined();
       });
 
+      it('Then plot.close should be defined', function() {
+        expect(bucket.plot.close).toBeDefined();
+      });
+
       it('Then plot.macd should be defined', function() {
         expect(bucket.plot.macd).toBeDefined();
       });

@@ -40,8 +40,9 @@ module.exports = function(d3) {
       };
     },
     pathLine: function(accessor_date, x, accessor_value, y) {
+      var xPoint = x.rangeBand()/2;
       return d3.svg.line().interpolate('monotone')
-        .x(function(d) { return x(accessor_date(d)); } )
+        .x(function(d) { return x(accessor_date(d))+xPoint; } )
         .y(function(d) { return y(accessor_value(d)); } );
     }
   };

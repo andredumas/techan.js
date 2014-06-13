@@ -66,6 +66,14 @@ function techanSpec(techan) {
       expect(techan.plot.candlestick()).toBeDefined();
     });
 
+    it('Then techan.plot.close should be defined', function () {
+      expect(techan.plot.close).toBeDefined();
+    });
+
+    it('Then techan.plot.close can be constructed', function () {
+      expect(techan.plot.close()).toBeDefined();
+    });
+
     it('Then techan.plot.macd should be defined', function () {
       expect(techan.plot.macd).toBeDefined();
     });
