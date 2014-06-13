@@ -1,48 +1,31 @@
 'use strict';
 
-module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, accessor_ohlc, plot) {  // Injected dependencies
-  return function() { // Closure function
-    var xScale = techan_scale_financetime(),
-        yScale = d3_scale_linear(),
-        accessor = accessor_ohlc();
+module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
+  return function() { // Closure constructor
+    var p = {};  // Container for private, direct access mixed in variables
 
     function candlestickPlot(g, data) {
-      var group = plot.groupSelect(g, data, accessor.date()),
-          volumeOpacityScale = d3_scale_linear().domain(d3_extent(data.map(accessor.v))).range([0.2, 1]);
+      var group = plot.groupSelect(g, data, p.accessor.d),
+          volumeOpacityScale = d3_scale_linear().domain(d3_extent(data.map(p.accessor.v))).range([0.2, 1]);
 
       function volumeOpacity(d) {
-        return volumeOpacityScale(accessor.v(d));
+        return volumeOpacityScale(p.accessor.v(d));
       }
 
       // Two path's as wick and body can be styled slightly differently (stroke and fills)
-      group.entry.append('path').attr({ class: 'candle body' }).classed(plot.classedUpDown(accessor));
-      group.entry.append('path').attr({ class: 'candle wick' }).classed(plot.classedUpDown(accessor));
+      group.entry.append('path').attr({ class: 'candle body' }).classed(plot.classedUpDown(p.accessor));
+      group.entry.append('path').attr({ class: 'candle wick' }).classed(plot.classedUpDown(p.accessor));
       group.selection.selectAll('path').style('opacity', volumeOpacity);
 
       candlestickPlot.refresh(g);
     }
 
     candlestickPlot.refresh = function(g) {
-      refresh(g, accessor, xScale, yScale);
+      refresh(g, p.accessor, p.xScale, p.yScale);
     };
 
-    candlestickPlot.accessor = function(_) {
-      if (!arguments.length) return accessor;
-      accessor = _;
-      return candlestickPlot;
-    };
-
-    candlestickPlot.xScale = function(_) {
-      if (!arguments.length) return xScale;
-      xScale = _;
-      return candlestickPlot;
-    };
-
-    candlestickPlot.yScale = function(_) {
-      if (!arguments.length) return yScale;
-      yScale = _;
-      return candlestickPlot;
-    };
+    // Mixin 'superclass' methods and variables
+    plotMixin(candlestickPlot, p, accessor_ohlc());
 
     return candlestickPlot;
   };

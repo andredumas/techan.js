@@ -4,23 +4,19 @@ techanModule('plot/volume', function(specBuilder) {
   var techan = require('../../../../src/techan'),
       data = ohlc.facebook.slice(0, 10),
       mocks = {
-        d3_scale_linear: function() {},
-        d3_extent: function() {},
-        techan_scale_financetime: function() {},
-        techan_plot_plot: {}
+        techan_plot_plot: {},
+        techan_plot_plotmixin: function() {}
       };
 
   var mockInit = function(module) {
-    return module(mocks.d3_scale_linear, mocks.d3_extent,
-      mocks.techan_scale_financetime, techan.accessor.ohlc, mocks.techan_plot_plot);
+    return module(techan.accessor.ohlc, mocks.techan_plot_plot, mocks.techan_plot_plotmixin);
   };
 
   var actualInit = function(module) {
-    var linear = d3.scale.linear,
-        extent = d3.extent,
-        plot = require('../../../../src/plot/plot')(d3);
+    var plot = require('../../../../src/plot/plot')(d3),
+        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
 
-    return module(linear, extent, techan.scale.financetime, techan.accessor.volume, plot);
+    return module(techan.accessor.volume, plot, plotMixin);
   };
 
   specBuilder.require(require('../../../../src/plot/volume'), function(instanceBuilder) {

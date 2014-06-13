@@ -1,13 +1,11 @@
 'use strict';
 
-module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, accessor_rsi, plot) {  // Injected dependencies
+module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependencies
   function rsi() { // Closure function
-    var xScale = techan_scale_financetime(),
-        yScale = d3_scale_linear(),
-        accessor = accessor_rsi();
+    var p = {};  // Container for private, direct access mixed in variables
 
     function rsiPlot(g, data) {
-      var group = plot.groupSelect(g, [data], accessor.date());
+      var group = plot.groupSelect(g, [data], p.accessor.date());
 
       group.entry.append('path').attr({ class: 'overbought' });
       group.entry.append('path').attr({ class: 'middle' });
@@ -18,26 +16,11 @@ module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, 
     }
 
     rsiPlot.refresh = function(g) {
-      refresh(g, accessor, xScale, yScale, plot);
+      refresh(g, p.accessor, p.xScale, p.yScale, plot);
     };
 
-    rsiPlot.accessor = function(_) {
-      if (!arguments.length) return accessor;
-      accessor = _;
-      return rsiPlot;
-    };
-
-    rsiPlot.xScale = function(_) {
-      if (!arguments.length) return xScale;
-      xScale = _;
-      return rsiPlot;
-    };
-
-    rsiPlot.yScale = function(_) {
-      if (!arguments.length) return yScale;
-      yScale = _;
-      return rsiPlot;
-    };
+    // Mixin 'superclass' methods and variables
+    plotMixin(rsiPlot, p, accessor_rsi());
 
     return rsiPlot;
   }

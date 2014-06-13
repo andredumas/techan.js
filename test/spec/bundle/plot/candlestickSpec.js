@@ -6,21 +6,22 @@ techanModule('plot/candlestick', function(specBuilder) {
       mocks = {
         d3_scale_linear: function() {},
         d3_extent: function() {},
-        techan_scale_financetime: function() {},
-        techan_plot_plot: {}
+        techan_plot_plot: {},
+        techan_plot_plotmixin: function() {}
       };
 
   var mockInit = function(module) {
     return module(mocks.d3_scale_linear, mocks.d3_extent,
-      mocks.techan_scale_financetime, techan.accessor.ohlc, mocks.techan_plot_plot);
+      techan.accessor.ohlc, mocks.techan_plot_plot, mocks.techan_plot_plotmixin);
   };
 
   var actualInit = function(module) {
     var linear = d3.scale.linear,
         extent = d3.extent,
-        plot = require('../../../../src/plot/plot')(d3);
+        plot = require('../../../../src/plot/plot')(d3),
+        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
 
-    return module(linear, extent, techan.scale.financetime, techan.accessor.ohlc, plot);
+    return module(linear, extent, techan.accessor.ohlc, plot, plotMixin);
   };
 
   specBuilder.require(require('../../../../src/plot/candlestick'), function(instanceBuilder) {

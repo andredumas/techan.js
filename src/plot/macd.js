@@ -1,13 +1,11 @@
 'use strict';
 
-module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, accessor_macd, plot) {  // Injected dependencies
+module.exports = function(accessor_macd, plot, plotMixin) {  // Injected dependencies
   function macd() { // Closure function
-    var xScale = techan_scale_financetime(),
-      yScale = d3_scale_linear(),
-      accessor = accessor_macd();
+    var p = {};  // Container for private, direct access mixed in variables
 
     function macdPlot(g, data) {
-      var group = plot.groupSelect(g, [data], accessor.date());
+      var group = plot.groupSelect(g, [data], p.accessor.d);
 
       var histogramSelection = group.selection
         .append('g').attr({ class: 'difference' })
@@ -23,26 +21,11 @@ module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, 
     }
 
     macdPlot.refresh = function(g) {
-      refresh(g, accessor, xScale, yScale, plot);
+      refresh(g, p.accessor, p.xScale, p.yScale, plot);
     };
 
-    macdPlot.accessor = function(_) {
-      if (!arguments.length) return accessor;
-      accessor = _;
-      return macdPlot;
-    };
-
-    macdPlot.xScale = function(_) {
-      if (!arguments.length) return xScale;
-      xScale = _;
-      return macdPlot;
-    };
-
-    macdPlot.yScale = function(_) {
-      if (!arguments.length) return yScale;
-      yScale = _;
-      return macdPlot;
-    };
+    // Mixin 'superclass' methods and variables
+    plotMixin(macdPlot, p, accessor_macd());
 
     return macdPlot;
   }

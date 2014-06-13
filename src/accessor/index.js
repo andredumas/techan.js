@@ -6,6 +6,7 @@ module.exports = function() {
     ohlc: require('./ohlc'),
     volume: require('./volume'),
     macd: require('./macd'),
-    rsi: require('./rsi')
+    rsi: require('./rsi'),
+    value: require('./value')
   };
 };

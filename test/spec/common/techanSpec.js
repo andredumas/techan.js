@@ -74,6 +74,14 @@ function techanSpec(techan) {
       expect(techan.plot.macd()).toBeDefined();
     });
 
+    it('Then techan.plot.movingaverage should be defined', function () {
+      expect(techan.plot.movingaverage).toBeDefined();
+    });
+
+    it('Then techan.plot.movingaverage can be constructed', function () {
+      expect(techan.plot.movingaverage()).toBeDefined();
+    });
+
     it('Then techan.plot.rsi should be defined', function () {
       expect(techan.plot.rsi).toBeDefined();
     });

@@ -1,1 +1,1 @@
-var movingaverage = [{ date: new Date("2014-03-05"), movingaverage: 14.81 }];
+var movingaverage = [{ date: new Date("2014-03-05"), value: 14.81 }];

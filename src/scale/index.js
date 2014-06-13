@@ -51,6 +51,9 @@ module.exports = function(d3) {
       },
       macd: function(accessor, data) {
         return pathScale(d3, accessor, data);
+      },
+      movingaverage: function(accessor, data) {
+        return pathScale(d3, accessor, data);
       }
     },
     position: {

@@ -1,44 +1,27 @@
 'use strict';
 
-module.exports = function(d3_scale_linear, d3_extent, techan_scale_financetime, accessor_volume, plot) {  // Injected dependencies
+module.exports = function(accessor_volume, plot, plotMixin) {  // Injected dependencies
   function volume() { // Closure function
-    var xScale = techan_scale_financetime(),
-        yScale = d3_scale_linear(),
-        accessor = accessor_volume();
+    var p = {};  // Container for private, direct access mixed in variables
 
     function volumePlot(g, data) {
-      var volume = plot.groupSelect(g, data, accessor.date())
+      var volume = plot.groupSelect(g, data, p.accessor.d)
         .entry.append('path')
           .attr({ class: 'volume' });
 
-        if(accessor.o && accessor.c) {
-          volume.classed(plot.classedUpDown(accessor));
+        if(p.accessor.o && p.accessor.c) {
+          volume.classed(plot.classedUpDown(p.accessor));
         }
 
       volumePlot.refresh(g);
     }
 
     volumePlot.refresh = function(g) {
-      refresh(g, accessor, xScale, yScale);
+      refresh(g, p.accessor, p.xScale, p.yScale);
     };
 
-    volumePlot.accessor = function(_) {
-      if (!arguments.length) return accessor;
-      accessor = _;
-      return volumePlot;
-    };
-
-    volumePlot.xScale = function(_) {
-      if (!arguments.length) return xScale;
-      xScale = _;
-      return volumePlot;
-    };
-
-    volumePlot.yScale = function(_) {
-      if (!arguments.length) return yScale;
-      yScale = _;
-      return volumePlot;
-    };
+    // Mixin 'superclass' methods and variables
+    plotMixin(volumePlot, p, accessor_volume());
 
     return volumePlot;
   }

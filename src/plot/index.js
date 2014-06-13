@@ -3,12 +3,14 @@
 module.exports = function(d3) {
   var scale = require('../scale')(d3),
       accessor = require('../accessor')(),
-      plot = require('./plot')(d3);
+      plot = require('./plot')(d3),
+      plotMixin = require('./plotmixin')(d3.scale.linear, scale.financetime);
 
   return {
-    candlestick: require('./candlestick')(d3.scale.linear, d3.extent, scale.financetime, accessor.ohlc, plot),
-    volume: require('./volume')(d3.scale.linear, d3.extent, scale.financetime, accessor.volume, plot),
-    rsi: require('./rsi')(d3.scale.linear, d3.extent, scale.financetime, accessor.rsi, plot),
-    macd: require('./macd')(d3.scale.linear, d3.extent, scale.financetime, accessor.macd, plot)
+    candlestick: require('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
+    volume: require('./volume')(accessor.volume, plot, plotMixin),
+    rsi: require('./rsi')(accessor.rsi, plot, plotMixin),
+    macd: require('./macd')(accessor.macd, plot, plotMixin),
+    movingaverage: require('./movingaverage')(accessor.value, plot, plotMixin)
   };
 };

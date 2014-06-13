@@ -1,21 +1,30 @@
 techanModule('plot', function(specBuilder) {
   'use strict';
 
-  var mockInit = function(module) {
-    var mockD3 = {
-      extent: function() {},
-      scale: {
-        linear: function() {}
-      }
-    };
-
-    return module(mockD3);
+  var actualInit = function(module) {
+    return module(d3);
   };
 
   specBuilder.require(require('../../../../src/plot'), function(instanceBuilder) {
-    instanceBuilder.index('mocked', mockInit, function(bucket) {
+    instanceBuilder.index('mocked', actualInit, function(bucket) {
       it('Then plot.candlestick should be defined', function() {
         expect(bucket.plot.candlestick).toBeDefined();
+      });
+
+      it('Then plot.macd should be defined', function() {
+        expect(bucket.plot.macd).toBeDefined();
+      });
+
+      it('Then plot.movingaverage should be defined', function() {
+        expect(bucket.plot.movingaverage).toBeDefined();
+      });
+
+      it('Then plot.rsi should be defined', function() {
+        expect(bucket.plot.rsi).toBeDefined();
+      });
+
+      it('Then plot.volume should be defined', function() {
+        expect(bucket.plot.volume).toBeDefined();
       });
     });
   });
