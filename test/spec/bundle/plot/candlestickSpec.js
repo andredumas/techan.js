@@ -2,31 +2,13 @@ techanModule('plot/candlestick', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = ohlc.facebook.slice(0, 10),
-      mocks = {
-        d3_scale_linear: function() {},
-        d3_extent: function() {},
-        techan_plot_plot: {},
-        techan_plot_plotmixin: function() {}
-      };
+      data = ohlc.facebook.slice(0, 2);
 
-  var mockInit = function(module) {
-    return module(mocks.d3_scale_linear, mocks.d3_extent,
-      techan.accessor.ohlc, mocks.techan_plot_plot, mocks.techan_plot_plotmixin);
-  };
-
-  var actualInit = function(module) {
-    var linear = d3.scale.linear,
-        extent = d3.extent,
-        plot = require('../../../../src/plot/plot')(d3),
-        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
-
-    return module(linear, extent, techan.accessor.ohlc, plot, plotMixin);
+  var actualInit = function() {
+    return techan.plot.candlestick;
   };
 
   specBuilder.require(require('../../../../src/plot/candlestick'), function(instanceBuilder) {
-    instanceBuilder.instance('mocked', mockInit);
-
     instanceBuilder.instance('actual', actualInit, function(bucket) {
       describe('And candlestick is initialised with defaults', function () {
         var candlestick,
@@ -48,17 +30,10 @@ techanModule('plot/candlestick', function(specBuilder) {
           candlestick.refresh(g);
         });
 
-        describe('And accessor is a new ohlc', function() {
-          var accessor;
-
-          beforeEach(function () {
-            accessor = techan.accessor.ohlc();
-            candlestick.accessor(accessor);
-          });
-
-          it('Then the accessor should equal the set', function () {
-            expect(candlestick.accessor()).toEqual(accessor);
-          });
+        it('Then the plot mixin methods should be defined', function () {
+          expect(candlestick.xScale).toBeDefined();
+          expect(candlestick.yScale).toBeDefined();
+          expect(candlestick.accessor).toBeDefined();
         });
       });
     });

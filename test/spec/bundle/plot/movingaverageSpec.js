@@ -2,26 +2,13 @@ techanModule('plot/movingaverage', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = movingaverage,
-      mocks = {
-        techan_plot_plot: {},
-        techan_plot_plotmixin: function() {}
-      };
+      data = movingaverage;
 
-  var mockInit = function(module) {
-    return module(techan.accessor.value, mocks.techan_plot_plot, mocks.techan_plot_plotmixin);
-  };
-
-  var actualInit = function(module) {
-    var plot = require('../../../../src/plot/plot')(d3),
-        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
-
-    return module(techan.accessor.value, plot, plotMixin);
+  var actualInit = function() {
+    return techan.plot.movingaverage;
   };
 
   specBuilder.require(require('../../../../src/plot/movingaverage'), function(instanceBuilder) {
-    instanceBuilder.instance('mocked', mockInit);
-
     instanceBuilder.instance('actual', actualInit, function(bucket) {
       describe('And movingaverage is initialised with defaults', function () {
         var movingaverage,
@@ -44,11 +31,10 @@ techanModule('plot/movingaverage', function(specBuilder) {
           movingaverage.refresh(g);
         });
 
-        it('Then the accessor should equal a newly set moving average accessor', function () {
-          accessor = techan.accessor.value();
-          movingaverage.accessor(accessor);
-
-          expect(movingaverage.accessor()).toEqual(accessor);
+        it('Then the plot mixin methods should be defined', function () {
+          expect(movingaverage.xScale).toBeDefined();
+          expect(movingaverage.yScale).toBeDefined();
+          expect(movingaverage.accessor).toBeDefined();
         });
       });
     });

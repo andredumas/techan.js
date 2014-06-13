@@ -2,26 +2,13 @@ techanModule('plot/rsi', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = rsi,
-      mocks = {
-        techan_plot_plot: {},
-        techan_plot_plotmixin: function() {}
-      };
+      data = rsi;
 
-  var mockInit = function(module) {
-    return module(techan.accessor.rsi, mocks.techan_plot_plot, mocks.techan_plot_plotmixin);
-  };
-
-  var actualInit = function(module) {
-    var plot = require('../../../../src/plot/plot')(d3),
-        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
-
-    return module(techan.accessor.rsi, plot, plotMixin);
+  var actualInit = function() {
+    return techan.plot.rsi;
   };
 
   specBuilder.require(require('../../../../src/plot/rsi'), function(instanceBuilder) {
-    instanceBuilder.instance('mocked', mockInit);
-
     instanceBuilder.instance('actual', actualInit, function(bucket) {
       describe('And rsi is initialised with defaults', function () {
         var rsi,
@@ -44,11 +31,10 @@ techanModule('plot/rsi', function(specBuilder) {
           rsi.refresh(g);
         });
 
-        it('Then the accessor should equal a newly set rsi accessor', function () {
-          accessor = techan.accessor.rsi();
-          rsi.accessor(accessor);
-
-          expect(rsi.accessor()).toEqual(accessor);
+        it('Then the plot mixin methods should be defined', function () {
+          expect(rsi.xScale).toBeDefined();
+          expect(rsi.yScale).toBeDefined();
+          expect(rsi.accessor).toBeDefined();
         });
       });
     });

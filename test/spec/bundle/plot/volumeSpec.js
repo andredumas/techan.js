@@ -2,26 +2,13 @@ techanModule('plot/volume', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = ohlc.facebook.slice(0, 10),
-      mocks = {
-        techan_plot_plot: {},
-        techan_plot_plotmixin: function() {}
-      };
+      data = ohlc.facebook.slice(0, 2);
 
-  var mockInit = function(module) {
-    return module(techan.accessor.ohlc, mocks.techan_plot_plot, mocks.techan_plot_plotmixin);
-  };
-
-  var actualInit = function(module) {
-    var plot = require('../../../../src/plot/plot')(d3),
-        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
-
-    return module(techan.accessor.volume, plot, plotMixin);
+  var actualInit = function() {
+    return techan.plot.volume;
   };
 
   specBuilder.require(require('../../../../src/plot/volume'), function(instanceBuilder) {
-    instanceBuilder.instance('mocked', mockInit);
-
     instanceBuilder.instance('actual', actualInit, function(bucket) {
       describe('And volume is initialised with defaults', function () {
         var volume,
@@ -44,6 +31,12 @@ techanModule('plot/volume', function(specBuilder) {
           // TODO Assert the result/DOM
           volume(g, data);
           volume.refresh(g);
+        });
+
+        it('Then the plot mixin methods should be defined', function () {
+          expect(volume.xScale).toBeDefined();
+          expect(volume.yScale).toBeDefined();
+          expect(volume.accessor).toBeDefined();
         });
 
         describe('And accessor is ohlc', function() {

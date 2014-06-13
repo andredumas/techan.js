@@ -2,15 +2,7 @@ techanModule('plot/line', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = line,
-      mocks = {
-        techan_plot_plot: {},
-        techan_plot_plotmixin: function() {}
-      };
-
-  var mockInit = function(module) {
-    return module(techan.accessor.value, mocks.techan_plot_plot, mocks.techan_plot_plotmixin);
-  };
+      data = line;
 
   var actualInit = function(module) {
     var plot = require('../../../../src/plot/plot')(d3),
@@ -20,8 +12,6 @@ techanModule('plot/line', function(specBuilder) {
   };
 
   specBuilder.require(require('../../../../src/plot/line'), function(instanceBuilder) {
-    instanceBuilder.instance('mocked', mockInit);
-
     instanceBuilder.instance('actual', actualInit, function(bucket) {
       describe('And line is initialised with defaults', function () {
         var line,
@@ -44,15 +34,10 @@ techanModule('plot/line', function(specBuilder) {
           line.refresh(g);
         });
 
-        it('Then the xScale mixin should be defined', function () {
+        it('Then the plot mixin methods should be defined', function () {
           expect(line.xScale).toBeDefined();
-        });
-
-        it('Then the accessor should equal a newly set moving average accessor', function () {
-          accessor = techan.accessor.value();
-          line.accessor(accessor);
-
-          expect(line.accessor()).toEqual(accessor);
+          expect(line.yScale).toBeDefined();
+          expect(line.accessor).toBeDefined();
         });
       });
     });
