@@ -19,6 +19,10 @@ techanModule('plot', function(specBuilder) {
         expect(bucket.plot.movingaverage).toBeDefined();
       });
 
+      it('Then plot.ohlc should be defined', function() {
+        expect(bucket.plot.ohlc).toBeDefined();
+      });
+
       it('Then plot.rsi should be defined', function() {
         expect(bucket.plot.rsi).toBeDefined();
       });

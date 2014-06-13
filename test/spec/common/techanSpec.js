@@ -82,6 +82,14 @@ function techanSpec(techan) {
       expect(techan.plot.movingaverage()).toBeDefined();
     });
 
+    it('Then techan.plot.ohlc should be defined', function () {
+      expect(techan.plot.ohlc).toBeDefined();
+    });
+
+    it('Then techan.plot.ohlc can be constructed', function () {
+      expect(techan.plot.ohlc()).toBeDefined();
+    });
+
     it('Then techan.plot.rsi should be defined', function () {
       expect(techan.plot.rsi).toBeDefined();
     });
