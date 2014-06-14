@@ -21,7 +21,7 @@ module.exports = function() {
 module.exports = function() {
   var date = function(d) { return d.date; },
       macd = function(d) { return d.macd; },
-      zero = function(d) { return 0; },
+      zero = function() { return 0; },
       signal = function(d) { return d.signal;},
       difference = function(d) { return d.difference;};
 
@@ -196,7 +196,8 @@ module.exports = function() {
 
 module.exports = function() {
   var date = function(d) { return d.date; },
-      value = function(d) { return d.value; };
+      value = function(d) { return d.value;},
+      zero = function() { return 0; };
 
   function accessor(d) {
     return accessor.v(d);
@@ -215,10 +216,17 @@ module.exports = function() {
     return bind();
   };
 
+  accessor.zero = function(_) {
+    if (!arguments.length) return zero;
+    zero = _;
+    return bind();
+  };
+
   function bind() {
     // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.v = value;
+    accessor.z = zero;
 
     return accessor;
   }
@@ -406,25 +414,20 @@ module.exports = function(d3) {
   return {
     candlestick: _dereq_('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
     ohlc: _dereq_('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
-    close: line(accessor.ohlc, plot, plotMixin, 'close'),
+    close: line(accessor.ohlc, plot, plotMixin),
     volume: _dereq_('./volume')(accessor.volume, plot, plotMixin),
     rsi: _dereq_('./rsi')(accessor.rsi, plot, plotMixin),
     macd: _dereq_('./macd')(accessor.macd, plot, plotMixin),
-    movingaverage: line(accessor.value, plot, plotMixin, 'movingaverage')
+    movingaverage: line(accessor.value, plot, plotMixin),
+    momentum: line(accessor.value, plot, plotMixin, true),
+    moneyflow: line(accessor.value, plot, plotMixin, true)
   };
 };
 },{"../accessor":1,"../scale":18,"./candlestick":9,"./line":11,"./macd":12,"./ohlc":13,"./plot":14,"./plotmixin":15,"./rsi":16,"./volume":17}],11:[function(_dereq_,module,exports){
 'use strict';
 
-module.exports = function(accessor_value, plot, plotMixin, clazz) {  // Injected dependencies
-  var classes = ['line'];
-
-  if(clazz) {
-    classes.push(clazz);
-  }
-
-  var classSelect = classes.join('.'),
-      classDeclare = classes.join(' ');
+module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
+  showZero = showZero || false;
 
   function line() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
@@ -432,13 +435,17 @@ module.exports = function(accessor_value, plot, plotMixin, clazz) {  // Injected
     function linePlot(g, data) {
       var group = plot.groupSelect(g, [data], p.accessor.date());
 
-      group.entry.append('path').attr({ class: classDeclare });
+      group.entry.append('path').attr({ class: 'line' });
+
+      if(showZero) {
+        group.selection.append('path').attr({ class: 'zero' });
+      }
 
       linePlot.refresh(g);
     }
 
     linePlot.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, classSelect);
+      refresh(g, p.accessor, p.xScale, p.yScale, plot, showZero);
     };
 
     // Mixin 'superclass' methods and variables
@@ -450,8 +457,12 @@ module.exports = function(accessor_value, plot, plotMixin, clazz) {  // Injected
   return line;
 };
 
-function refresh(g, accessor, x, y, plot, classSelector) {
-  g.selectAll('path.' + classSelector).attr({ d: plot.pathLine(accessor.d, x, accessor, y) });
+function refresh(g, accessor, x, y, plot, showZero) {
+  g.selectAll('path.line').attr({ d: plot.pathLine(accessor.d, x, accessor, y) });
+
+  if(showZero) {
+    g.selectAll('path.zero').attr({ d: plot.horizontalPathLine(x, accessor.z, y) });
+  }
 }
 },{}],12:[function(_dereq_,module,exports){
 'use strict';
@@ -661,7 +672,7 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
     var p = {};  // Container for private, direct access mixed in variables
 
     function rsiPlot(g, data) {
-      var group = plot.groupSelect(g, [data], p.accessor.date());
+      var group = plot.groupSelect(g, [data], p.accessor.d);
 
       group.entry.append('path').attr({ class: 'overbought' });
       group.entry.append('path').attr({ class: 'middle' });
