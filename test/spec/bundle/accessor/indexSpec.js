@@ -6,25 +6,25 @@ techanModule('accessor', function(specBuilder) {
   };
 
   specBuilder.require(require('../../../../src/accessor'), function(instanceBuilder) {
-    instanceBuilder.index('actual', actualInit, function(bucket) {
+    instanceBuilder.index('actual', actualInit, function(scope) {
       it('Then accessor.macd should be defined', function() {
-        expect(bucket.accessor.macd).toBeDefined();
+        expect(scope.accessor.macd).toBeDefined();
       });
 
       it('Then accessor.ohlc should be defined', function() {
-        expect(bucket.accessor.ohlc).toBeDefined();
+        expect(scope.accessor.ohlc).toBeDefined();
       });
 
       it('Then accessor.rsi should be defined', function() {
-        expect(bucket.accessor.rsi).toBeDefined();
+        expect(scope.accessor.rsi).toBeDefined();
       });
 
       it('Then accessor.value should be defined', function() {
-        expect(bucket.accessor.value).toBeDefined();
+        expect(scope.accessor.value).toBeDefined();
       });
 
       it('Then accessor.volume should be defined', function() {
-        expect(bucket.accessor.volume).toBeDefined();
+        expect(scope.accessor.volume).toBeDefined();
       });
     });
   });

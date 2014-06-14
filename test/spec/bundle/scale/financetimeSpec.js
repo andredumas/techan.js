@@ -12,12 +12,12 @@ techanModule('scale/financetime', function(specBuilder) {
   var data = ohlc.facebook.slice(0, 10).map(function(d) { return d.date; });
 
   specBuilder.require(require('../../../../src/scale/financetime'), function(instanceBuilder) {
-    instanceBuilder.instance('actual', actualInit, function(bucket) {
+    instanceBuilder.instance('actual', actualInit, function(scope) {
       var financetime = null;
 
       describe('And domain and range is initialised', function() {
         beforeEach(function() {
-          financetime = bucket.financetime;
+          financetime = scope.financetime;
           financetime.domain(data).range([100, 120]);
         });
 
@@ -86,7 +86,7 @@ techanModule('scale/financetime', function(specBuilder) {
 
           beforeEach(function() {
             zoom = d3.behavior.zoom();
-            financetime = bucket.financetime;
+            financetime = scope.financetime;
             zoom.x(financetime);
           });
 

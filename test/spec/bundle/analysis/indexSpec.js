@@ -12,9 +12,9 @@ techanModule('analysis', function(specBuilder) {
   };
 
   specBuilder.require(require('../../../../src/analysis'), function(instanceBuilder) {
-    instanceBuilder.index('mocked', mockInit, function(bucket) {
+    instanceBuilder.index('mocked', mockInit, function(scope) {
       it('Then analysis.supstance should be defined', function() {
-        expect(bucket.analysis.supstance).toBeDefined();
+        expect(scope.analysis.supstance).toBeDefined();
       });
     });
   });
