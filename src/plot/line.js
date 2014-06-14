@@ -1,14 +1,7 @@
 'use strict';
 
-module.exports = function(accessor_value, plot, plotMixin, clazz) {  // Injected dependencies
-  var classes = ['line'];
-
-  if(clazz) {
-    classes.push(clazz);
-  }
-
-  var classSelect = classes.join('.'),
-      classDeclare = classes.join(' ');
+module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
+  showZero = showZero || false;
 
   function line() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
@@ -16,13 +9,17 @@ module.exports = function(accessor_value, plot, plotMixin, clazz) {  // Injected
     function linePlot(g, data) {
       var group = plot.groupSelect(g, [data], p.accessor.date());
 
-      group.entry.append('path').attr({ class: classDeclare });
+      group.entry.append('path').attr({ class: 'line' });
+
+      if(showZero) {
+        group.selection.append('path').attr({ class: 'zero' });
+      }
 
       linePlot.refresh(g);
     }
 
     linePlot.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, classSelect);
+      refresh(g, p.accessor, p.xScale, p.yScale, plot, showZero);
     };
 
     // Mixin 'superclass' methods and variables
@@ -34,6 +31,10 @@ module.exports = function(accessor_value, plot, plotMixin, clazz) {  // Injected
   return line;
 };
 
-function refresh(g, accessor, x, y, plot, classSelector) {
-  g.selectAll('path.' + classSelector).attr({ d: plot.pathLine(accessor.d, x, accessor, y) });
+function refresh(g, accessor, x, y, plot, showZero) {
+  g.selectAll('path.line').attr({ d: plot.pathLine(accessor.d, x, accessor, y) });
+
+  if(showZero) {
+    g.selectAll('path.zero').attr({ d: plot.horizontalPathLine(x, accessor.z, y) });
+  }
 }

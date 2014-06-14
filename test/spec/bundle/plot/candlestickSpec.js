@@ -2,20 +2,20 @@ techanModule('plot/candlestick', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = ohlc.facebook.slice(0, 2);
+      data = ohlc.alternating.array;
 
   var actualInit = function() {
     return techan.plot.candlestick;
   };
 
   specBuilder.require(require('../../../../src/plot/candlestick'), function(instanceBuilder) {
-    instanceBuilder.instance('actual', actualInit, function(bucket) {
+    instanceBuilder.instance('actual', actualInit, function(scope) {
       describe('And candlestick is initialised with defaults', function () {
         var candlestick,
             g;
 
         beforeEach(function () {
-          candlestick = bucket.candlestick;
+          candlestick = scope.candlestick;
           g = d3.select(document.createElement('g'));
         });
 
@@ -30,11 +30,7 @@ techanModule('plot/candlestick', function(specBuilder) {
           candlestick.refresh(g);
         });
 
-        it('Then the plot mixin methods should be defined', function () {
-          expect(candlestick.xScale).toBeDefined();
-          expect(candlestick.yScale).toBeDefined();
-          expect(candlestick.accessor).toBeDefined();
-        });
+        assertPlotMixin(scope);
       });
     });
   });

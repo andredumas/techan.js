@@ -82,6 +82,22 @@ function techanSpec(techan) {
       expect(techan.plot.macd()).toBeDefined();
     });
 
+    it('Then techan.plot.momentum should be defined', function () {
+      expect(techan.plot.momentum).toBeDefined();
+    });
+
+    it('Then techan.plot.momentum can be constructed', function () {
+      expect(techan.plot.momentum()).toBeDefined();
+    });
+
+    it('Then techan.plot.moneyflow should be defined', function () {
+      expect(techan.plot.moneyflow).toBeDefined();
+    });
+
+    it('Then techan.plot.moneyflow can be constructed', function () {
+      expect(techan.plot.moneyflow()).toBeDefined();
+    });
+
     it('Then techan.plot.movingaverage should be defined', function () {
       expect(techan.plot.movingaverage).toBeDefined();
     });

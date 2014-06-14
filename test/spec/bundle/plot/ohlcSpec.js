@@ -2,20 +2,20 @@ techanModule('plot/ohlc', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-    data = ohlc.facebook.slice(0, 10);
+      data = ohlc.alternating.array;
 
   var actualInit = function() {
     return techan.plot.ohlc;
   };
 
   specBuilder.require(require('../../../../src/plot/ohlc'), function(instanceBuilder) {
-    instanceBuilder.instance('actual', actualInit, function(bucket) {
+    instanceBuilder.instance('actual', actualInit, function(scope) {
       describe('And ohlc is initialised with defaults', function () {
         var ohlc,
             g;
 
         beforeEach(function () {
-          ohlc = bucket.ohlc;
+          ohlc = scope.ohlc;
           g = d3.select(document.createElement('g'));
         });
 
@@ -30,11 +30,7 @@ techanModule('plot/ohlc', function(specBuilder) {
           ohlc.refresh(g);
         });
 
-        it('Then the plot mixin methods should be defined', function () {
-          expect(ohlc.xScale).toBeDefined();
-          expect(ohlc.yScale).toBeDefined();
-          expect(ohlc.accessor).toBeDefined();
-        });
+        assertPlotMixin(scope);
       });
     });
   });

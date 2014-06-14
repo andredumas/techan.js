@@ -32,18 +32,19 @@ function techanModule(moduleName, moduleSpec) {
       });
 
       describe('And the constructor is used to construct an instance', function () {
-        var bucket = {};
+        var scope = {};
 
         beforeEach(function () {
-          bucket[actualModuleName] = constructor();
+          scope.plot = constructor();
+          scope[actualModuleName] = scope.plot;
         });
 
         it('Then a new default instance should be defined', function () {
-          expect(bucket[actualModuleName]).toBeDefined();
+          expect(scope[actualModuleName]).toBeDefined();
         });
 
         if(instanceSpec) {
-          instanceSpec(bucket);
+          instanceSpec(scope);
         }
       });
     });
@@ -51,18 +52,18 @@ function techanModule(moduleName, moduleSpec) {
 
   instanceBuilder.index = function(description, moduleInit, instanceSpec) {
     describe('And initialise with ' + description +' dependencies', function() {
-      var bucket = {};
+      var scope = {};
 
       beforeEach(function() {
-        bucket[actualModuleName] = moduleInit(module);
+        scope[actualModuleName] = moduleInit(module);
       });
 
       it('Then the instance should be obtained', function () {
-        expect(bucket[actualModuleName]).toBeDefined();
+        expect(scope[actualModuleName]).toBeDefined();
       });
 
       if(instanceSpec) {
-        instanceSpec(bucket);
+        instanceSpec(scope);
       }
     });
   };

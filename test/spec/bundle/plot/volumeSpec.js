@@ -9,14 +9,14 @@ techanModule('plot/volume', function(specBuilder) {
   };
 
   specBuilder.require(require('../../../../src/plot/volume'), function(instanceBuilder) {
-    instanceBuilder.instance('actual', actualInit, function(bucket) {
+    instanceBuilder.instance('actual', actualInit, function(scope) {
       describe('And volume is initialised with defaults', function () {
         var volume,
             accessor,
             g;
 
         beforeEach(function () {
-          volume = bucket.volume;
+          volume = scope.volume;
           g = d3.select(document.createElement('g'));
         });
 
@@ -33,20 +33,12 @@ techanModule('plot/volume', function(specBuilder) {
           volume.refresh(g);
         });
 
-        it('Then the plot mixin methods should be defined', function () {
-          expect(volume.xScale).toBeDefined();
-          expect(volume.yScale).toBeDefined();
-          expect(volume.accessor).toBeDefined();
-        });
+        assertPlotMixin(scope);
 
         describe('And accessor is ohlc', function() {
           beforeEach(function() {
             accessor = techan.accessor.ohlc();
             volume.accessor(accessor);
-          });
-
-          it('Then the accessor should equal the set ohlc accessor', function () {
-            expect(volume.accessor()).toEqual(accessor);
           });
 
           xit('Then on default invoke, up/down classes should be rendered', function() {});

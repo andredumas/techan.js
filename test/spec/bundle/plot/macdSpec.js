@@ -9,14 +9,13 @@ techanModule('plot/macd', function(specBuilder) {
   };
 
   specBuilder.require(require('../../../../src/plot/macd'), function(instanceBuilder) {
-    instanceBuilder.instance('actual', actualInit, function(bucket) {
+    instanceBuilder.instance('actual', actualInit, function(scope) {
       describe('And macd is initialised with defaults', function () {
         var macd,
-            accessor,
             g;
 
         beforeEach(function () {
-          macd = bucket.macd;
+          macd = scope.macd;
           g = d3.select(document.createElement('g'));
         });
 
@@ -31,11 +30,7 @@ techanModule('plot/macd', function(specBuilder) {
           macd.refresh(g);
         });
 
-        it('Then the plot mixin methods should be defined', function () {
-          expect(macd.xScale).toBeDefined();
-          expect(macd.yScale).toBeDefined();
-          expect(macd.accessor).toBeDefined();
-        });
+        assertPlotMixin(scope);
       });
     });
   });

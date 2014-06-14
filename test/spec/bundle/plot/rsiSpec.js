@@ -9,14 +9,13 @@ techanModule('plot/rsi', function(specBuilder) {
   };
 
   specBuilder.require(require('../../../../src/plot/rsi'), function(instanceBuilder) {
-    instanceBuilder.instance('actual', actualInit, function(bucket) {
+    instanceBuilder.instance('actual', actualInit, function(scope) {
       describe('And rsi is initialised with defaults', function () {
         var rsi,
-            accessor,
             g;
 
         beforeEach(function () {
-          rsi = bucket.rsi;
+          rsi = scope.rsi;
           g = d3.select(document.createElement('g'));
         });
 
@@ -31,11 +30,7 @@ techanModule('plot/rsi', function(specBuilder) {
           rsi.refresh(g);
         });
 
-        it('Then the plot mixin methods should be defined', function () {
-          expect(rsi.xScale).toBeDefined();
-          expect(rsi.yScale).toBeDefined();
-          expect(rsi.accessor).toBeDefined();
-        });
+        assertPlotMixin(scope);
       });
     });
   });
