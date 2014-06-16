@@ -17,15 +17,16 @@ techanModule('plot/ohlc', function(specBuilder) {
         beforeEach(function () {
           ohlc = scope.ohlc;
           g = d3.select(document.createElement('g'));
+          g.data([data]);
         });
 
         it('Then on default invoke, ohlc should be rendered without error', function() {
           // TODO Assert the result/DOM
-          ohlc(g, data);
+          ohlc(g);
         });
 
         it('Then on refresh invoke, ohlc should be refreshed only', function() {
-          ohlc(g, data);
+          ohlc(g);
           // TODO Assert the result/DOM
           ohlc.refresh(g);
         });

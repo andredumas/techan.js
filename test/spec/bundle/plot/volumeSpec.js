@@ -17,19 +17,19 @@ techanModule('plot/volume', function(specBuilder) {
 
         beforeEach(function () {
           volume = scope.volume;
-          g = d3.select(document.createElement('g'));
+          g = gFixture(data);
         });
 
         it('Then on default invoke, volume should be rendered without error', function() {
           // TODO Assert the result/DOM
-          volume(g, data);
+          volume(g);
         });
 
         xit('Then on default invoke, should not render up/down classes', function() {});
 
         it('Then on refresh invoke, volume should be refreshed only', function() {
           // TODO Assert the result/DOM
-          volume(g, data);
+          volume(g);
           volume.refresh(g);
         });
 

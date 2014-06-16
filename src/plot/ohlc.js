@@ -4,8 +4,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   return function() { // Closure constructor
     var p = {};  // Container for private, direct access mixed in variables
 
-    function ohlcPlot(g, data) {
-      plot.groupSelect(g, data, p.accessor.d)
+    function ohlcPlot(g) {
+      plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
         .entry.append('path').attr({ class: 'ohlc' }).classed(plot.classedUpDown(p.accessor));
 
       ohlcPlot.refresh(g);

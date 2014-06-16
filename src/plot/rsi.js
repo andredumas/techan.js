@@ -4,8 +4,8 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
   function rsi() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function rsiPlot(g, data) {
-      var group = plot.groupSelect(g, [data], p.accessor.d);
+    function rsiPlot(g) {
+      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
       group.entry.append('path').attr({ class: 'overbought' });
       group.entry.append('path').attr({ class: 'middle' });

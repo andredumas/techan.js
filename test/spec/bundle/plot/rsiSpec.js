@@ -16,17 +16,17 @@ techanModule('plot/rsi', function(specBuilder) {
 
         beforeEach(function () {
           rsi = scope.rsi;
-          g = d3.select(document.createElement('g'));
+          g = gFixture(data);
         });
 
         it('Then on default invoke, rsi should be rendered without error', function() {
           // TODO Assert the result/DOM
-          rsi(g, data);
+          rsi(g);
         });
 
         it('Then on refresh invoke, rsi should be refreshed only', function() {
           // TODO Assert the result/DOM
-          rsi(g, data);
+          rsi(g);
           rsi.refresh(g);
         });
 

@@ -23,16 +23,17 @@ techanModule('plot/line', function(specBuilder) {
         beforeEach(function () {
           line = scope.line;
           g = d3.select(document.createElement('g'));
+          g.data([data]);
         });
 
         it('Then on default invoke, line should be rendered without error', function() {
           // TODO Assert the result/DOM
-          line(g, data);
+          line(g);
         });
 
         it('Then on refresh invoke, line should be refreshed only', function() {
           // TODO Assert the result/DOM
-          line(g, data);
+          line(g);
           line.refresh(g);
         });
 
@@ -47,17 +48,17 @@ techanModule('plot/line', function(specBuilder) {
 
         beforeEach(function () {
           line = scope.line;
-          g = d3.select(document.createElement('g'));
+          g = gFixture(data);
         });
 
         it('Then on default invoke, line and zero line should be rendered without error', function() {
           // TODO Assert the result/DOM
-          line(g, data);
+          line(g);
         });
 
         it('Then on refresh invoke, line and zero line should be refreshed only', function() {
           // TODO Assert the result/DOM
-          line(g, data);
+          line(g);
           line.refresh(g);
         });
 

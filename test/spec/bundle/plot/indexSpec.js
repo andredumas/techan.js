@@ -6,7 +6,7 @@ techanModule('plot', function(specBuilder) {
   };
 
   specBuilder.require(require('../../../../src/plot'), function(instanceBuilder) {
-    instanceBuilder.index('mocked', actualInit, function(bucket) {
+    instanceBuilder.index('actual', actualInit, function(bucket) {
       it('Then plot.candlestick should be defined', function() {
         expect(bucket.plot.candlestick).toBeDefined();
       });

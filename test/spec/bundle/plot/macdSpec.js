@@ -16,17 +16,17 @@ techanModule('plot/macd', function(specBuilder) {
 
         beforeEach(function () {
           macd = scope.macd;
-          g = d3.select(document.createElement('g'));
+          g = gFixture(data);
         });
 
         it('Then on default invoke, macd should be rendered without error', function() {
           // TODO Assert the result/DOM
-          macd(g, data);
+          macd(g);
         });
 
         it('Then on refresh invoke, macd should be refreshed only', function() {
           // TODO Assert the result/DOM
-          macd(g, data);
+          macd(g);
           macd.refresh(g);
         });
 

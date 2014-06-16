@@ -16,16 +16,16 @@ techanModule('plot/candlestick', function(specBuilder) {
 
         beforeEach(function () {
           candlestick = scope.candlestick;
-          g = d3.select(document.createElement('g'));
+          g = gFixture(data);
         });
 
         it('Then on default invoke, candlesticks should be rendered without error', function() {
           // TODO Assert the result/DOM
-          candlestick(g, data);
+          candlestick(g);
         });
 
         it('Then on refresh invoke, candlesticks should be refreshed only', function() {
-          candlestick(g, data);
+          candlestick(g);
           // TODO Assert the result/DOM
           candlestick.refresh(g);
         });

@@ -4,14 +4,14 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
   function volume() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function volumePlot(g, data) {
-      var volume = plot.groupSelect(g, data, p.accessor.d)
+    function volumePlot(g) {
+      var volume = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
         .entry.append('path')
           .attr({ class: 'volume' });
 
-        if(p.accessor.o && p.accessor.c) {
-          volume.classed(plot.classedUpDown(p.accessor));
-        }
+      if(p.accessor.o && p.accessor.c) {
+        volume.classed(plot.classedUpDown(p.accessor));
+      }
 
       volumePlot.refresh(g);
     }

@@ -4,8 +4,8 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
   function macd() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function macdPlot(g, data) {
-      var group = plot.groupSelect(g, [data], p.accessor.d);
+    function macdPlot(g) {
+      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
       var histogramSelection = group.selection
         .append('g').attr({ class: 'difference' })
