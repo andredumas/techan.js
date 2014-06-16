@@ -2,7 +2,8 @@ techanModule('plot/rsi', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = rsi;
+      data = require('./../_fixtures/data/rsi'),
+      domFixtures = require('../_fixtures/dom');
 
   var actualInit = function() {
     return techan.plot.rsi;
@@ -16,7 +17,7 @@ techanModule('plot/rsi', function(specBuilder) {
 
         beforeEach(function () {
           rsi = scope.rsi;
-          g = gFixture(data);
+          g = domFixtures.g([data]);
         });
 
         it('Then on default invoke, rsi should be rendered without error', function() {

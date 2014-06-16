@@ -2,7 +2,8 @@ techanModule('plot/ohlc', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = ohlc.alternating.array;
+      data = require('./../_fixtures/data/ohlc').alternating.array,
+      domFixtures = require('../_fixtures/dom');
 
   var actualInit = function() {
     return techan.plot.ohlc;
@@ -16,8 +17,7 @@ techanModule('plot/ohlc', function(specBuilder) {
 
         beforeEach(function () {
           ohlc = scope.ohlc;
-          g = d3.select(document.createElement('g'));
-          g.data([data]);
+          g = domFixtures.g([data]);
         });
 
         it('Then on default invoke, ohlc should be rendered without error', function() {

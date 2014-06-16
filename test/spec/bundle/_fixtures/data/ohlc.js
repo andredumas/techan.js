@@ -1,5 +1,7 @@
 var ohlc = {};
 
+module.exports = ohlc;
+
 ohlc.alternating = {
   up: { date: new Date("2014-03-05"), open: 1, high: 1.5, low: 0.5, close: 1.1, volume: 10},
   down: { date: new Date("2014-03-06"), open: 1.1, high: 1.5, low: 0.5, close: 1, volume: 100},

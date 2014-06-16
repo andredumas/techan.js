@@ -2,7 +2,8 @@ techanModule('plot/candlestick', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = ohlc.alternating.array;
+      data = require('../_fixtures/data/ohlc').alternating.array,
+      domFixtures = require('../_fixtures/dom');
 
   var actualInit = function() {
     return techan.plot.candlestick;
@@ -16,7 +17,7 @@ techanModule('plot/candlestick', function(specBuilder) {
 
         beforeEach(function () {
           candlestick = scope.candlestick;
-          g = gFixture(data);
+          g = domFixtures.g(data);
         });
 
         it('Then on default invoke, candlesticks should be rendered without error', function() {

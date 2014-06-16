@@ -2,7 +2,8 @@ techanModule('plot/macd', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-    data = macd;
+      data = require('../_fixtures/data/macd'),
+      domFixtures = require('../_fixtures/dom');
 
   var actualInit = function() {
     return techan.plot.macd;
@@ -16,7 +17,7 @@ techanModule('plot/macd', function(specBuilder) {
 
         beforeEach(function () {
           macd = scope.macd;
-          g = gFixture(data);
+          g = domFixtures.g([data]);
         });
 
         it('Then on default invoke, macd should be rendered without error', function() {

@@ -2,7 +2,8 @@ techanModule('plot/volume', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = ohlc.facebook.slice(0, 2);
+      data = require('../_fixtures/data/ohlc').facebook.slice(0, 2),
+      domFixtures = require('../_fixtures/dom');
 
   var actualInit = function() {
     return techan.plot.volume;
@@ -17,7 +18,7 @@ techanModule('plot/volume', function(specBuilder) {
 
         beforeEach(function () {
           volume = scope.volume;
-          g = gFixture(data);
+          g = domFixtures.g([data]);
         });
 
         it('Then on default invoke, volume should be rendered without error', function() {
