@@ -5,17 +5,17 @@
  generally contains data points on days where a market is open but no points when closed, such as weekday
  and weekends respectively. When plot, is done so without weekend gaps.
 
- TODO rename to arraytime
+ TODO Possibly rename to arraytime
  */
 module.exports = function(d3_scale_linear, d3_rebind, zoomable, techan_util_rebindCallback) {  // Injected dependencies
   function financetime(index, domain) {
     var dateIndexMap = {},
-        rangeExtent,
+        rangeBounds,
         rangeBand = 3;
 
     index = index || d3_scale_linear();
     domain = domain || [0, 1];
-    rangeExtent = index.range();
+    rangeBounds = index.range();
 
     function rescale() {
       index.domain([0, domain.length-1]);
@@ -27,8 +27,8 @@ module.exports = function(d3_scale_linear, d3_rebind, zoomable, techan_util_rebi
 
       var range = index.range(),
           rangeBand = calculateRangeBand(index, domain);
-      rangeExtent = [range[0]-rangeBand*0.65, range[1]+rangeBand*0.65];
-      index.domain([index.invert(rangeExtent[0]), index.invert(rangeExtent[1])]);
+      rangeBounds = [range[0]-rangeBand*0.65, range[1]+rangeBand*0.65];
+      index.domain([index.invert(rangeBounds[0]), index.invert(rangeBounds[1])]);
 
       zoomed();
 
@@ -40,8 +40,7 @@ module.exports = function(d3_scale_linear, d3_rebind, zoomable, techan_util_rebi
     }
 
     function scale(x) {
-      // TODO Review half rangeBand offset here
-      return index(dateIndexMap[x])-rangeBand/2;
+      return index(dateIndexMap[x]);
     }
 
     scale.invert = function(y) {
@@ -54,8 +53,12 @@ module.exports = function(d3_scale_linear, d3_rebind, zoomable, techan_util_rebi
       return domain[i] ? Math.abs(i) : null;
     };
 
-    scale.rangeExtent = function() {
-      return rangeExtent;
+    /**
+     * Returns a 2 element array representing the minimum and maximum pixel bounds for this scale.
+     * @returns {*}
+     */
+    scale.rangeBounds = function() {
+      return rangeBounds;
     };
 
     /**

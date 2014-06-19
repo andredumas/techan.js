@@ -40,19 +40,19 @@ module.exports = function(d3) {
     horizontalPathLine: function(x, accessor_value, y) {
       return function(d) {
         var path = [],
-            rangeExtent = x.rangeExtent();
+            rangeBounds = x.rangeBounds(); // Support non techan scales??
+                                           // revert to rangeExtent or range()[0],range()[last] if this function not available??
 
-        path.push('M', rangeExtent[0], y(accessor_value(d)));
-        path.push('l', rangeExtent[1]-rangeExtent[1], 0);
+        path.push('M', rangeBounds[0], y(accessor_value(d)));
+        path.push('l', rangeBounds[1]-rangeBounds[1], 0);
 
         return path.join(' ');
       };
     },
 
     pathLine: function(accessor_date, x, accessor_value, y) {
-      var xPoint = x.rangeBand()/2;
       return d3.svg.line().interpolate('monotone')
-        .x(function(d) { return x(accessor_date(d))+xPoint; } )
+        .x(function(d) { return x(accessor_date(d)); } )
         .y(function(d) { return y(accessor_value(d)); } );
     }
   };

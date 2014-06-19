@@ -29,11 +29,11 @@ function refresh(g, accessor, x, y) {
 function ohlcPath(accessor, x, y) {
   return function(d) {
     var path = [],
-        xValue = x(accessor.d(d)),
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
         rangeBand = x.rangeBand(),
-        xPoint = xValue + rangeBand/2;
+        xPoint = x(accessor.d(d)),
+        xValue = xPoint - rangeBand/2;
 
     path.push('M', xValue, open);
     path.push('l', rangeBand/2, 0);

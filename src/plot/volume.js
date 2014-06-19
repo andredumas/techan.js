@@ -36,10 +36,10 @@ function refresh(g, accessor, x, y) {
 function volumePath(accessor, x, y) {
   return function(d) {
     var path = [],
-        xValue = x(accessor.d(d)),
         zero = y(0),
         height = y(accessor.v(d)) - zero,
-        rangeBand = x.rangeBand();
+        rangeBand = x.rangeBand(),
+        xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push('M', xValue, zero);
     path.push('l', 0, height);

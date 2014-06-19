@@ -28,11 +28,11 @@ techanModule('scale/financetime', function(specBuilder) {
         });
 
         it('Then rangeExtent should return the full visible range set inclusive of range bands', function() {
-          expect(financetime.rangeExtent()).toEqual([98.84444444444445, 121.15555555555555]);
+          expect(financetime.rangeBounds()).toEqual([98.84444444444445, 121.15555555555555]);
         });
 
         it('Then scale of first index should return min range', function() {
-          expect(financetime(data[0])).toEqual(100.23904382470118);
+          expect(financetime(data[0])).toEqual(101.03585657370517);
         });
 
         it('Then invert of just over min range should return the first domain', function() {
@@ -118,11 +118,11 @@ techanModule('scale/financetime', function(specBuilder) {
             });
 
             it('Then scale of first index should return min range', function() {
-              expect(financetime(data[0])).toEqual(132.11155378486055);
+              expect(financetime(data[0])).toEqual(132.64276228419655);
             });
 
             it('Then scale of last index should return max range', function() {
-              expect(financetime(data[data.length-1])).toEqual(120.1593625498008);
+              expect(financetime(data[data.length-1])).toEqual(120.69057104913679);
             });
           });
         });

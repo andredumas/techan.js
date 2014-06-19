@@ -50,10 +50,10 @@ function refresh(g, accessor, x, y) {
 function candleBodyPath(accessor, x, y) {
   return function(d) {
     var path = [],
-        xValue = x(accessor.d(d)),
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.rangeBand();
+        rangeBand = x.rangeBand(),
+        xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push('M', xValue, open);
     path.push('l', rangeBand, 0);
@@ -72,11 +72,11 @@ function candleBodyPath(accessor, x, y) {
 function candleWickPath(accessor, x, y) {
   return function(d) {
     var path = [],
-        xValue = x(accessor.d(d)),
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
         rangeBand = x.rangeBand(),
-        xPoint = xValue + rangeBand/2;
+        xPoint = x(accessor.d(d)),
+        xValue = xPoint - rangeBand/2;
 
     // Top
     path.push('M', xPoint, y(accessor.h(d)));
