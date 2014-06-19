@@ -320,26 +320,37 @@ function refresh(yScale) {
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure constructor
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        volumeOpacity = false;
 
-    function candlestickPlot(g, data) {
-      var group = plot.groupSelect(g, data, p.accessor.d),
-          volumeOpacityScale = d3_scale_linear().domain(d3_extent(data.map(p.accessor.v))).range([0.2, 1]);
-
-      function volumeOpacity(d) {
-        return volumeOpacityScale(p.accessor.v(d));
-      }
+    function candlestickPlot(g) {
+      var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d);
 
       // Two path's as wick and body can be styled slightly differently (stroke and fills)
       group.entry.append('path').attr({ class: 'candle body' }).classed(plot.classedUpDown(p.accessor));
       group.entry.append('path').attr({ class: 'candle wick' }).classed(plot.classedUpDown(p.accessor));
-      group.selection.selectAll('path').style('opacity', volumeOpacity);
+
+      if(volumeOpacity) {
+        var volumeOpacityScale = d3_scale_linear()
+          .domain(d3_extent(group.selection.data().map(p.accessor.v)))
+          .range([0.2, 1]);
+
+        group.selection.selectAll('path').style('opacity', function(d) {
+          return volumeOpacityScale(p.accessor.v(d));
+        });
+      }
 
       candlestickPlot.refresh(g);
     }
 
     candlestickPlot.refresh = function(g) {
       refresh(g, p.accessor, p.xScale, p.yScale);
+    };
+
+    candlestickPlot.volumeOpacity = function(_) {
+      if (!arguments.length) return volumeOpacity;
+      volumeOpacity = _;
+      return candlestickPlot;
     };
 
     // Mixin 'superclass' methods and variables
@@ -357,10 +368,10 @@ function refresh(g, accessor, x, y) {
 function candleBodyPath(accessor, x, y) {
   return function(d) {
     var path = [],
-        xValue = x(accessor.d(d)),
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.rangeBand();
+        rangeBand = x.rangeBand(),
+        xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push('M', xValue, open);
     path.push('l', rangeBand, 0);
@@ -379,11 +390,11 @@ function candleBodyPath(accessor, x, y) {
 function candleWickPath(accessor, x, y) {
   return function(d) {
     var path = [],
-        xValue = x(accessor.d(d)),
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
         rangeBand = x.rangeBand(),
-        xPoint = xValue + rangeBand/2;
+        xPoint = x(accessor.d(d)),
+        xValue = xPoint - rangeBand/2;
 
     // Top
     path.push('M', xPoint, y(accessor.h(d)));
@@ -423,7 +434,7 @@ module.exports = function(d3) {
     moneyflow: line(accessor.value, plot, plotMixin, true)
   };
 };
-},{"../accessor":1,"../scale":18,"./candlestick":9,"./line":11,"./macd":12,"./ohlc":13,"./plot":14,"./plotmixin":15,"./rsi":16,"./volume":17}],11:[function(_dereq_,module,exports){
+},{"../accessor":1,"../scale":19,"./candlestick":9,"./line":11,"./macd":12,"./ohlc":13,"./plot":14,"./plotmixin":15,"./rsi":16,"./volume":17}],11:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
@@ -432,8 +443,8 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
   function line() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function linePlot(g, data) {
-      var group = plot.groupSelect(g, [data], p.accessor.date());
+    function linePlot(g) {
+      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.date());
 
       group.entry.append('path').attr({ class: 'line' });
 
@@ -471,8 +482,8 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
   function macd() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function macdPlot(g, data) {
-      var group = plot.groupSelect(g, [data], p.accessor.d);
+    function macdPlot(g) {
+      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
       var histogramSelection = group.selection
         .append('g').attr({ class: 'difference' })
@@ -510,10 +521,10 @@ function refresh(g, accessor, x, y, plot) {
 function differencePath(accessor, x, y) {
   return function(d) {
     var path = [],
-        xValue = x(accessor.d(d)),
         zero = y(0),
         height = y(accessor.dif(d)) - zero,
-        rangeBand = x.rangeBand();
+        rangeBand = x.rangeBand(),
+        xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push('M', xValue, zero);
     path.push('l', 0, height);
@@ -530,8 +541,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   return function() { // Closure constructor
     var p = {};  // Container for private, direct access mixed in variables
 
-    function ohlcPlot(g, data) {
-      plot.groupSelect(g, data, p.accessor.d)
+    function ohlcPlot(g) {
+      plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
         .entry.append('path').attr({ class: 'ohlc' }).classed(plot.classedUpDown(p.accessor));
 
       ohlcPlot.refresh(g);
@@ -555,11 +566,11 @@ function refresh(g, accessor, x, y) {
 function ohlcPath(accessor, x, y) {
   return function(d) {
     var path = [],
-        xValue = x(accessor.d(d)),
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
         rangeBand = x.rangeBand(),
-        xPoint = xValue + rangeBand/2;
+        xPoint = x(accessor.d(d)),
+        xValue = xPoint - rangeBand/2;
 
     path.push('M', xValue, open);
     path.push('l', rangeBand/2, 0);
@@ -577,8 +588,8 @@ function ohlcPath(accessor, x, y) {
 'use strict';
 
 module.exports = function(d3) {
-  function dataSelection(g, data, accessor_date) {
-    var selection = g.selectAll('g.data').data(data, accessor_date);
+  function dataSelection(g, dataMapper, accessor_date) {
+    var selection = g.selectAll('g.data').data(dataMapper, accessor_date);
     selection.exit().remove();
     return selection;
   }
@@ -588,37 +599,47 @@ module.exports = function(d3) {
   }
 
   return {
+    dataMapper: {
+      unity: function(d) { return d; },
+      array: function(d) { return [d]; }
+    },
+
     dataSelection: dataSelection,
+
     dataEntry: dataEntry,
-    groupSelect: function(g, data, accessor_date) {
-      var selection = dataSelection(g, data, accessor_date),
+
+    groupSelect: function(g, dataMapper, accessor_date) {
+      var selection = dataSelection(g, dataMapper, accessor_date),
           entry = dataEntry(selection);
       return {
         selection: selection,
         entry: entry
       };
     },
+
     classedUpDown: function(accessor) {
       return {
         up: function(d) { return accessor.o(d) < accessor.c(d); },
         down: function(d) { return accessor.o(d) > accessor.c(d); }
       };
     },
+
     horizontalPathLine: function(x, accessor_value, y) {
       return function(d) {
         var path = [],
-            rangeExtent = x.rangeExtent();
+            rangeBounds = x.rangeBounds(); // Support non techan scales??
+                                           // revert to rangeExtent or range()[0],range()[last] if this function not available??
 
-        path.push('M', rangeExtent[0], y(accessor_value(d)));
-        path.push('l', rangeExtent[1]-rangeExtent[1], 0);
+        path.push('M', rangeBounds[0], y(accessor_value(d)));
+        path.push('l', rangeBounds[1]-rangeBounds[1], 0);
 
         return path.join(' ');
       };
     },
+
     pathLine: function(accessor_date, x, accessor_value, y) {
-      var xPoint = x.rangeBand()/2;
       return d3.svg.line().interpolate('monotone')
-        .x(function(d) { return x(accessor_date(d))+xPoint; } )
+        .x(function(d) { return x(accessor_date(d)); } )
         .y(function(d) { return y(accessor_value(d)); } );
     }
   };
@@ -671,8 +692,8 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
   function rsi() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function rsiPlot(g, data) {
-      var group = plot.groupSelect(g, [data], p.accessor.d);
+    function rsiPlot(g) {
+      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
       group.entry.append('path').attr({ class: 'overbought' });
       group.entry.append('path').attr({ class: 'middle' });
@@ -708,14 +729,14 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
   function volume() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function volumePlot(g, data) {
-      var volume = plot.groupSelect(g, data, p.accessor.d)
+    function volumePlot(g) {
+      var volume = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
         .entry.append('path')
           .attr({ class: 'volume' });
 
-        if(p.accessor.o && p.accessor.c) {
-          volume.classed(plot.classedUpDown(p.accessor));
-        }
+      if(p.accessor.o && p.accessor.c) {
+        volume.classed(plot.classedUpDown(p.accessor));
+      }
 
       volumePlot.refresh(g);
     }
@@ -740,10 +761,10 @@ function refresh(g, accessor, x, y) {
 function volumePath(accessor, x, y) {
   return function(d) {
     var path = [],
-        xValue = x(accessor.d(d)),
         zero = y(0),
         height = y(accessor.v(d)) - zero,
-        rangeBand = x.rangeBand();
+        rangeBand = x.rangeBand(),
+        xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push('M', xValue, zero);
     path.push('l', 0, height);
@@ -756,62 +777,181 @@ function volumePath(accessor, x, y) {
 },{}],18:[function(_dereq_,module,exports){
 'use strict';
 
+/*
+ Finance time scale which is not necessarily continuous, is required to be plot continuous. Finance scale
+ generally contains data points on days where a market is open but no points when closed, such as weekday
+ and weekends respectively. When plot, is done so without weekend gaps.
+
+ TODO Possibly rename to arraytime
+ */
+module.exports = function(d3_scale_linear, d3_rebind, zoomable, techan_util_rebindCallback) {  // Injected dependencies
+  function financetime(index, domain) {
+    var dateIndexMap = {},
+        rangeBounds,
+        rangeBand = 3;
+
+    index = index || d3_scale_linear();
+    domain = domain || [0, 1];
+    rangeBounds = index.range();
+
+    function rescale() {
+      index.domain([0, domain.length-1]);
+
+      dateIndexMap = {};
+      domain.forEach(function(d, i) {
+        dateIndexMap[d] = i;
+      });
+
+      var range = index.range(),
+          rangeBand = calculateRangeBand(index, domain);
+      rangeBounds = [range[0]-rangeBand*0.65, range[1]+rangeBand*0.65];
+      index.domain([index.invert(rangeBounds[0]), index.invert(rangeBounds[1])]);
+
+      zoomed();
+
+      return scale;
+    }
+
+    function zoomed() {
+      rangeBand = calculateRangeBand(index, domain);
+    }
+
+    function scale(x) {
+      return index(dateIndexMap[x]);
+    }
+
+    scale.invert = function(y) {
+      var i = scale.invertToIndex(y);
+      return i === null ? null : domain[i];
+    };
+
+    scale.invertToIndex = function(y) {
+      var i = Math.round(index.invert(y));
+      return domain[i] ? Math.abs(i) : null;
+    };
+
+    /**
+     * Returns a 2 element array representing the minimum and maximum pixel bounds for this scale.
+     * @returns {*}
+     */
+    scale.rangeBounds = function() {
+      return rangeBounds;
+    };
+
+    /**
+     * As the underlying structure relies on a full array, ensure the full domain is passed here,
+     * not just min and max values.
+     *
+     * @param _ The full domain array
+     * @returns {*}
+     */
+    scale.domain = function(_) {
+      if (!arguments.length) return domain;
+      domain = _;
+      return rescale();
+    };
+
+    scale.copy = function() {
+      return financetime(index.copy(), domain);
+    };
+
+    scale.rangeBand = function() {
+      return rangeBand;
+    };
+
+    scale.zoomable = function() {
+      return zoomable(index, zoomed);
+    };
+
+    // TODO Implement tick support
+    scale.ticks = delegateGetOrSetAndChain(scale, index.ticks);
+    scale.tickFormat = delegateGetOrSetAndChain(scale, index.tickFormat);
+
+    techan_util_rebindCallback(scale, index, rescale, 'range', 'interpolate', 'clamp', 'nice');
+
+    return rescale();
+  }
+
+  return financetime;
+};
+
+function delegateGetOrSetAndChain(target, thefunction) {
+  return function() {
+    if (!arguments.length) return thefunction.apply(this);
+    thefunction.apply(this, arguments);
+    return target;
+  };
+}
+
+
+function calculateRangeBand(linear, domain) {
+  var band = (Math.abs(linear(domain.length-1) - linear(0))/Math.max(1, domain.length-1));
+  return band*0.8;
+}
+},{}],19:[function(_dereq_,module,exports){
+'use strict';
+
 module.exports = function(d3) {
+  var zoomable = _dereq_('./zoomable')(),
+      util = _dereq_('../util')();
+
   return {
-    // Temporarily disabled until the scale implementation is fixed
-    //financetime: require('./financetime')(d3.scale.linear, d3.scale.ordinal, d3.rebind),
-    financetime: function() {
-      var ordinal = d3.scale.ordinal();
-      var originalRange = ordinal.range;
-      ordinal.range = function(range) {
-        if(!arguments.length) return originalRange();
-        return ordinal.rangeRoundBands(range, 0.2);
-      };
-      return ordinal;
-    },
+    financetime: _dereq_('./financetime')(d3.scale.linear, d3.rebind, zoomable, util.rebindCallback),
+
     analysis: {
       supstance: function(accessor, data) {
         return d3.scale.linear();
       },
+
       trendline: function(accessor, data) {
         return d3.scale.linear();
       }
     },
+
     plot: {
       percent: function (scale, reference) {
         var domain = scale.domain();
         return scale.copy().domain([((domain[0] - reference) / reference), ((domain[1] - reference) / reference)]);
       },
+
       ohlc: function (accessor, data) {
         return d3.scale.linear()
           .domain([d3.min(data.map(accessor.low())) * 0.98, d3.max(data.map(accessor.high())) * 1.03])
           .range([1, 0]);
       },
+
       volume: function (accessor, data) {
         return d3.scale.linear()
           .domain([0, d3.max(data.map(accessor)) * 1.15])
           .range([1, 0]);
       },
+
       rsi: function (accessor, data) {
         return d3.scale.linear().domain([0, 100])
           .range([1, 0]);
       },
+
       path: function(accessor, data) {
         return pathScale(d3, accessor, data);
       },
+
       momentum: function(accessor, data) {
         return pathScale(d3, accessor, data);
       },
+
       moneyflow: function(accessor, data) {
         return pathScale(d3, accessor, data);
       },
+
       macd: function(accessor, data) {
         return pathScale(d3, accessor, data);
       },
+
       movingaverage: function(accessor, data) {
         return pathScale(d3, accessor, data);
       }
     },
+
     position: {
 
     }
@@ -826,7 +966,47 @@ function pathScale(d3, accessor, data) {
   return d3.scale.linear().domain(pathDomain(d3, accessor, data))
     .range([1, 0]);
 }
-},{}],19:[function(_dereq_,module,exports){
+},{"../util":22,"./financetime":18,"./zoomable":20}],20:[function(_dereq_,module,exports){
+'use strict';
+
+/**
+ * Creates a decorated zoomable view of the passed scale. As the finance scale deals with an array and integer positions within the
+ * array, it does not support the d3 zoom behaviour. d3 zoom behaviour rescales the input domain.
+ * Finance scale is composed of an array of dates which is fixed in length and position and a linear scale mapping index
+ * to range. The linear scale can be zoomed. This object decorates the scale with only the methods required by zoom
+ * (invert, domain, copy). On zoom, calls the based zoomed callback.
+ *
+ * NOTE: This is not a complete scale, it will throw errors if it is used for anything else but zooming
+ */
+module.exports = function() {
+  function zoomable(linear, zoomed) {
+    var scale = {},
+        domainLimit = linear.domain();
+
+    scale.invert = linear.invert;
+
+    scale.domain = function(_) {
+      if(!arguments.length) throw "zoomable is a write only domain. Use this scale for zooming only";
+      linear.domain([Math.max(domainLimit[0], _[0]), Math.min(domainLimit[1], _[1])]);
+      if(zoomed) zoomed(); // Callback to that we have been zoomed
+      return scale;
+    };
+
+    scale.range = function(_) {
+      if(!arguments.length) return linear.range();
+      throw "zoomable is a read only range. Use this scale for zooming only";
+    };
+
+    scale.copy = function() {
+      return zoomable(linear.copy(), zoomed);
+    };
+
+    return scale;
+  }
+
+  return zoomable;
+};
+},{}],21:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = (function(d3) {
@@ -838,6 +1018,38 @@ module.exports = (function(d3) {
     scale: _dereq_('./scale')(d3)
   };
 })(d3);
-},{"./accessor":1,"./analysis":7,"./plot":10,"./scale":18}]},{},[19])
-(19)
+},{"./accessor":1,"./analysis":7,"./plot":10,"./scale":19}],22:[function(_dereq_,module,exports){
+'use strict';
+
+module.exports = function() {
+  return {
+    rebindCallback: rebindCallback,
+
+    rebind: function(target, source) {
+      var newArgs = Array.prototype.slice.call(arguments, 0);
+      newArgs.splice(2, 0, undefined);
+      return rebindCallback.apply(this, newArgs);
+    }
+  };
+};
+
+/*
+ Slight modification to d3.rebind taking a post set callback
+ https://github.com/mbostock/d3/blob/master/src/core/rebind.js
+ */
+function rebindCallback(target, source, postSetCallback) {
+  var i = 2, n = arguments.length, method;
+  while (++i < n) target[method = arguments[i]] = doRebind(target, source, source[method], postSetCallback);
+  return target;
+}
+
+function doRebind(target, source, method, postSetCallback) {
+  return function() {
+    var value = method.apply(source, arguments);
+    if(postSetCallback) postSetCallback();
+    return value === source ? target : value;
+  };
+}
+},{}]},{},[21])
+(21)
 });
