@@ -1,19 +1,12 @@
 'use strict';
 
 module.exports = function(d3) {
-  return {
-    // Temporarily disabled until the scale implementation is fixed
-    //financetime: require('./financetime')(d3.scale.linear, d3.scale.ordinal, d3.rebind),
+  var zoomable = require('./zoomable')(),
+      util = require('../util')();
 
-    financetime: function() {
-      var ordinal = d3.scale.ordinal();
-      var originalRange = ordinal.range;
-      ordinal.range = function(range) {
-        if(!arguments.length) return originalRange();
-        return ordinal.rangeRoundBands(range, 0.2);
-      };
-      return ordinal;
-    },
+  return {
+    financetime: require('./financetime')(d3.scale.linear, d3.rebind, zoomable, util.rebindCallback),
+
     analysis: {
       supstance: function(accessor, data) {
         return d3.scale.linear();
@@ -23,6 +16,7 @@ module.exports = function(d3) {
         return d3.scale.linear();
       }
     },
+
     plot: {
       percent: function (scale, reference) {
         var domain = scale.domain();
@@ -66,6 +60,7 @@ module.exports = function(d3) {
         return pathScale(d3, accessor, data);
       }
     },
+
     position: {
 
     }

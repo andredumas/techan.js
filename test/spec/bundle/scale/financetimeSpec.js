@@ -1,12 +1,10 @@
 techanModule('scale/financetime', function(specBuilder) {
   'use strict';
 
-  var actualInit = function(module) {
-    var linear = d3.scale.linear,
-        ordinal = d3.scale.ordinal,
-        rebind = d3.rebind;
+  var techan = require('../../../../src/techan');
 
-    return module(linear, ordinal, rebind);
+  var actualInit = function() {
+    return techan.scale.financetime;
   };
 
   var data = require('../_fixtures/data/ohlc').facebook.slice(0, 10).map(function(d) { return d.date; });
@@ -29,32 +27,56 @@ techanModule('scale/financetime', function(specBuilder) {
           expect(financetime.range()).toEqual([100, 120]);
         });
 
+        it('Then rangeExtent should return the full visible range set inclusive of range bands', function() {
+          expect(financetime.rangeExtent()).toEqual([98.84444444444445, 121.15555555555555]);
+        });
+
         it('Then scale of first index should return min range', function() {
-          expect(financetime(data[0])).toEqual(105);
+          expect(financetime(data[0])).toEqual(100.23904382470118);
         });
 
-        it('Then invert of max range should return last domain', function() {
-          expect(financetime.invert(114)).toEqual(data[data.length-1]);
+        it('Then invert of just over min range should return the first domain', function() {
+          expect(financetime.invert(101)).toEqual(data[0]);
         });
 
-        it('Then linear(linear.invert(y)) should equal y for each in ordinal range', function() {
-          financetime.ordinal().range().forEach(function(y) {
+        it('Then invert of just under max range should return the last domain', function() {
+          expect(financetime.invert(119)).toEqual(data[data.length-1]);
+        });
+
+        it('Then invertToIndex of just over min range should return the first domain index', function() {
+          expect(financetime.invertToIndex(101)).toEqual(0);
+        });
+
+        it('Then invertToIndex of less than min range should return null', function() {
+          expect(financetime.invertToIndex(90)).toBeNull();
+        });
+
+        it('Then invertToIndex of just under max range should return the last domain index', function() {
+          expect(financetime.invertToIndex(119)).toEqual(data.length-1);
+        });
+
+        it('Then invertToIndex of greater max range should return null', function() {
+          expect(financetime.invertToIndex(130)).toBeNull();
+        });
+
+        xit('Then linear(linear.invert(y)) should equal y for each in ordinal range', function() {
+          financetime.range().forEach(function(y) {
             expect(financetime(financetime.invert(y))).toEqual(y);
           });
         });
 
-        it('Then linear.invert(linear(x)) should equal x for each in domain', function() {
+        it('Then invert(financetime(x)) should equal x for each in domain', function() {
             data.forEach(function(x) {
               expect(financetime.invert(financetime(x))).toEqual(x);
             });
         });
 
-        it('Then invert of value before range, should return first domain', function() {
-          expect(financetime.invert(50)).toEqual(data[0]);
+        it('Then invert of value before range, should return null', function() {
+          expect(financetime.invert(50)).toBeNull();
         });
 
-        it('Then invert of value after range, should return last domain', function() {
-          expect(financetime.invert(150)).toEqual(data[data.length-1]);
+        it('Then invert of value after range, should return null', function() {
+          expect(financetime.invert(150)).toBeNull();
         });
 
         it('Then using invert as Array.prototyp.map(invert) of a value greater than max range, should return last domain', function() {
@@ -87,7 +109,7 @@ techanModule('scale/financetime', function(specBuilder) {
           beforeEach(function() {
             zoom = d3.behavior.zoom();
             financetime = scope.financetime;
-            zoom.x(financetime);
+            zoom.x(financetime.zoomable());
           });
 
           describe('And translated by 50 left', function() {
@@ -95,42 +117,12 @@ techanModule('scale/financetime', function(specBuilder) {
               zoom.translate([-50, 0]);
             });
 
-            xit('Then scale of first index should return min range', function() {
-              expect(financetime(data[0])).toEqual(50);
+            it('Then scale of first index should return min range', function() {
+              expect(financetime(data[0])).toEqual(132.11155378486055);
             });
 
-            xit('Then scale of last index should return max range', function() {
-              expect(financetime(data[data.length-1])).toEqual(60);
-            });
-
-            xit('Then invert of min range should return first domain', function() {
-              expect(financetime.invert(50)).toEqual(data[0]);
-            });
-
-            xit('Then invert of max range should return last domain', function() {
-              expect(financetime.invert(60)).toEqual(data[data.length-1]);
-            });
-          });
-
-          describe('And scaled by 2', function() {
-            beforeEach(function() {
-              zoom.scale(2);
-            });
-
-            xit('Then scale of first index should return min range', function() {
-              expect(financetime(data[0])).toEqual(50);
-            });
-
-            xit('Then scale of last index should return max range', function() {
-              expect(financetime(data[data.length-1])).toEqual(140);
-            });
-
-            xit('Then invert of min range should return first domain', function() {
-              expect(financetime.invert(50)).toEqual(data[0]);
-            });
-
-            xit('Then invert of max range should return last domain', function() {
-              expect(financetime.invert(140)).toEqual(data[data.length-1]);
+            it('Then scale of last index should return max range', function() {
+              expect(financetime(data[data.length-1])).toEqual(120.1593625498008);
             });
           });
         });
