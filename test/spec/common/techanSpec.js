@@ -54,6 +54,42 @@ function techanSpec(techan) {
       expect(techan.analysis.supstance).toBeDefined();
     });
 
+    it('Then techan.indicator should be defined', function () {
+      expect(techan.indicator).toBeDefined();
+    });
+
+    it('Then techan.indicator.ema should be defined', function () {
+      expect(techan.indicator.ema).toBeDefined();
+    });
+
+    it('Then techan.indicator.ema can be constructed', function () {
+      expect(techan.indicator.ema()).toBeDefined();
+    });
+
+    it('Then techan.indicator.macd should be defined', function () {
+      expect(techan.indicator.macd).toBeDefined();
+    });
+
+    it('Then techan.indicator.macd can be constructed', function () {
+      expect(techan.indicator.macd()).toBeDefined();
+    });
+
+    it('Then techan.indicator.rsi should be defined', function () {
+      expect(techan.indicator.rsi).toBeDefined();
+    });
+
+    it('Then techan.indicator.rsi can be constructed', function () {
+      expect(techan.indicator.rsi()).toBeDefined();
+    });
+
+    it('Then techan.indicator.sma should be defined', function () {
+      expect(techan.indicator.sma).toBeDefined();
+    });
+
+    it('Then techan.indicator.sma can be constructed', function () {
+      expect(techan.indicator.sma()).toBeDefined();
+    });
+
     it('Then techan.plot should be defined', function () {
       expect(techan.plot).toBeDefined();
     });

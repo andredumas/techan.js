@@ -2,7 +2,7 @@ techanModule('plot/rsi', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = require('./../_fixtures/data/rsi'),
+      data = require('./../_fixtures/data/rsi').plot,
       domFixtures = require('../_fixtures/dom');
 
   var actualInit = function() {

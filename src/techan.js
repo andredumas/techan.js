@@ -5,6 +5,7 @@ module.exports = (function(d3) {
     version: '0.1.0', // TODO Dynamically populate/tokenize
     accessor: require('./accessor')(),
     analysis: require('./analysis')(d3),
+    indicator: require('./indicator')(),
     plot: require('./plot')(d3),
     scale: require('./scale')(d3)
   };

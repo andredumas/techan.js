@@ -37,14 +37,14 @@ module.exports = function(d3) {
       };
     },
 
-    horizontalPathLine: function(x, accessor_value, y) {
+    horizontalPathLine: function(accessor_date, x, accessor_value, y) {
       return function(d) {
         var path = [],
-            rangeBounds = x.rangeBounds(); // Support non techan scales??
-                                           // revert to rangeExtent or range()[0],range()[last] if this function not available??
+            firstDatum = d[0],
+            lastDatum = d[d.length-1];
 
-        path.push('M', rangeBounds[0], y(accessor_value(d)));
-        path.push('l', rangeBounds[1]-rangeBounds[1], 0);
+        path.push('M', x(accessor_date(firstDatum)), y(accessor_value(firstDatum)));
+        path.push('L', x(accessor_date(lastDatum)), y(accessor_value(lastDatum)));
 
         return path.join(' ');
       };

@@ -11,6 +11,10 @@ techanModule('scale', function(specBuilder) {
         expect(scope.scale.financetime).toBeDefined();
       });
 
+      it('Then scale.plot.time should be defined', function() {
+        expect(scope.scale.plot.time).toBeDefined();
+      });
+
       it('Then scale.plot.percent should be defined', function() {
         expect(scope.scale.plot.percent).toBeDefined();
       });

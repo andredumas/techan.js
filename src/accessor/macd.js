@@ -3,7 +3,7 @@
 module.exports = function() {
   var date = function(d) { return d.date; },
       macd = function(d) { return d.macd; },
-      zero = function() { return 0; },
+      zero = function(d) { return d.zero; },
       signal = function(d) { return d.signal;},
       difference = function(d) { return d.difference;};
 

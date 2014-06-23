@@ -2,62 +2,67 @@
 
 module.exports = function(d3) {
   var zoomable = require('./zoomable')(),
-      util = require('../util')();
+      util = require('../util')(),
+      financetime = require('./financetime')(d3.scale.linear, d3.rebind, zoomable, util.rebindCallback);
 
   return {
-    financetime: require('./financetime')(d3.scale.linear, d3.rebind, zoomable, util.rebindCallback),
+    financetime: financetime,
 
     analysis: {
-      supstance: function(accessor, data) {
+      supstance: function(data, accessor) {
         return d3.scale.linear();
       },
 
-      trendline: function(accessor, data) {
+      trendline: function(data, accessor) {
         return d3.scale.linear();
       }
     },
 
     plot: {
+      time: function(data, accessor) {
+        return financetime().domain(data.map(accessor.d));
+      },
+
       percent: function (scale, reference) {
         var domain = scale.domain();
         return scale.copy().domain([((domain[0] - reference) / reference), ((domain[1] - reference) / reference)]);
       },
 
-      ohlc: function (accessor, data) {
+      ohlc: function (data, accessor) {
         return d3.scale.linear()
           .domain([d3.min(data.map(accessor.low())) * 0.98, d3.max(data.map(accessor.high())) * 1.03])
           .range([1, 0]);
       },
 
-      volume: function (accessor, data) {
+      volume: function (data, accessor) {
         return d3.scale.linear()
           .domain([0, d3.max(data.map(accessor)) * 1.15])
           .range([1, 0]);
       },
 
-      rsi: function (accessor, data) {
+      rsi: function (data, accessor) {
         return d3.scale.linear().domain([0, 100])
           .range([1, 0]);
       },
 
-      path: function(accessor, data) {
-        return pathScale(d3, accessor, data);
+      path: function(data, accessor) {
+        return pathScale(d3, data, accessor);
       },
 
-      momentum: function(accessor, data) {
-        return pathScale(d3, accessor, data);
+      momentum: function(data, accessor) {
+        return pathScale(d3, data, accessor);
       },
 
-      moneyflow: function(accessor, data) {
-        return pathScale(d3, accessor, data);
+      moneyflow: function(data, accessor) {
+        return pathScale(d3, data, accessor);
       },
 
-      macd: function(accessor, data) {
-        return pathScale(d3, accessor, data);
+      macd: function(data, accessor) {
+        return pathScale(d3, data, accessor);
       },
 
-      movingaverage: function(accessor, data) {
-        return pathScale(d3, accessor, data);
+      movingaverage: function(data, accessor) {
+        return pathScale(d3, data, accessor);
       }
     },
 
@@ -67,11 +72,11 @@ module.exports = function(d3) {
   };
 };
 
-function pathDomain(d3, accessor, data) {
+function pathDomain(d3, data, accessor) {
   return data.length > 0 ? d3.extent(data, accessor) : null;
 }
 
-function pathScale(d3, accessor, data) {
-  return d3.scale.linear().domain(pathDomain(d3, accessor, data))
+function pathScale(d3, data, accessor) {
+  return d3.scale.linear().domain(pathDomain(d3, data, accessor))
     .range([1, 0]);
 }

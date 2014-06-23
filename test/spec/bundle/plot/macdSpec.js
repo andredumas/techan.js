@@ -2,7 +2,7 @@ techanModule('plot/macd', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = require('../_fixtures/data/macd'),
+      data = require('../_fixtures/data/macd').plot,
       domFixtures = require('../_fixtures/dom');
 
   var actualInit = function() {

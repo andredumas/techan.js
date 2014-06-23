@@ -3,7 +3,7 @@
 module.exports = function() {
   var date = function(d) { return d.date; },
       value = function(d) { return d.value;},
-      zero = function() { return 0; };
+      zero = function(d) { return d.zero; };
 
   function accessor(d) {
     return accessor.v(d);
