@@ -9,13 +9,14 @@ module.exports = function(d3) {
 
   return {
     candlestick: require('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
+    ema: line(accessor.value, plot, plotMixin),
     ohlc: require('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
     close: line(accessor.ohlc, plot, plotMixin),
     volume: require('./volume')(accessor.volume, plot, plotMixin),
     rsi: require('./rsi')(accessor.rsi, plot, plotMixin),
     macd: require('./macd')(accessor.macd, plot, plotMixin),
-    movingaverage: line(accessor.value, plot, plotMixin),
     momentum: line(accessor.value, plot, plotMixin, true),
-    moneyflow: line(accessor.value, plot, plotMixin, true)
+    moneyflow: line(accessor.value, plot, plotMixin, true),
+    sma: line(accessor.value, plot, plotMixin)
   };
 };

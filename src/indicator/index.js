@@ -8,8 +8,6 @@ module.exports = function() {
   return {
     ema: ema,
     macd: require('./macd')(indicatorMixin, accessor.ohlc, ema),
-    momentum: null,
-    moneyflow: null,
     rsi: require('./rsi')(indicatorMixin, accessor.ohlc, ema),
     sma: require('./sma')(indicatorMixin, accessor.ohlc)
   };

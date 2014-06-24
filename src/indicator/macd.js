@@ -21,8 +21,8 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
         var macd = slow - fast,
             signalValue = i >= minFastSlow ? signalLine.average(macd) : null;
 
-        if(i >= minCount) return { date: p.accessor.d(d), macd: macd, signal: signalValue, difference: macd - signalValue, zero: 0 };
-        else return { date: p.accessor.d(d), macd: null, signal: null, difference: null, zero: null };
+        if(i >= minCount) return datum(p.accessor.d(d), macd, signalValue, macd - signalValue, 0);
+        else return datum(p.accessor.d(d));
 
       }).filter(function(d) { return d.macd; });
     }
@@ -51,3 +51,8 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
     return indicator;
   };
 };
+
+function datum(date, macd, signal, difference, zero) {
+  if(macd) return { date: date, macd: macd, signal: signal, difference: difference, zero: zero };
+  else return { date: date, macd: null, signal: null, difference: null, zero: null };
+}

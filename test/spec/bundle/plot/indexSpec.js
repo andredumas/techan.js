@@ -15,6 +15,10 @@ techanModule('plot', function(specBuilder) {
         expect(bucket.plot.close).toBeDefined();
       });
 
+      it('Then plot.ema should be defined', function() {
+        expect(bucket.plot.ema).toBeDefined();
+      });
+
       it('Then plot.macd should be defined', function() {
         expect(bucket.plot.macd).toBeDefined();
       });
@@ -27,8 +31,8 @@ techanModule('plot', function(specBuilder) {
         expect(bucket.plot.moneyflow).toBeDefined();
       });
 
-      it('Then plot.movingaverage should be defined', function() {
-        expect(bucket.plot.movingaverage).toBeDefined();
+      it('Then plot.sma should be defined', function() {
+        expect(bucket.plot.sma).toBeDefined();
       });
 
       it('Then plot.ohlc should be defined', function() {

@@ -110,6 +110,14 @@ function techanSpec(techan) {
       expect(techan.plot.close()).toBeDefined();
     });
 
+    it('Then techan.plot.ema should be defined', function () {
+      expect(techan.plot.ema).toBeDefined();
+    });
+
+    it('Then techan.plot.ema can be constructed', function () {
+      expect(techan.plot.ema()).toBeDefined();
+    });
+
     it('Then techan.plot.macd should be defined', function () {
       expect(techan.plot.macd).toBeDefined();
     });
@@ -134,12 +142,12 @@ function techanSpec(techan) {
       expect(techan.plot.moneyflow()).toBeDefined();
     });
 
-    it('Then techan.plot.movingaverage should be defined', function () {
-      expect(techan.plot.movingaverage).toBeDefined();
+    it('Then techan.plot.sma should be defined', function () {
+      expect(techan.plot.sma).toBeDefined();
     });
 
-    it('Then techan.plot.movingaverage can be constructed', function () {
-      expect(techan.plot.movingaverage()).toBeDefined();
+    it('Then techan.plot.sma can be constructed', function () {
+      expect(techan.plot.sma()).toBeDefined();
     });
 
     it('Then techan.plot.ohlc should be defined', function () {

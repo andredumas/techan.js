@@ -13,7 +13,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
           gainAverage = indicator_ema().accessor(indicator.accessor()).period(period).init();
 
       return data.map(function(d, i) {
-        if(i < 1) return blank(p, d);
+        if(i < 1) return datum(p.accessor.d(d));
 
         var difference = p.accessor(d) - p.accessor(data[i-1]),
             averageGain = gainAverage.average(Math.max(difference, 0)),
@@ -21,9 +21,9 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
 
         if(i >= period) {
           var rsi = 100 - (100/(1+(averageGain/averageLoss)));
-          return { date: p.accessor.d(d), rsi: rsi, middle: middle, overbought: overbought, oversold: oversold };
+          return datum(p.accessor.d(d), rsi, middle, overbought, oversold);
         }
-        else return blank(p, d);
+        else return datum(p.accessor.d(d));
 
       }).filter(function(d) { return d.rsi; });
     }
@@ -59,6 +59,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
   };
 };
 
-function blank(p, d) {
-  return { date: p.accessor.d(d), rsi: null, middle: null, overbought: null, oversold: null };
+function datum(date, rsi, middle, overbought, oversold) {
+  if(rsi) return { date: date, rsi: rsi, middle: middle, overbought: overbought, oversold: oversold };
+  else return { date: date, rsi: null, middle: null, overbought: null, oversold: null };
 }
