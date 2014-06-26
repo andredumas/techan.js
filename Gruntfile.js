@@ -16,11 +16,20 @@ module.exports = function(grunt) {
       build: ['build']
     },
 
+    filegen: {
+      version: {
+        options: {
+          content: "'use strict';module.exports='<%= pkg.version %>';"
+        },
+        dest: 'build/version.js'
+      }
+    },
+
     browserify: {
       dev: {
         options: {
           // Thanks https://github.com/amitayd/grunt-browserify-jasmine-node-example/blob/2488181e29b09226f2a87202a851f996820eafb6/Gruntfile.js#L51
-          require: grunt.file.expand({filter: 'isFile'}, './src/**/*.js'),
+          require: grunt.file.expand({filter: 'isFile'}, './src/**/*.js', './<%= filegen.version.dest %>'),
           bundleOptions: {
             debug: true
           }
@@ -76,7 +85,7 @@ module.exports = function(grunt) {
         jshintrc: ".jshintrc"
       },
       dev: {
-        src: ['src/**/*.js', 'lib/**/*.js', 'Gruntfile.js', 'test/**/*.js']
+        src: ['src/**/*.js', 'lib/**/*.js', 'Gruntfile.js', 'test/**/*.js', '<%= filegen.version.dest %>']
       }
     },
 
@@ -84,7 +93,7 @@ module.exports = function(grunt) {
       options: {
         config: '.jscs.json'
       },
-      dev: ['src/**/*.js', 'Gruntfile.js', 'test/**/*.js']
+      dev: ['src/**/*.js', 'Gruntfile.js', 'test/**/*.js', '<%= filegen.version.dest %>']
     },
 
     watch: {
@@ -141,7 +150,7 @@ module.exports = function(grunt) {
   grunt.loadTasks('lib/grunt');
 
   grunt.registerTask('lint', ['jshint', 'jscs']);
-  grunt.registerTask('dev', ['lint', 'browserify:dev', 'browserify:test', 'jasmine:test']);
+  grunt.registerTask('dev', ['filegen:version', 'lint', 'browserify:dev', 'browserify:test', 'jasmine:test']);
   grunt.registerTask('dist', ['browserify:dist', 'usebanner', 'jasmine:dist']);
   grunt.registerTask('minify', ['uglify', 'jasmine:minify']);
   grunt.registerTask('serve', ['connect', 'watch']);

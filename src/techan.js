@@ -2,7 +2,7 @@
 
 module.exports = (function(d3) {
   return {
-    version: '0.1.0', // TODO Dynamically populate/tokenize
+    version: require('../build/version'),
     accessor: require('./accessor')(),
     analysis: require('./analysis')(d3),
     indicator: require('./indicator')(),
