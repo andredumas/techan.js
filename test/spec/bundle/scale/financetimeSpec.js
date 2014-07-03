@@ -7,7 +7,8 @@ techanModule('scale/financetime', function(specBuilder) {
     return techan.scale.financetime;
   };
 
-  var data = require('../_fixtures/data/ohlc').facebook.slice(0, 10).map(function(d) { return d.date; });
+  var data = require('../_fixtures/data/ohlc').facebook.slice(0, 10).map(function(d) { return d.date; }),
+      timeData = require('../_fixtures/data/time').input;
 
   specBuilder.require(require('../../../../src/scale/financetime'), function(instanceBuilder) {
     instanceBuilder.instance('actual', actualInit, function(scope) {
@@ -83,8 +84,27 @@ techanModule('scale/financetime', function(specBuilder) {
           expect([110].map(financetime.invert)).toEqual([data[5]]);
         });
 
+        it('Then ticks should return a distributed range of ticks', function() {
+          expect(financetime.ticks()).toEqual([
+            new Date(2012, 4, 19),
+            new Date(2012, 4, 20),
+            new Date(2012, 4, 21),
+            new Date(2012, 4, 22),
+            new Date(2012, 4, 23),
+            new Date(2012, 4, 24),
+            new Date(2012, 4, 25),
+            new Date(2012, 4, 26),
+            new Date(2012, 4, 27),
+            new Date(2012, 4, 28),
+            new Date(2012, 4, 29),
+            new Date(2012, 4, 30),
+            new Date(2012, 4, 31),
+            new Date(2012, 5, 1)
+          ]);
+        });
+
         describe('And copied', function() {
-          var cloned = null;
+          var cloned;
 
           beforeEach(function() {
             cloned = financetime.copy();
@@ -104,7 +124,7 @@ techanModule('scale/financetime', function(specBuilder) {
         });
 
         describe('And a zoom applied', function() {
-          var zoom = null;
+          var zoom;
 
           beforeEach(function() {
             zoom = d3.behavior.zoom();
@@ -123,6 +143,99 @@ techanModule('scale/financetime', function(specBuilder) {
 
             it('Then scale of last index should return max range', function() {
               expect(financetime(data[data.length-1])).toEqual(120.69057104913679);
+            });
+
+            it('Then ticks should return offset tick values', function() {
+              // TODO Filter out or adjust ticks that are not in the domain
+              expect(financetime.ticks()).toEqual([
+                new Date(2012,5,3),
+                new Date(2012,5,5),
+                new Date(2012,5,7),
+                new Date(2012,5,9),
+                new Date(2012,5,11),
+                new Date(2012,5,13),
+                new Date(2012,5,15),
+                new Date(2012,5,17),
+                new Date(2012,5,19),
+                new Date(2012,5,21)
+              ]);
+            });
+
+            xdescribe('And copied', function() {
+              var cloned;
+
+              beforeEach(function() {
+                cloned = financetime.copy();
+              });
+
+              it('Then ticks should return same offset tick values', function() {
+                expect(cloned.ticks()).toEqual(financetime.ticks());
+              });
+            });
+          });
+        });
+
+        describe('(SCRATCHPAD) And domain and range is initialised with symmetric data', function() {
+          var index,
+              time,
+              zoomIndex,
+              zoomTime;
+
+          beforeEach(function() {
+            index = d3.scale.linear().domain([0, timeData.length-1]).range([0, 1000]);
+            time = d3.time.scale().domain([timeData[0], timeData[timeData.length-1]]).range([0, 1000]);
+            zoomIndex = d3.behavior.zoom().x(index);
+            zoomTime = d3.behavior.zoom().x(time);
+          });
+
+          it('Should have domain set correctly', function() {
+            expect(index.domain()).toEqual([0, 9]);
+            expect(time.domain()).toEqual([new Date(0), new Date(9000)]);
+          });
+
+          it('Should have 10 ticks equaling input data', function() {
+            expect(time.ticks()).toEqual(timeData);
+          });
+
+          describe('And zoom applied to translate both scales to left', function() {
+            beforeEach(function() {
+              // Move across to get symmetrical number on the domain
+              zoomIndex.translate([-111.11111111111111, 0]);
+              zoomTime.translate([-111.11111111111111, 0]);
+            });
+
+            it('Should move proportionately resulting in round number domain', function() {
+              expect(index.domain()).toEqual([1, 10]);
+            });
+
+            it('Should have index domain scale correctly applied to time domain ', function() {
+              expect(time.domain()).toEqual([new Date(1000), new Date(10000)]);
+            });
+          });
+
+          describe('And zoom applied to translate index scale to the left', function() {
+            var indexToTime;
+
+            beforeEach(function() {
+              indexToTime = d3.scale.linear()
+                .domain(index.domain())
+                .range(time.domain().map(function(d) { return d.getTime(); }));
+
+              // Move across to get symmetrical number on the domain
+              zoomIndex.translate([-111.11111111111111, 0]);
+            });
+
+            it('Should move proportionately resulting in round number domain', function() {
+              expect(index.domain()).toEqual([1, 10]);
+            });
+
+            it('Should have index domain scale correctly applied to time domain ', function() {
+              time.domain(index.domain().map(indexToTime));
+              expect(time.domain()).toEqual([new Date(1000), new Date(10000)]);
+            });
+
+            xit('Should have 10 ticks equaling input offset to left', function() {
+              expect(time.ticks()).toEqual(timeData);
             });
           });
         });

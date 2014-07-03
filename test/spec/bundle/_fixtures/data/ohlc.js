@@ -1,3 +1,5 @@
+'use strict';
+
 var ohlc = {};
 
 module.exports = ohlc;
@@ -464,7 +466,6 @@ ohlc.facebook = [
   ["2012-05-21",36.53,36.66,33,34.03,168192700],
   ["2012-05-18",42.05,45,38,38.23,573576400]
 ].map(function(d) {
-    'use strict';
     return {
       date: new Date(d[0]),
       open: d[0],
@@ -473,6 +474,6 @@ ohlc.facebook = [
       close: d[3],
       volume: d[4]
     };
+  }).sort(function(a, b) {
+    return d3.ascending(a.date, b.date);
   });
-
-//console.log(JSON.stringify(ohlc.facebook, null, '  '));
