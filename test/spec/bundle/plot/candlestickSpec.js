@@ -17,7 +17,7 @@ techanModule('plot/candlestick', function(specBuilder) {
 
         beforeEach(function () {
           candlestick = scope.candlestick;
-          g = domFixtures.g(data);
+          g = domFixtures.g([data]);
         });
 
         it('Then on default invoke, candlesticks should be rendered without error', function() {

@@ -10,7 +10,6 @@
 module.exports = function(d3_scale_linear, d3_time_scale, d3_rebind, d3_extent, d3_bisector, zoomable, techan_util_rebindCallback) {  // Injected dependencies
   function financetime(index, time, domain) {
     var dateIndexMap = {},
-        rangeBounds,
         rangeBand = 3,
         bisector = d3_bisector(function(d) { return d.getTime(); }).right,
         indexToTime = d3_scale_linear();
@@ -18,34 +17,31 @@ module.exports = function(d3_scale_linear, d3_time_scale, d3_rebind, d3_extent, 
     index = index || d3_scale_linear();
     time = time || d3_time_scale();
     domain = domain || [new Date(0), new Date(1)];
-    rangeBounds = index.range();
 
     function rescale() {
-      index.domain([0, domain.length-1]); // Can't initialise it to this, clearing any zooms
-      time.domain([domain[0], domain[domain.length-1]]); // Can't initialise to this, clearining any zooms
-
-      dateIndexMap = {};
-      domain.forEach(function(d, i) {
-        dateIndexMap[d] = i;
-      });
-
-      var range = index.range(),
-          rangeBand = calculateRangeBand(index, domain);
-      // Pull the first and last points in a bit to be visible accross their band
-      rangeBounds = [range[0]-rangeBand*0.65, range[1]+rangeBand*0.65];
-      index.domain([index.invert(rangeBounds[0]), index.invert(rangeBounds[1])]);
+      index.domain([0, domain.length-1]);
+      time.domain([domain[0], domain[domain.length-1]]);
+      rangeBand = calculateRangeBand(index, domain);
+      var rangeBounds = index.range().map(function(d, i) { return d + (i*2-1)*rangeBand*0.65; });
+      index.domain(rangeBounds.map(index.invert));
       time.range(index.range());
-      // Can happen everytime
-      indexToTime.domain(index.domain()).range(time.domain().map(function(d) { return d.getTime(); }));
-
-      zoomed();
-
-      return scale;
+      scaleIndexToTime();
+      return zoomed();
     }
 
     function zoomed() {
       rangeBand = calculateRangeBand(index, domain);
       time.domain(index.domain().map(indexToTime));
+      return scale;
+    }
+
+    function domainToIndexMap() {
+      dateIndexMap = {};
+      domain.forEach(function(d, i) { dateIndexMap[d] = i; });
+    }
+
+    function scaleIndexToTime() {
+      indexToTime.domain(index.domain()).range(time.domain().map(function(d) { return d.getTime(); }));
     }
 
     function scale(x) {
@@ -71,14 +67,6 @@ module.exports = function(d3_scale_linear, d3_time_scale, d3_rebind, d3_extent, 
     };
 
     /**
-     * Returns a 2 element array representing the minimum and maximum pixel bounds for this scale.
-     * @returns {*}
-     */
-    scale.rangeBounds = function() {
-      return rangeBounds;
-    };
-
-    /**
      * As the underlying structure relies on a full array, ensure the full domain is passed here,
      * not just min and max values.
      *
@@ -88,6 +76,7 @@ module.exports = function(d3_scale_linear, d3_time_scale, d3_rebind, d3_extent, 
     scale.domain = function(_) {
       if (!arguments.length) return domain;
       domain = _;
+      domainToIndexMap();
       return rescale();
     };
 
@@ -95,8 +84,15 @@ module.exports = function(d3_scale_linear, d3_time_scale, d3_rebind, d3_extent, 
       return financetime(index.copy(), time.copy(), domain);
     };
 
-    // FIXME This is causing axis ticks to be rendered offset by half of this. Need to rename to techan specific
-    scale.rangeBand = function() {
+    /**
+     * Equivalent to d3's ordinal.rangeBand(). It could not be named rangeBand as d3 uses the method
+     * to determine how axis ticks should be rendered. This scale is a hybrid ordinal and linear scale,
+     * such that scale(x) returns y at center of the band as does d3.scale.linear()(x) does, whereas
+     * d3.scale.ordinal()(x) returns y at the beginning of the band. When rendering svg axis, d3
+     * compensates for this checking if rangeBand is defined and compensates as such.
+     * @returns {number}
+     */
+    scale.band = function() {
       return rangeBand;
     };
 
@@ -109,17 +105,13 @@ module.exports = function(d3_scale_linear, d3_time_scale, d3_rebind, d3_extent, 
     techan_util_rebindCallback(scale, time, rescale, 'ticks', 'tickFormat');
 
     // TODO Filter and update ticks, ensure they are in the domain
-//    scale.ticks = function(_) {
-//      if (!arguments.length) {
-//        console.log('ticks');
-//        return time.ticks();
-//      }
-//
-//      time.ticks.apply(this, arguments);
-//      return rescale();
+//    scale.ticks = function() {
+//      return [domain[100]];
 //    };
 
-    return rescale();
+    domainToIndexMap(domain);
+    scaleIndexToTime();
+    return zoomed();
   }
 
   return financetime;

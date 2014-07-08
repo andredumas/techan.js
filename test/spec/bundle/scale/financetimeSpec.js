@@ -17,7 +17,7 @@ techanModule('scale/financetime', function(specBuilder) {
       describe('And domain and range is initialised', function() {
         beforeEach(function() {
           financetime = scope.financetime;
-          financetime.domain(data).range([100, 120]);
+          financetime.domain(data).range([48, 1052]);
         });
 
         it('Then domain should equal the domain set', function() {
@@ -25,15 +25,15 @@ techanModule('scale/financetime', function(specBuilder) {
         });
 
         it('Then range should return the range set', function() {
-          expect(financetime.range()).toEqual([100, 120]);
+          expect(financetime.range()).toEqual([48, 1052]);
         });
 
-        it('Then rangeExtent should return the full visible range set inclusive of range bands', function() {
-          expect(financetime.rangeBounds()).toEqual([98.84444444444445, 121.15555555555555]);
+        it('Then band should correct band', function() {
+          expect(financetime.band()).toEqual(80);
         });
 
         it('Then scale of first index should return min range', function() {
-          expect(financetime(data[0])).toEqual(101.03585657370517);
+          expect(financetime(data[0])).toEqual(100);
         });
 
         it('Then invert of just over min range should return the first domain', function() {
@@ -41,7 +41,7 @@ techanModule('scale/financetime', function(specBuilder) {
         });
 
         it('Then invert of just under max range should return the last domain', function() {
-          expect(financetime.invert(119)).toEqual(data[data.length-1]);
+          expect(financetime.invert(1020)).toEqual(data[data.length-1]);
         });
 
         it('Then invertToIndex of just over min range should return the first domain index', function() {
@@ -49,15 +49,15 @@ techanModule('scale/financetime', function(specBuilder) {
         });
 
         it('Then invertToIndex of less than min range should return null', function() {
-          expect(financetime.invertToIndex(90)).toBeNull();
+          expect(financetime.invertToIndex(40)).toBeNull();
         });
 
         it('Then invertToIndex of just under max range should return the last domain index', function() {
-          expect(financetime.invertToIndex(119)).toEqual(data.length-1);
+          expect(financetime.invertToIndex(1020)).toEqual(data.length-1);
         });
 
         it('Then invertToIndex of greater max range should return null', function() {
-          expect(financetime.invertToIndex(130)).toBeNull();
+          expect(financetime.invertToIndex(1060)).toBeNull();
         });
 
         xit('Then linear(linear.invert(y)) should equal y for each in ordinal range', function() {
@@ -73,18 +73,18 @@ techanModule('scale/financetime', function(specBuilder) {
         });
 
         it('Then invert of value before range, should return null', function() {
-          expect(financetime.invert(50)).toBeNull();
+          expect(financetime.invert(40)).toBeNull();
         });
 
         it('Then invert of value after range, should return null', function() {
-          expect(financetime.invert(150)).toBeNull();
+          expect(financetime.invert(1100)).toBeNull();
         });
 
-        it('Then using invert as Array.prototyp.map(invert) of a value greater than max range, should return last domain', function() {
-          expect([110].map(financetime.invert)).toEqual([data[5]]);
+        it('Then using invert as Array.prototyp.map(invert) of a value about half of range, should return mid domain', function() {
+          expect([600].map(financetime.invert)).toEqual([data[5]]);
         });
 
-        it('Then ticks should return a distributed range of ticks', function() {
+        xit('Then ticks should return a distributed range of ticks', function() {
           expect(financetime.ticks()).toEqual([
             new Date(2012, 4, 19),
             new Date(2012, 4, 20),
@@ -119,56 +119,89 @@ techanModule('scale/financetime', function(specBuilder) {
           });
 
           it('Then range should return the range set', function() {
-            expect(cloned.range()).toEqual([100, 120]);
+            expect(cloned.range()).toEqual([48, 1052]);
+          });
+
+          xit('Then ticks should return a distributed range of ticks', function() {
+            expect(cloned.ticks()).toEqual(financetime.ticks());
           });
         });
 
         describe('And a zoom applied', function() {
-          var zoom;
+          var zoom,
+              baselineScale;
 
           beforeEach(function() {
             zoom = d3.behavior.zoom();
             financetime = scope.financetime;
             zoom.x(financetime.zoomable());
+            baselineScale = d3.scale.linear()
+              .domain([-0.52, 9.52]) // Adjusted index domain taking to account the extra padding
+              .range(financetime.range());
           });
 
-          describe('And translated by 50 left', function() {
+          describe('And translated left', function() {
             beforeEach(function() {
-              zoom.translate([-50, 0]);
+              d3.behavior.zoom().x(baselineScale)
+                  .scale(1.5).translate([-10, 0]);
+              zoom.scale(1.5).translate([-10, 0]);
+            });
+
+            it('Then baseline scale range should return the range set', function() {
+              expect(baselineScale.range()).toEqual([48, 1052]);
+            });
+
+            it('Then range should return the range set', function() {
+              expect(financetime.range()).toEqual([48, 1052]);
+            });
+
+            it('Then baseline scale of first index should return min zoomed range', function() {
+              expect(baselineScale(0)).toEqual(140.00000000000003);
             });
 
             it('Then scale of first index should return min range', function() {
-              expect(financetime(data[0])).toEqual(132.64276228419655);
+              expect(financetime(data[0])).toEqual(127.10303030303034);
+            });
+
+            it('Then baseline scale of last index should return max zoomed range', function() {
+              expect(baselineScale(data.length-1)).toEqual(1490.0000000000002);
             });
 
             it('Then scale of last index should return max range', function() {
-              expect(financetime(data[data.length-1])).toEqual(120.69057104913679);
+              expect(financetime(data[data.length-1])).toEqual(1496.19393939394);
             });
 
-            it('Then ticks should return offset tick values', function() {
+            xit('Then ticks should return offset tick values', function() {
               // TODO Filter out or adjust ticks that are not in the domain
               expect(financetime.ticks()).toEqual([
-                new Date(2012,5,3),
-                new Date(2012,5,5),
-                new Date(2012,5,7),
-                new Date(2012,5,9),
-                new Date(2012,5,11),
-                new Date(2012,5,13),
-                new Date(2012,5,15),
-                new Date(2012,5,17),
-                new Date(2012,5,19),
-                new Date(2012,5,21)
+                new Date(2012,4,19),
+                new Date(2012,4,20),
+                new Date(2012,4,21),
+                new Date(2012,4,22),
+                new Date(2012,4,23),
+                new Date(2012,4,24),
+                new Date(2012,4,25),
+                new Date(2012,4,26),
+                new Date(2012,4,27)
               ]);
             });
 
-            xdescribe('And copied', function() {
+            describe('And copied', function() {
               var cloned;
 
               beforeEach(function() {
                 cloned = financetime.copy();
               });
 
-              it('Then ticks should return same offset tick values', function() {
+              it('Then scale of first index should return min range', function() {
+                expect(cloned(data[0])).toEqual(127.10303030303034);
+              });
+
+              it('Then scale of last index should return max range', function() {
+                expect(cloned(data[data.length-1])).toEqual(1496.19393939394);
+              });
+
+              xit('Then ticks should return same offset tick values', function() {
                 expect(cloned.ticks()).toEqual(financetime.ticks());
               });
             });
@@ -234,7 +267,7 @@ techanModule('scale/financetime', function(specBuilder) {
               expect(time.domain()).toEqual([new Date(1000), new Date(10000)]);
             });
 
-            xit('Should have 10 ticks equaling input offset to left', function() {
+            it('Should have 10 ticks equaling input offset to left', function() {
               expect(time.ticks()).toEqual(timeData);
             });
           });

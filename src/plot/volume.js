@@ -38,7 +38,7 @@ function volumePath(accessor, x, y) {
     var path = [],
         zero = y(0),
         height = y(accessor.v(d)) - zero,
-        rangeBand = x.rangeBand(),
+        rangeBand = x.band(),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push('M', xValue, zero);

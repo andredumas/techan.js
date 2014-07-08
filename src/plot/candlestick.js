@@ -52,7 +52,7 @@ function candleBodyPath(accessor, x, y) {
     var path = [],
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.rangeBand(),
+        rangeBand = x.band(),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push('M', xValue, open);
@@ -74,7 +74,7 @@ function candleWickPath(accessor, x, y) {
     var path = [],
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.rangeBand(),
+        rangeBand = x.band(),
         xPoint = x(accessor.d(d)),
         xValue = xPoint - rangeBand/2;
 
