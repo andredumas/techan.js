@@ -25,7 +25,7 @@ function rebindCallback(target, source, postSetCallback) {
 function doRebind(target, source, method, postSetCallback) {
   return function() {
     var value = method.apply(source, arguments);
-    if(postSetCallback) postSetCallback();
+    if(postSetCallback && value === source) postSetCallback();
     return value === source ? target : value;
   };
 }
