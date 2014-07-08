@@ -3,8 +3,10 @@ techanModule('util', function(specBuilder) {
 
   var target,
       source = {
+        // A typical getter/setter type method
         method: function() {
-          return 2;
+          if(!arguments.length) return 2;
+          return source;
         }
       };
 
@@ -30,7 +32,7 @@ techanModule('util', function(specBuilder) {
           expect(target.method).toBeDefined();
         });
 
-        it('Then the target method should return the expected result', function() {
+        it('Then the target method should return the expected "get" result', function() {
           expect(target.method()).toEqual(2);
         });
       });
@@ -49,13 +51,18 @@ techanModule('util', function(specBuilder) {
           expect(target.method).toBeDefined();
         });
 
-        it('Then the target method should return the expected result', function() {
+        it('Then the target method should return the expected "get" result', function() {
           expect(target.method()).toEqual(2);
         });
 
-        it('Then on set the callback should be invoked', function() {
+        it('Then on "set" the callback should be invoked', function() {
           target.method("mock value");
           expect(postSetCallback).toHaveBeenCalled();
+        });
+
+        it('Then on "get" the callback should not be invoked', function() {
+          target.method();
+          expect(postSetCallback).not.toHaveBeenCalled();
         });
       });
     });
