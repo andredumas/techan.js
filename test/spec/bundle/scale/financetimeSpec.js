@@ -60,12 +60,6 @@ techanModule('scale/financetime', function(specBuilder) {
           expect(financetime.invertToIndex(1060)).toBeNull();
         });
 
-        xit('Then linear(linear.invert(y)) should equal y for each in ordinal range', function() {
-          financetime.range().forEach(function(y) {
-            expect(financetime(financetime.invert(y))).toEqual(y);
-          });
-        });
-
         it('Then invert(financetime(x)) should equal x for each in domain', function() {
             data.forEach(function(x) {
               expect(financetime.invert(financetime(x))).toEqual(x);
@@ -84,23 +78,47 @@ techanModule('scale/financetime', function(specBuilder) {
           expect([600].map(financetime.invert)).toEqual([data[5]]);
         });
 
-        xit('Then ticks should return a distributed range of ticks', function() {
+        it('Then ticks should return a distributed range of ticks', function() {
           expect(financetime.ticks()).toEqual([
-            new Date(2012, 4, 19),
-            new Date(2012, 4, 20),
-            new Date(2012, 4, 21),
+            new Date(2012, 4, 18),
+            new Date(2012, 4, 21), // Irregular but continuous. Skipping where there is no domain (like weekends and holidays)
             new Date(2012, 4, 22),
             new Date(2012, 4, 23),
             new Date(2012, 4, 24),
             new Date(2012, 4, 25),
-            new Date(2012, 4, 26),
-            new Date(2012, 4, 27),
-            new Date(2012, 4, 28),
             new Date(2012, 4, 29),
             new Date(2012, 4, 30),
             new Date(2012, 4, 31),
             new Date(2012, 5, 1)
           ]);
+        });
+
+        it('Then ticks with specified tick count returns approximately that number', function() {
+          expect(financetime.ticks(3)).toEqual([
+            new Date(2012,4,21),
+            new Date(2012,4,29)
+          ]);
+        });
+
+        it('Then ticks with specified interval and step count returns that number', function() {
+          expect(financetime.ticks(d3.time.day, 2)).toEqual([
+            new Date(2012,4,21),
+            new Date(2012,4,23),
+            new Date(2012,4,25),
+            new Date(2012,4,29),
+            new Date(2012,4,31),
+            new Date(2012,5,1)
+          ]);
+        });
+
+        it('Then default tickFormat should be yearly', function() {
+          expect(financetime.tickFormat()(new Date(2012,0,20))).toEqual('2012');
+        });
+
+        it('Then default tickFormat after ticks invoke should be day', function() {
+          financetime.ticks();
+          expect(financetime.tickFormat()(new Date(2012,0,20))).toEqual('Jan 20');
+          expect(financetime.tickFormat()(new Date(2012,3,3))).toEqual('Apr  3');
         });
 
         describe('And copied', function() {
@@ -122,7 +140,7 @@ techanModule('scale/financetime', function(specBuilder) {
             expect(cloned.range()).toEqual([48, 1052]);
           });
 
-          xit('Then ticks should return a distributed range of ticks', function() {
+          it('Then ticks should return a distributed range of ticks', function() {
             expect(cloned.ticks()).toEqual(financetime.ticks());
           });
         });
@@ -138,6 +156,20 @@ techanModule('scale/financetime', function(specBuilder) {
             baselineScale = d3.scale.linear()
               .domain([-0.52, 9.52]) // Adjusted index domain taking to account the extra padding
               .range(financetime.range());
+          });
+
+          describe('And heavily scaled', function() {
+            beforeEach(function() {
+              zoom.scale(100);
+            });
+
+            it('Then domain should return empty', function() {
+              expect(financetime.domain()).toEqual([]);
+            });
+
+            it('Then ticks should return empty', function() {
+              expect(financetime.ticks()).toEqual([]);
+            });
           });
 
           describe('And translated left', function() {
@@ -171,18 +203,35 @@ techanModule('scale/financetime', function(specBuilder) {
               expect(financetime(data[data.length-1])).toEqual(1496.19393939394);
             });
 
-            xit('Then ticks should return offset tick values', function() {
-              // TODO Filter out or adjust ticks that are not in the domain
+            it('Then domain should return visible domain', function() {
+              expect(financetime.domain()).toEqual(data.slice(0, 7));
+            });
+
+            it('Then ticks should return offset tick values', function() {
               expect(financetime.ticks()).toEqual([
-                new Date(2012,4,19),
-                new Date(2012,4,20),
+                new Date(2012,4,18),
                 new Date(2012,4,21),
                 new Date(2012,4,22),
                 new Date(2012,4,23),
                 new Date(2012,4,24),
                 new Date(2012,4,25),
-                new Date(2012,4,26),
-                new Date(2012,4,27)
+                new Date(2012,4,29)
+              ]);
+            });
+
+            it('Then ticks with specified tick count returns approximately that number', function() {
+              expect(financetime.ticks(3)).toEqual([
+                new Date(2012,4,21),
+                new Date(2012,4,29)
+              ]);
+            });
+
+            it('Then ticks with specified interval and step count returns that number', function() {
+              expect(financetime.ticks(d3.time.day, 2)).toEqual([
+                new Date(2012,4,21),
+                new Date(2012,4,23),
+                new Date(2012,4,25),
+                new Date(2012,4,29)
               ]);
             });
 
@@ -201,7 +250,11 @@ techanModule('scale/financetime', function(specBuilder) {
                 expect(cloned(data[data.length-1])).toEqual(1496.19393939394);
               });
 
-              xit('Then ticks should return same offset tick values', function() {
+              it('Then domain should return visible domain', function() {
+                expect(financetime.domain()).toEqual(data.slice(0, 7));
+              });
+
+              it('Then ticks should return same offset tick values', function() {
                 expect(cloned.ticks()).toEqual(financetime.ticks());
               });
             });

@@ -3,7 +3,7 @@
 module.exports = function(d3) {
   var zoomable = require('./zoomable')(),
       util = require('../util')(),
-      financetime = require('./financetime')(d3.scale.linear, d3.time.scale, d3.rebind, d3.extent, d3.bisector, zoomable, util.rebindCallback);
+      financetime = require('./financetime')(d3.scale.linear, d3.time, d3.bisect, zoomable, util.rebindCallback);
 
   return {
     financetime: financetime,

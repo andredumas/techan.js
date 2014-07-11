@@ -466,8 +466,10 @@ ohlc.facebook = [
   ["2012-05-21",36.53,36.66,33,34.03,168192700],
   ["2012-05-18",42.05,45,38,38.23,573576400]
 ].map(function(d) {
+    var date = new Date(d[0]);
+    date.setHours(0,0,0,0);
     return {
-      date: new Date(d[0]),
+      date: date,
       open: d[0],
       high: d[1],
       low: d[2],
