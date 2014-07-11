@@ -3,6 +3,8 @@
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+'use strict';module.exports='0.1.0';
+},{}],2:[function(_dereq_,module,exports){
 'use strict';
 
 // TODO Could these be singletons? Generally will be accessing the same data and data structures at the same time
@@ -15,7 +17,7 @@ module.exports = function() {
     value: _dereq_('./value')
   };
 };
-},{"./macd":2,"./ohlc":3,"./rsi":4,"./value":5,"./volume":6}],2:[function(_dereq_,module,exports){
+},{"./macd":3,"./ohlc":4,"./rsi":5,"./value":6,"./volume":7}],3:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -67,7 +69,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],3:[function(_dereq_,module,exports){
+},{}],4:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -133,7 +135,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],4:[function(_dereq_,module,exports){
+},{}],5:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -191,7 +193,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],5:[function(_dereq_,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -233,7 +235,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],6:[function(_dereq_,module,exports){
+},{}],7:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -267,7 +269,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],7:[function(_dereq_,module,exports){
+},{}],8:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -275,7 +277,7 @@ module.exports = function(d3) {
     supstance: _dereq_('./supstance')(d3.scale.linear)
   };
 };
-},{"./supstance":8}],8:[function(_dereq_,module,exports){
+},{"./supstance":9}],9:[function(_dereq_,module,exports){
 'use strict';
 
 /*
@@ -315,7 +317,7 @@ module.exports = function(d3_scale_linear, techan_scale_financetime, accessor_su
 function refresh(yScale) {
 
 }
-},{}],9:[function(_dereq_,module,exports){
+},{}],10:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
@@ -372,7 +374,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
     return indicator;
   };
 };
-},{}],10:[function(_dereq_,module,exports){
+},{}],11:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -387,7 +389,7 @@ module.exports = function() {
     sma: _dereq_('./sma')(indicatorMixin, accessor.ohlc)
   };
 };
-},{"../accessor":1,"./ema":9,"./indicatormixin":11,"./macd":12,"./rsi":13,"./sma":14}],11:[function(_dereq_,module,exports){
+},{"../accessor":2,"./ema":10,"./indicatormixin":12,"./macd":13,"./rsi":14,"./sma":15}],12:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -411,7 +413,7 @@ module.exports = function() {
 
   return indicatorMixin;
 };
-},{}],12:[function(_dereq_,module,exports){
+},{}],13:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
@@ -470,7 +472,7 @@ function datum(date, macd, signal, difference, zero) {
   if(macd) return { date: date, macd: macd, signal: signal, difference: difference, zero: zero };
   else return { date: date, macd: null, signal: null, difference: null, zero: null };
 }
-},{}],13:[function(_dereq_,module,exports){
+},{}],14:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
@@ -536,7 +538,7 @@ function datum(date, rsi, middle, overbought, oversold) {
   if(rsi) return { date: date, rsi: rsi, middle: middle, overbought: overbought, oversold: oversold };
   else return { date: date, rsi: null, middle: null, overbought: null, oversold: null };
 }
-},{}],14:[function(_dereq_,module,exports){
+},{}],15:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
@@ -600,7 +602,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
     return indicator;
   };
 };
-},{}],15:[function(_dereq_,module,exports){
+},{}],16:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
@@ -655,7 +657,7 @@ function candleBodyPath(accessor, x, y) {
     var path = [],
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.rangeBand(),
+        rangeBand = x.band(),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push('M', xValue, open);
@@ -677,7 +679,7 @@ function candleWickPath(accessor, x, y) {
     var path = [],
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.rangeBand(),
+        rangeBand = x.band(),
         xPoint = x(accessor.d(d)),
         xValue = xPoint - rangeBand/2;
 
@@ -697,7 +699,7 @@ function candleWickPath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],16:[function(_dereq_,module,exports){
+},{}],17:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -720,7 +722,7 @@ module.exports = function(d3) {
     sma: line(accessor.value, plot, plotMixin)
   };
 };
-},{"../accessor":1,"../scale":25,"./candlestick":15,"./line":17,"./macd":18,"./ohlc":19,"./plot":20,"./plotmixin":21,"./rsi":22,"./volume":23}],17:[function(_dereq_,module,exports){
+},{"../accessor":2,"../scale":26,"./candlestick":16,"./line":18,"./macd":19,"./ohlc":20,"./plot":21,"./plotmixin":22,"./rsi":23,"./volume":24}],18:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
@@ -761,7 +763,7 @@ function refresh(g, accessor, x, y, plot, showZero) {
     g.selectAll('path.zero').attr({ d: plot.horizontalPathLine(x, accessor.z, y) });
   }
 }
-},{}],18:[function(_dereq_,module,exports){
+},{}],19:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_macd, plot, plotMixin) {  // Injected dependencies
@@ -810,7 +812,7 @@ function differencePath(accessor, x, y) {
     var path = [],
         zero = y(0),
         height = y(accessor.dif(d)) - zero,
-        rangeBand = x.rangeBand(),
+        rangeBand = x.band(),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push('M', xValue, zero);
@@ -821,7 +823,7 @@ function differencePath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],19:[function(_dereq_,module,exports){
+},{}],20:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
@@ -855,7 +857,7 @@ function ohlcPath(accessor, x, y) {
     var path = [],
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.rangeBand(),
+        rangeBand = x.band(),
         xPoint = x(accessor.d(d)),
         xValue = xPoint - rangeBand/2;
 
@@ -871,7 +873,7 @@ function ohlcPath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],20:[function(_dereq_,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -931,7 +933,7 @@ module.exports = function(d3) {
     }
   };
 };
-},{}],21:[function(_dereq_,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, techan_scale_financetime) {
@@ -972,7 +974,7 @@ module.exports = function(d3_scale_linear, techan_scale_financetime) {
 
   return plotMixin;
 };
-},{}],22:[function(_dereq_,module,exports){
+},{}],23:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependencies
@@ -1009,7 +1011,7 @@ function refresh(g, accessor, x, y, plot) {
   g.selectAll('path.oversold').attr({ d: plot.horizontalPathLine(accessor.d, x, accessor.os, y) });
   g.selectAll('path.rsi').attr({ d: plot.pathLine(accessor.d, x, accessor.r, y) });
 }
-},{}],23:[function(_dereq_,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_volume, plot, plotMixin) {  // Injected dependencies
@@ -1050,7 +1052,7 @@ function volumePath(accessor, x, y) {
     var path = [],
         zero = y(0),
         height = y(accessor.v(d)) - zero,
-        rangeBand = x.rangeBand(),
+        rangeBand = x.band(),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push('M', xValue, zero);
@@ -1061,47 +1063,22 @@ function volumePath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],24:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 'use strict';
 
 /*
  Finance time scale which is not necessarily continuous, is required to be plot continuous. Finance scale
  generally contains data points on days where a market is open but no points when closed, such as weekday
  and weekends respectively. When plot, is done so without weekend gaps.
-
- TODO Possibly rename to arraytime
  */
-module.exports = function(d3_scale_linear, d3_rebind, zoomable, techan_util_rebindCallback) {  // Injected dependencies
+module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_util_rebindCallback) {  // Injected dependencies
   function financetime(index, domain) {
     var dateIndexMap = {},
-        rangeBounds,
-        rangeBand = 3;
+        tickState = { tickFormat: dailyTickMethod[dailyTickMethod.length-1][2] },
+        band = 3;
 
     index = index || d3_scale_linear();
-    domain = domain || [0, 1];
-    rangeBounds = index.range();
-
-    function rescale() {
-      index.domain([0, domain.length-1]);
-
-      dateIndexMap = {};
-      domain.forEach(function(d, i) {
-        dateIndexMap[d] = i;
-      });
-
-      var range = index.range(),
-          rangeBand = calculateRangeBand(index, domain);
-      rangeBounds = [range[0]-rangeBand*0.65, range[1]+rangeBand*0.65];
-      index.domain([index.invert(rangeBounds[0]), index.invert(rangeBounds[1])]);
-
-      zoomed();
-
-      return scale;
-    }
-
-    function zoomed() {
-      rangeBand = calculateRangeBand(index, domain);
-    }
+    domain = domain || [new Date(0), new Date(1)];
 
     function scale(x) {
       return index(dateIndexMap[x]);
@@ -1118,14 +1095,6 @@ module.exports = function(d3_scale_linear, d3_rebind, zoomable, techan_util_rebi
     };
 
     /**
-     * Returns a 2 element array representing the minimum and maximum pixel bounds for this scale.
-     * @returns {*}
-     */
-    scale.rangeBounds = function() {
-      return rangeBounds;
-    };
-
-    /**
      * As the underlying structure relies on a full array, ensure the full domain is passed here,
      * not just min and max values.
      *
@@ -1133,55 +1102,187 @@ module.exports = function(d3_scale_linear, d3_rebind, zoomable, techan_util_rebi
      * @returns {*}
      */
     scale.domain = function(_) {
-      if (!arguments.length) return domain;
+      if (!arguments.length) {
+        var visible = index.domain();
+        visible = [
+          Math.ceil(visible[0]), // If min is fraction, it is partially out of view, round up (ceil)
+          Math.floor(visible[visible.length-1]) // If max is fraction, is partially out of view, round down (floor)
+        ];
+        return domain.slice(visible[0], visible[visible.length-1]+1); // Grab visible domain, inclusive
+      }
+
       domain = _;
-      return rescale();
+      domainMap();
+      index.domain([0, domain.length-1]);
+      zoomed();
+      // Adjust the outer edges by pulling the domain in to ensure start and end bands are fully visible
+      index.domain(index.range().map(function(d, i) { return d + (i*2-1)*band*0.65; }).map(index.invert));
+      return zoomed();
     };
+
+    function zoomed() {
+      band = rangeBand(index, domain);
+      return scale;
+    }
+
+    function domainMap() {
+      dateIndexMap = {};
+      domain.forEach(function(d, i) { dateIndexMap[d] = i; });
+    }
 
     scale.copy = function() {
       return financetime(index.copy(), domain);
     };
 
-    scale.rangeBand = function() {
-      return rangeBand;
+    /**
+     * Equivalent to d3's ordinal.rangeBand(). It could not be named rangeBand as d3 uses the method
+     * to determine how axis ticks should be rendered. This scale is a hybrid ordinal and linear scale,
+     * such that scale(x) returns y at center of the band as does d3.scale.linear()(x) does, whereas
+     * d3.scale.ordinal()(x) returns y at the beginning of the band. When rendering svg axis, d3
+     * compensates for this checking if rangeBand is defined and compensates as such.
+     * @returns {number}
+     */
+    scale.band = function() {
+      return band;
     };
 
     scale.zoomable = function() {
       return zoomable(index, zoomed);
     };
 
-    // TODO Implement tick support
-    scale.ticks = delegateGetOrSetAndChain(scale, index.ticks);
-    scale.tickFormat = delegateGetOrSetAndChain(scale, index.tickFormat);
+    /*
+     * Ticks based heavily on d3 implementation. Attempted to implement this using composition with d3.time.scale,
+     * but in the end there were sufficient differences to 'roll my own'.
+     * - Different base tick steps: millis not required (yet!)
+     * - State based tick formatting given the non continuous, even steps of ticks
+     * - Supporting daily and intraday continuous (no gaps) plotting
+     * https://github.com/mbostock/d3/blob/e03b6454294e1c0bbe3125f787df56c468658d4e/src/time/scale.js#L67
+     */
+    /**
+     * Generates ticks as continuous as possible against the underlying domain. Where continuous time ticks
+     * fall on where there is no matching domain (such as weekend or holiday day), it will be replaced with
+     * the nearest domain datum ahead of the tick to keep close to continuous.
+     * @param interval
+     * @param steps
+     * @returns {*}
+     */
+    scale.ticks = function(interval, steps) {
+      var visibleDomain = scale.domain();
 
-    techan_util_rebindCallback(scale, index, rescale, 'range', 'interpolate', 'clamp', 'nice');
+      if(!visibleDomain.length) return []; // Nothing is visible, no ticks to show
 
-    return rescale();
+      var method = interval === undefined ? tickMethod(visibleDomain, 10) :
+                    typeof interval === 'number' ? tickMethod(visibleDomain, interval) : null;
+
+      tickState.tickFormat = method ? method[2] : tickMethod(visibleDomain, 10)[2];
+
+      if(method) {
+        interval = method[0];
+        steps = method[1];
+      }
+
+      var intervalRange = interval.range(visibleDomain[0], +visibleDomain[visibleDomain.length-1]+1, steps);
+
+      return intervalRange                  // Interval, possibly contains values not in domain
+        .map(domainTicks(visibleDomain))    // Line up interval ticks with domain, possibly adding duplicates
+        .reduce(sequentialDuplicates, []);  // Filter out duplicates, produce new 'reduced' array
+    };
+
+    /**
+     * NOTE: The type of tick format returned is dependant on ticks that were generated. To obtain the correct
+     * format for ticks, ensure ticks function is called first, otherwise a default tickFormat will be returned
+     * which may not be the optimal representation of the current domain state.
+     * @returns {Function}
+     */
+    scale.tickFormat = function() {
+      return function(date) {
+        return tickState.tickFormat(date);
+      };
+    };
+
+    techan_util_rebindCallback(scale, index, zoomed, 'range', 'interpolate', 'clamp', 'nice');
+
+    domainMap();
+    return zoomed();
+  }
+
+  function rangeBand(linear, domain) {
+    return (Math.abs(linear(domain.length-1) - linear(0))/Math.max(1, domain.length-1))*0.8;
+  }
+
+  var dayFormat = d3_time.format('%b %e'),
+      yearFormat = d3_time.format.multi([
+    ['%b %Y', function(d) { return d.getMonth(); }],
+    ['%Y', function() { return true; }]
+  ]);
+
+  var dailyTickSteps = [
+    864e5,  // 1-day
+    6048e5, // 1-week
+    2592e6, // 1-month
+    7776e6, // 3-month
+    31536e6 // 1-year
+  ];
+
+  var dailyTickMethod = [
+    [d3_time.day, 1, dayFormat],
+    [d3_time.monday, 1, dayFormat],
+    [d3_time.month, 1, yearFormat],
+    [d3_time.month, 3, yearFormat],
+    [d3_time.year, 1, yearFormat]
+  ];
+
+  var intraDayTickSteps = [
+    36e5,   // 1-hour
+    108e5,  // 3-hour
+    216e5,  // 6-hour
+    432e5,  // 12-hour
+    864e5   // 1-day
+  ];
+
+  var intraDayTickMethod = [
+    [d3_time.hour, 1],
+    [d3_time.hour, 3],
+    [d3_time.hour, 6],
+    [d3_time.hour, 12],
+    [d3_time.day, 1]
+  ];
+
+  function tickMethod(visibleDomain, count) {
+    // TODO Is this daily data or intra day data? This will dictate which 'mode' to select.
+    var tickMethods = dailyTickMethod,
+        tickSteps = dailyTickSteps;
+
+    var target = (visibleDomain[visibleDomain.length-1] - visibleDomain[0])/count,
+        i = d3_bisect(tickSteps, target);
+    return i ? tickMethods[target/tickSteps[i-1] < tickSteps[i]/target ? i-1 : i] : tickMethods[i];
+  }
+
+  function domainTicks(visibleDomain) {
+    var visibleDomainLookup = {}; // Quickly lookup index of the domain
+    visibleDomain.forEach(function(d, i) { visibleDomainLookup[d] = i; });
+
+    return function(d) {
+      var value = visibleDomainLookup[d];
+      if (value !== undefined) return visibleDomain[value];
+      return visibleDomain[d3_bisect(visibleDomain, d)];
+    };
+  }
+
+  function sequentialDuplicates(previous, current) {
+    if(previous.length === 0 || previous[previous.length-1] !== current) previous.push(current);
+    return previous;
   }
 
   return financetime;
 };
-
-function delegateGetOrSetAndChain(target, thefunction) {
-  return function() {
-    if (!arguments.length) return thefunction.apply(this);
-    thefunction.apply(this, arguments);
-    return target;
-  };
-}
-
-
-function calculateRangeBand(linear, domain) {
-  var band = (Math.abs(linear(domain.length-1) - linear(0))/Math.max(1, domain.length-1));
-  return band*0.8;
-}
-},{}],25:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
   var zoomable = _dereq_('./zoomable')(),
       util = _dereq_('../util')(),
-      financetime = _dereq_('./financetime')(d3.scale.linear, d3.rebind, zoomable, util.rebindCallback);
+      financetime = _dereq_('./financetime')(d3.scale.linear, d3.time, d3.bisect, zoomable, util.rebindCallback);
 
   return {
     financetime: financetime,
@@ -1258,7 +1359,7 @@ function pathScale(d3, data, accessor) {
   return d3.scale.linear().domain(pathDomain(d3, data, accessor))
     .range([1, 0]);
 }
-},{"../util":28,"./financetime":24,"./zoomable":26}],26:[function(_dereq_,module,exports){
+},{"../util":29,"./financetime":25,"./zoomable":27}],27:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -1298,12 +1399,12 @@ module.exports = function() {
 
   return zoomable;
 };
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = (function(d3) {
   return {
-    version: '0.1.0', // TODO Dynamically populate/tokenize
+    version: _dereq_('../build/version'),
     accessor: _dereq_('./accessor')(),
     analysis: _dereq_('./analysis')(d3),
     indicator: _dereq_('./indicator')(),
@@ -1311,7 +1412,7 @@ module.exports = (function(d3) {
     scale: _dereq_('./scale')(d3)
   };
 })(d3);
-},{"./accessor":1,"./analysis":7,"./indicator":10,"./plot":16,"./scale":25}],28:[function(_dereq_,module,exports){
+},{"../build/version":1,"./accessor":2,"./analysis":8,"./indicator":11,"./plot":17,"./scale":26}],29:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -1339,10 +1440,10 @@ function rebindCallback(target, source, postSetCallback) {
 function doRebind(target, source, method, postSetCallback) {
   return function() {
     var value = method.apply(source, arguments);
-    if(postSetCallback) postSetCallback();
+    if(postSetCallback && value === source) postSetCallback();
     return value === source ? target : value;
   };
 }
-},{}]},{},[27])
-(27)
+},{}]},{},[28])
+(28)
 });
