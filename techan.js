@@ -1073,7 +1073,7 @@ function volumePath(accessor, x, y) {
  */
 module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_util_rebindCallback) {  // Injected dependencies
   function financetime(index, domain) {
-    var dateIndexMap = {},
+    var dateIndexMap,
         tickState = { tickFormat: dailyTickMethod[dailyTickMethod.length-1][2] },
         band = 3;
 
@@ -1081,7 +1081,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_
     domain = domain || [new Date(0), new Date(1)];
 
     function scale(x) {
-      return index(dateIndexMap[x]);
+      return index(dateIndexMap[+x]);
     }
 
     scale.invert = function(y) {
@@ -1126,8 +1126,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_
     }
 
     function domainMap() {
-      dateIndexMap = {};
-      domain.forEach(function(d, i) { dateIndexMap[d] = i; });
+      dateIndexMap = lookupIndex(domain);
     }
 
     scale.copy = function() {
@@ -1258,12 +1257,17 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_
     return i ? tickMethods[target/tickSteps[i-1] < tickSteps[i]/target ? i-1 : i] : tickMethods[i];
   }
 
+  function lookupIndex(array) {
+    var lookup = {};
+    array.forEach(function(d, i) { lookup[+d] = i; });
+    return lookup;
+  }
+
   function domainTicks(visibleDomain) {
-    var visibleDomainLookup = {}; // Quickly lookup index of the domain
-    visibleDomain.forEach(function(d, i) { visibleDomainLookup[d] = i; });
+    var visibleDomainLookup = lookupIndex(visibleDomain); // Quickly lookup index of the domain
 
     return function(d) {
-      var value = visibleDomainLookup[d];
+      var value = visibleDomainLookup[+d];
       if (value !== undefined) return visibleDomain[value];
       return visibleDomain[d3_bisect(visibleDomain, d)];
     };
@@ -1282,6 +1286,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_
 module.exports = function(d3) {
   var zoomable = _dereq_('./zoomable')(),
       util = _dereq_('../util')(),
+      accessors = _dereq_('../accessor')(),
       financetime = _dereq_('./financetime')(d3.scale.linear, d3.time, d3.bisect, zoomable, util.rebindCallback);
 
   return {
@@ -1299,48 +1304,52 @@ module.exports = function(d3) {
 
     plot: {
       time: function(data, accessor) {
+        accessor = accessor || accessors.value();
         return financetime().domain(data.map(accessor.d));
       },
 
       percent: function (scale, reference) {
         var domain = scale.domain();
+        reference = reference || domain[0];
         return scale.copy().domain([((domain[0] - reference) / reference), ((domain[1] - reference) / reference)]);
       },
 
       ohlc: function (data, accessor) {
+        accessor = accessor || accessors.ohlc();
         return d3.scale.linear()
           .domain([d3.min(data.map(accessor.low())) * 0.98, d3.max(data.map(accessor.high())) * 1.03])
           .range([1, 0]);
       },
 
       volume: function (data, accessor) {
+        accessor = accessor || accessors.ohlc().v;
         return d3.scale.linear()
           .domain([0, d3.max(data.map(accessor)) * 1.15])
           .range([1, 0]);
       },
 
-      rsi: function (data, accessor) {
+      rsi: function () {
         return d3.scale.linear().domain([0, 100])
           .range([1, 0]);
       },
 
-      path: function(data, accessor) {
-        return pathScale(d3, data, accessor);
-      },
-
       momentum: function(data, accessor) {
+        accessor = accessor || accessors.value();
         return pathScale(d3, data, accessor);
       },
 
       moneyflow: function(data, accessor) {
+        accessor = accessor || accessors.value();
         return pathScale(d3, data, accessor);
       },
 
       macd: function(data, accessor) {
+        accessor = accessor || accessors.macd();
         return pathScale(d3, data, accessor);
       },
 
       movingaverage: function(data, accessor) {
+        accessor = accessor || accessors.value();
         return pathScale(d3, data, accessor);
       }
     },
@@ -1359,7 +1368,7 @@ function pathScale(d3, data, accessor) {
   return d3.scale.linear().domain(pathDomain(d3, data, accessor))
     .range([1, 0]);
 }
-},{"../util":29,"./financetime":25,"./zoomable":27}],27:[function(_dereq_,module,exports){
+},{"../accessor":2,"../util":29,"./financetime":25,"./zoomable":27}],27:[function(_dereq_,module,exports){
 'use strict';
 
 /**
