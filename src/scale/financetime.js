@@ -7,7 +7,7 @@
  */
 module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_util_rebindCallback) {  // Injected dependencies
   function financetime(index, domain) {
-    var dateIndexMap = {},
+    var dateIndexMap,
         tickState = { tickFormat: dailyTickMethod[dailyTickMethod.length-1][2] },
         band = 3;
 
@@ -15,7 +15,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_
     domain = domain || [new Date(0), new Date(1)];
 
     function scale(x) {
-      return index(dateIndexMap[x]);
+      return index(dateIndexMap[+x]);
     }
 
     scale.invert = function(y) {
@@ -60,8 +60,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_
     }
 
     function domainMap() {
-      dateIndexMap = {};
-      domain.forEach(function(d, i) { dateIndexMap[d] = i; });
+      dateIndexMap = lookupIndex(domain);
     }
 
     scale.copy = function() {
@@ -192,12 +191,17 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_
     return i ? tickMethods[target/tickSteps[i-1] < tickSteps[i]/target ? i-1 : i] : tickMethods[i];
   }
 
+  function lookupIndex(array) {
+    var lookup = {};
+    array.forEach(function(d, i) { lookup[+d] = i; });
+    return lookup;
+  }
+
   function domainTicks(visibleDomain) {
-    var visibleDomainLookup = {}; // Quickly lookup index of the domain
-    visibleDomain.forEach(function(d, i) { visibleDomainLookup[d] = i; });
+    var visibleDomainLookup = lookupIndex(visibleDomain); // Quickly lookup index of the domain
 
     return function(d) {
-      var value = visibleDomainLookup[d];
+      var value = visibleDomainLookup[+d];
       if (value !== undefined) return visibleDomain[value];
       return visibleDomain[d3_bisect(visibleDomain, d)];
     };
