@@ -5,7 +5,7 @@
  generally contains data points on days where a market is open but no points when closed, such as weekday
  and weekends respectively. When plot, is done so without weekend gaps.
  */
-module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_util_rebindCallback) {  // Injected dependencies
+module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, widen, zoomable) {  // Injected dependencies
   function financetime(index, domain) {
     var dateIndexMap,
         tickState = { tickFormat: dailyTickMethod[dailyTickMethod.length-1][2] },
@@ -49,8 +49,8 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_
       domainMap();
       index.domain([0, domain.length-1]);
       zoomed();
-      // Adjust the outer edges by pulling the domain in to ensure start and end bands are fully visible
-      index.domain(index.range().map(function(d, i) { return d + (i*2-1)*band*0.65; }).map(index.invert));
+      // Widen the outer edges by pulling the domain in to ensure start and end bands are fully visible
+      index.domain(index.range().map(widen(0.65, band)).map(index.invert));
       return zoomed();
     };
 
