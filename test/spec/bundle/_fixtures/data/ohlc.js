@@ -12,6 +12,14 @@ ohlc.alternating = {
 
 ohlc.alternating.array = [ohlc.alternating.up, ohlc.alternating.down, ohlc.alternating.even];
 
+ohlc.invalidvolume = {
+  up: { date: new Date("2014-03-05"), open: 1, high: 1.5, low: 0.5, close: 1.1, volume: "not valid"},
+  down: { date: new Date("2014-03-06"), open: 1.1, high: 1.5, low: 0.5, close: 1, volume: undefined },
+  even: { date: new Date("2014-03-07"), open: 1, high: 1.5, low: 0.5, close: 1, volume: 1}
+};
+
+ohlc.invalidvolume.array = [ohlc.invalidvolume.up, ohlc.invalidvolume.down, ohlc.invalidvolume.even];
+
 ohlc.facebook = [
   ["2014-03-07",71.08,71.18,69.47,69.8,38927000],
   ["2014-03-06",71.88,71.89,70.25,70.84,46026500],

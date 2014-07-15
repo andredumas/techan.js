@@ -18,51 +18,15 @@ techanModule('plot/line', function(specBuilder) {
   specBuilder.require(require('../../../../src/plot/line'), function(instanceBuilder) {
     instanceBuilder.instance('actual', actualInit, function(scope) {
       describe('And line is initialised with defaults', function () {
-        var line,
-            g;
-
-        beforeEach(function () {
-          line = scope.line;
-          g = domFixtures.g([data]);
-        });
-
-        it('Then on default invoke, line should be rendered without error', function() {
-          // TODO Assert the result/DOM
-          line(g);
-        });
-
-        it('Then on refresh invoke, line should be refreshed only', function() {
-          // TODO Assert the result/DOM
-          line(g);
-          line.refresh(g);
-        });
-
-        assertPlotMixin(scope);
+        plotMixinShouldBeSetup(scope);
+        plotShouldRenderWithoutError(scope, data, domFixtures);
       });
     });
 
     instanceBuilder.instance('actual', actualZeroInit, function(scope) {
       describe('And line is initialised with showZero true', function () {
-        var line,
-            g;
-
-        beforeEach(function () {
-          line = scope.line;
-          g = domFixtures.g([data]);
-        });
-
-        it('Then on default invoke, line and zero line should be rendered without error', function() {
-          // TODO Assert the result/DOM
-          line(g);
-        });
-
-        it('Then on refresh invoke, line and zero line should be refreshed only', function() {
-          // TODO Assert the result/DOM
-          line(g);
-          line.refresh(g);
-        });
-
-        assertPlotMixin(scope);
+        plotMixinShouldBeSetup(scope);
+        plotShouldRenderWithoutError(scope, data, domFixtures);
       });
     });
 

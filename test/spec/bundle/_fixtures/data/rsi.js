@@ -1,8 +1,8 @@
 module.exports = {
   plot: [
-    { date: new Date("2014-03-05"), rsi: 60 },
-    { date: new Date("2014-03-06"), rsi: 34.95 },
-    { date: new Date("2014-03-07"), rsi: -5 }
+    { date: new Date("2014-03-05"), rsi: 60, overbought: 70, oversold: 30, middle: 0 },
+    { date: new Date("2014-03-06"), rsi: 34.95, overbought: 70, oversold: 30, middle: 0 },
+    { date: new Date("2014-03-07"), rsi: -5, overbought: 70, oversold: 30, middle: 0 }
   ],
   input: [
     { date: new Date(0), close: 44.34 },

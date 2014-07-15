@@ -12,26 +12,8 @@ techanModule('plot/ohlc', function(specBuilder) {
   specBuilder.require(require('../../../../src/plot/ohlc'), function(instanceBuilder) {
     instanceBuilder.instance('actual', actualInit, function(scope) {
       describe('And ohlc is initialised with defaults', function () {
-        var ohlc,
-            g;
-
-        beforeEach(function () {
-          ohlc = scope.ohlc;
-          g = domFixtures.g([data]);
-        });
-
-        it('Then on default invoke, ohlc should be rendered without error', function() {
-          // TODO Assert the result/DOM
-          ohlc(g);
-        });
-
-        it('Then on refresh invoke, ohlc should be refreshed only', function() {
-          ohlc(g);
-          // TODO Assert the result/DOM
-          ohlc.refresh(g);
-        });
-
-        assertPlotMixin(scope);
+        plotShouldRenderWithoutError(scope, data, domFixtures);
+        plotMixinShouldBeSetup(scope);
       });
     });
   });

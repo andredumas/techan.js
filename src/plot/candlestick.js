@@ -14,11 +14,12 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 
       if(volumeOpacity) {
         var volumeOpacityScale = d3_scale_linear()
-          .domain(d3_extent(group.selection.data().map(p.accessor.v)))
+          .domain(d3_extent(group.selection.data().map(p.accessor.v).filter(isNaN)))
           .range([0.2, 1]);
 
         group.selection.selectAll('path').style('opacity', function(d) {
-          return volumeOpacityScale(p.accessor.v(d));
+          var volume = p.accessor.v(d);
+          return isNaN(volume) ? null : volumeOpacityScale(volume);
         });
       }
 

@@ -12,26 +12,8 @@ techanModule('plot/macd', function(specBuilder) {
   specBuilder.require(require('../../../../src/plot/macd'), function(instanceBuilder) {
     instanceBuilder.instance('actual', actualInit, function(scope) {
       describe('And macd is initialised with defaults', function () {
-        var macd,
-            g;
-
-        beforeEach(function () {
-          macd = scope.macd;
-          g = domFixtures.g([data]);
-        });
-
-        it('Then on default invoke, macd should be rendered without error', function() {
-          // TODO Assert the result/DOM
-          macd(g);
-        });
-
-        it('Then on refresh invoke, macd should be refreshed only', function() {
-          // TODO Assert the result/DOM
-          macd(g);
-          macd.refresh(g);
-        });
-
-        assertPlotMixin(scope);
+        plotShouldRenderWithoutError(scope, data, domFixtures);
+        plotMixinShouldBeSetup(scope);
       });
     });
   });

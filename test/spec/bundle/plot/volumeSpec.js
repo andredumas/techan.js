@@ -2,7 +2,8 @@ techanModule('plot/volume', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = require('../_fixtures/data/ohlc').facebook.slice(0, 2),
+      data = require('../_fixtures/data/ohlc').alternating.array,
+      invalidvolume = require('../_fixtures/data/ohlc').invalidvolume.array,
       domFixtures = require('../_fixtures/dom');
 
   var actualInit = function() {
@@ -16,25 +17,20 @@ techanModule('plot/volume', function(specBuilder) {
             accessor,
             g;
 
+        plotShouldRenderWithoutError(scope, data, domFixtures);
+        plotMixinShouldBeSetup(scope);
+
         beforeEach(function () {
           volume = scope.volume;
+          volume.xScale().domain(data.map(function(d) { return d.date; }));
           g = domFixtures.g([data]);
         });
 
-        it('Then on default invoke, volume should be rendered without error', function() {
-          // TODO Assert the result/DOM
+        xit('Then on default invoke, should not render up/down classes', function() {
           volume(g);
+          expect(g[0][0].innerHTML).not.toContain('up');
+          expect(g[0][0].innerHTML).not.toContain('down');
         });
-
-        xit('Then on default invoke, should not render up/down classes', function() {});
-
-        it('Then on refresh invoke, volume should be refreshed only', function() {
-          // TODO Assert the result/DOM
-          volume(g);
-          volume.refresh(g);
-        });
-
-        assertPlotMixin(scope);
 
         describe('And accessor is ohlc', function() {
           beforeEach(function() {
@@ -42,7 +38,17 @@ techanModule('plot/volume', function(specBuilder) {
             volume.accessor(accessor);
           });
 
-          xit('Then on default invoke, up/down classes should be rendered', function() {});
+          it('Then on default invoke, up/down classes should be rendered', function() {
+            volume(g);
+            volume.refresh(g);
+            expect(g[0][0].innerHTML).toContain('up');
+            expect(g[0][0].innerHTML).toContain('down');
+          });
+        });
+
+        describe('And data contains invalid volume entry', function() {
+          plotShouldRenderWithoutError(scope, invalidvolume, domFixtures);
+          plotMixinShouldBeSetup(scope);
         });
       });
     });

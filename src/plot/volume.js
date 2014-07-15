@@ -35,9 +35,13 @@ function refresh(g, accessor, x, y) {
 
 function volumePath(accessor, x, y) {
   return function(d) {
+    var volume = accessor.v(d);
+
+    if(isNaN(volume)) return null;
+
     var path = [],
         zero = y(0),
-        height = y(accessor.v(d)) - zero,
+        height = y(volume) - zero,
         rangeBand = x.band(),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
