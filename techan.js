@@ -1071,7 +1071,7 @@ function volumePath(accessor, x, y) {
  generally contains data points on days where a market is open but no points when closed, such as weekday
  and weekends respectively. When plot, is done so without weekend gaps.
  */
-module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_util_rebindCallback) {  // Injected dependencies
+module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, widen, zoomable) {  // Injected dependencies
   function financetime(index, domain) {
     var dateIndexMap,
         tickState = { tickFormat: dailyTickMethod[dailyTickMethod.length-1][2] },
@@ -1115,8 +1115,8 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, zoomable, techan_
       domainMap();
       index.domain([0, domain.length-1]);
       zoomed();
-      // Adjust the outer edges by pulling the domain in to ensure start and end bands are fully visible
-      index.domain(index.range().map(function(d, i) { return d + (i*2-1)*band*0.65; }).map(index.invert));
+      // Widen the outer edges by pulling the domain in to ensure start and end bands are fully visible
+      index.domain(index.range().map(widen(0.65, band)).map(index.invert));
       return zoomed();
     };
 
@@ -1287,7 +1287,7 @@ module.exports = function(d3) {
   var zoomable = _dereq_('./zoomable')(),
       util = _dereq_('../util')(),
       accessors = _dereq_('../accessor')(),
-      financetime = _dereq_('./financetime')(d3.scale.linear, d3.time, d3.bisect, zoomable, util.rebindCallback);
+      financetime = _dereq_('./financetime')(d3.scale.linear, d3.time, d3.bisect, util.rebindCallback, widen, zoomable);
 
   return {
     financetime: financetime,
@@ -1311,20 +1311,20 @@ module.exports = function(d3) {
       percent: function (scale, reference) {
         var domain = scale.domain();
         reference = reference || domain[0];
-        return scale.copy().domain([((domain[0] - reference) / reference), ((domain[1] - reference) / reference)]);
+        return scale.copy().domain([domain[0], domain[domain.length-1]].map(function(d) { return (d-reference)/reference; }));
       },
 
       ohlc: function (data, accessor) {
         accessor = accessor || accessors.ohlc();
         return d3.scale.linear()
-          .domain([d3.min(data.map(accessor.low())) * 0.98, d3.max(data.map(accessor.high())) * 1.03])
+          .domain([d3.min(data.map(accessor.low())), d3.max(data.map(accessor.high()))].map(widen(0.02)))
           .range([1, 0]);
       },
 
       volume: function (data, accessor) {
         accessor = accessor || accessors.ohlc().v;
         return d3.scale.linear()
-          .domain([0, d3.max(data.map(accessor)) * 1.15])
+          .domain([0, d3.max(data.map(accessor))*1.15])
           .range([1, 0]);
       },
 
@@ -1335,17 +1335,17 @@ module.exports = function(d3) {
 
       momentum: function(data, accessor) {
         accessor = accessor || accessors.value();
-        return pathScale(d3, data, accessor);
+        return pathScale(d3, data, accessor, 0.04);
       },
 
       moneyflow: function(data, accessor) {
         accessor = accessor || accessors.value();
-        return pathScale(d3, data, accessor);
+        return pathScale(d3, data, accessor, 0.04);
       },
 
       macd: function(data, accessor) {
         accessor = accessor || accessors.macd();
-        return pathScale(d3, data, accessor);
+        return pathScale(d3, data, accessor, 0.04);
       },
 
       movingaverage: function(data, accessor) {
@@ -1360,13 +1360,29 @@ module.exports = function(d3) {
   };
 };
 
-function pathDomain(d3, data, accessor) {
-  return data.length > 0 ? d3.extent(data, accessor) : null;
+function pathDomain(d3, data, accessor, widening) {
+  return data.length > 0 ? d3.extent(data, accessor).map(widen(widening)) : null;
 }
 
-function pathScale(d3, data, accessor) {
-  return d3.scale.linear().domain(pathDomain(d3, data, accessor))
+function pathScale(d3, data, accessor, widening) {
+  return d3.scale.linear().domain(pathDomain(d3, data, accessor, widening))
     .range([1, 0]);
+}
+
+/**
+ * Only to be used on an array of 2 elements [min, max]
+ * @param padding
+ * @param width
+ * @returns {Function}
+ */
+function widen(widening, width) {
+  widening = widening || 0;
+
+  return function(d, i, array) {
+    if(array.length > 2) throw "array.length > 2 unsupported. array.length = " + array.length;
+    width = width || (array[array.length-1] - array[0]);
+    return d + (i*2-1)*width*widening;
+  };
 }
 },{"../accessor":2,"../util":29,"./financetime":25,"./zoomable":27}],27:[function(_dereq_,module,exports){
 'use strict';
