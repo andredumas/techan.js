@@ -14,10 +14,11 @@ module.exports = function() {
     volume: _dereq_('./volume'),
     macd: _dereq_('./macd'),
     rsi: _dereq_('./rsi'),
+    trendline: _dereq_('./trendline'),
     value: _dereq_('./value')
   };
 };
-},{"./macd":3,"./ohlc":4,"./rsi":5,"./value":6,"./volume":7}],3:[function(_dereq_,module,exports){
+},{"./macd":3,"./ohlc":4,"./rsi":5,"./trendline":6,"./value":7,"./volume":8}],3:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -197,6 +198,55 @@ module.exports = function() {
 'use strict';
 
 module.exports = function() {
+  var startDate = function(d) { return d.start.date;},
+      startValue = function(d) { return d.start.value;},
+      endDate = function(d) { return d.end.date;},
+      endValue = function(d) { return d.end.value; };
+
+  function accessor(d) {
+    return accessor.sv(d);
+  }
+
+  accessor.startDate = function(_) {
+    if (!arguments.length) return startDate;
+    startDate = _;
+    return bind();
+  };
+
+  accessor.startValue = function(_) {
+    if (!arguments.length) return startValue;
+    startValue = _;
+    return bind();
+  };
+
+  accessor.endDate = function(_) {
+    if (!arguments.length) return endDate;
+    endDate = _;
+    return bind();
+  };
+
+  accessor.endValue = function(_) {
+    if (!arguments.length) return endValue;
+    endValue = _;
+    return bind();
+  };
+
+  function bind() {
+    // TODO These methods will need to know if the variables are functions or values and execute as such
+    accessor.sd = startDate;
+    accessor.sv = startValue;
+    accessor.ed = endDate;
+    accessor.ev = endValue;
+
+    return accessor;
+  }
+
+  return bind();
+};
+},{}],7:[function(_dereq_,module,exports){
+'use strict';
+
+module.exports = function() {
   var date = function(d) { return d.date; },
       value = function(d) { return d.value;},
       zero = function(d) { return d.zero; };
@@ -235,7 +285,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],7:[function(_dereq_,module,exports){
+},{}],8:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -268,14 +318,6 @@ module.exports = function() {
   }
 
   return bind();
-};
-},{}],8:[function(_dereq_,module,exports){
-'use strict';
-
-module.exports = function(d3) {
-  return {
-    //supstance: require('./supstance')(d3.scale.linear)
-  };
 };
 },{}],9:[function(_dereq_,module,exports){
 'use strict';
@@ -680,10 +722,11 @@ module.exports = function(d3) {
     macd: _dereq_('./macd')(accessor.macd, plot, plotMixin),
     momentum: line(accessor.value, plot, plotMixin, true),
     moneyflow: line(accessor.value, plot, plotMixin, true),
-    sma: line(accessor.value, plot, plotMixin)
+    sma: line(accessor.value, plot, plotMixin),
+    trendline: _dereq_('./trendline')(accessor.trendline, plot, plotMixin)
   };
 };
-},{"../accessor":2,"../scale":25,"./candlestick":15,"./line":17,"./macd":18,"./ohlc":19,"./plot":20,"./plotmixin":21,"./rsi":22,"./volume":23}],17:[function(_dereq_,module,exports){
+},{"../accessor":2,"../scale":26,"./candlestick":15,"./line":17,"./macd":18,"./ohlc":19,"./plot":20,"./plotmixin":21,"./rsi":22,"./trendline":23,"./volume":24}],17:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
@@ -975,6 +1018,61 @@ function refresh(g, accessor, x, y, plot) {
 },{}],23:[function(_dereq_,module,exports){
 'use strict';
 
+module.exports = function(accessor_trendline, plot, plotMixin) {  // Injected dependencies
+  return function() { // Closure function
+    var p = {};  // Container for private, direct access mixed in variables
+
+    function trendline(g) {
+      var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d);
+
+      group.entry.append('path').attr({ class: 'trendline' });
+      // TODO End markers?
+
+      trendline.refresh(g);
+    }
+
+    trendline.refresh = function(g) {
+      refresh(g, p.accessor, p.xScale, p.yScale, plot);
+    };
+
+    trendline.drag = function() { // What name?
+      // TODO Setup d3.behaviour.drag() on elements. Emit events, add interaction support, end markers?
+      /*
+      Possible Usage:
+       d3.select("trendlines")
+         .call(trendline.interaction/drag/draggable/notsure())
+            .on('dragstart', dragStart)
+            .on('drag', drag)
+            .on('dragend', dragEnd)
+         )
+       */
+    };
+
+    // Mixin 'superclass' methods and variables
+    plotMixin(trendline, p, accessor_trendline());
+
+    return trendline;
+  };
+};
+
+function refresh(g, accessor, x, y) {
+  g.selectAll('path.trendline').attr({ d: trendlinePath(accessor, x, y) });
+}
+
+function trendlinePath(accessor, x, y) {
+  return function(d) {
+    var path = [];
+
+    path.push('M', x(accessor.sd(d)), y(accessor.sv(d)));
+    path.push('L', x(accessor.ed(d)), y(accessor.ev(d)));
+
+    return path.join(' ');
+  };
+}
+
+},{}],24:[function(_dereq_,module,exports){
+'use strict';
+
 module.exports = function(accessor_volume, plot, plotMixin) {  // Injected dependencies
   function volume() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
@@ -1028,7 +1126,7 @@ function volumePath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],24:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 'use strict';
 
 /*
@@ -1245,7 +1343,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
 
   return financetime;
 };
-},{}],25:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -1349,7 +1447,7 @@ function widen(widening, width) {
     return d + (i*2-1)*width*widening;
   };
 }
-},{"../accessor":2,"../util":28,"./financetime":24,"./zoomable":26}],26:[function(_dereq_,module,exports){
+},{"../accessor":2,"../util":29,"./financetime":25,"./zoomable":27}],27:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -1389,20 +1487,19 @@ module.exports = function() {
 
   return zoomable;
 };
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = (function(d3) {
   return {
     version: _dereq_('../build/version'),
     accessor: _dereq_('./accessor')(),
-    analysis: _dereq_('./analysis')(d3),
     indicator: _dereq_('./indicator')(),
     plot: _dereq_('./plot')(d3),
     scale: _dereq_('./scale')(d3)
   };
 })(d3);
-},{"../build/version":1,"./accessor":2,"./analysis":8,"./indicator":10,"./plot":16,"./scale":25}],28:[function(_dereq_,module,exports){
+},{"../build/version":1,"./accessor":2,"./indicator":10,"./plot":16,"./scale":26}],29:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -1434,6 +1531,6 @@ function doRebind(target, source, method, postSetCallback) {
     return value === source ? target : value;
   };
 }
-},{}]},{},[27])
-(27)
+},{}]},{},[28])
+(28)
 });
