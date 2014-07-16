@@ -17,6 +17,7 @@ module.exports = function(d3) {
     macd: require('./macd')(accessor.macd, plot, plotMixin),
     momentum: line(accessor.value, plot, plotMixin, true),
     moneyflow: line(accessor.value, plot, plotMixin, true),
-    sma: line(accessor.value, plot, plotMixin)
+    sma: line(accessor.value, plot, plotMixin),
+    trendline: require('./trendline')(accessor.trendline, plot, plotMixin)
   };
 };

@@ -46,14 +46,6 @@ function techanSpec(techan) {
       expect(techan.accessor.volume()).toBeDefined();
     });
 
-    it('Then techan.analysis should be defined', function () {
-      expect(techan.analysis).toBeDefined();
-    });
-
-    it('Then techan.analysis.supstance should be defined', function () {
-      expect(techan.analysis.supstance).toBeDefined();
-    });
-
     it('Then techan.indicator should be defined', function () {
       expect(techan.indicator).toBeDefined();
     });
@@ -164,6 +156,14 @@ function techanSpec(techan) {
 
     it('Then techan.plot.rsi can be constructed', function () {
       expect(techan.plot.rsi()).toBeDefined();
+    });
+
+    it('Then techan.plot.trendline should be defined', function () {
+      expect(techan.plot.trendline).toBeDefined();
+    });
+
+    it('Then techan.plot.trendline can be constructed', function () {
+      expect(techan.plot.trendline()).toBeDefined();
     });
 
     it('Then techan.plot.volume should be defined', function () {

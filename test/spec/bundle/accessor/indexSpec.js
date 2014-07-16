@@ -19,6 +19,10 @@ techanModule('accessor', function(specBuilder) {
         expect(scope.accessor.rsi).toBeDefined();
       });
 
+      it('Then accessor.trendline should be defined', function() {
+        expect(scope.accessor.trendline).toBeDefined();
+      });
+
       it('Then accessor.value should be defined', function() {
         expect(scope.accessor.value).toBeDefined();
       });

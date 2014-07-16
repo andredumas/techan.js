@@ -7,6 +7,7 @@ module.exports = function() {
     volume: require('./volume'),
     macd: require('./macd'),
     rsi: require('./rsi'),
+    trendline: require('./trendline'),
     value: require('./value')
   };
 };
