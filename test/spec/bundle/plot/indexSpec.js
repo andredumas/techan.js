@@ -35,6 +35,10 @@ techanModule('plot', function(specBuilder) {
         expect(bucket.plot.sma).toBeDefined();
       });
 
+      it('Then plot.supstance should be defined', function() {
+        expect(bucket.plot.supstance).toBeDefined();
+      });
+
       it('Then plot.trendline should be defined', function() {
         expect(bucket.plot.trendline).toBeDefined();
       });

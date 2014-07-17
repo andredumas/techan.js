@@ -158,6 +158,14 @@ function techanSpec(techan) {
       expect(techan.plot.rsi()).toBeDefined();
     });
 
+    it('Then techan.plot.supstance should be defined', function () {
+      expect(techan.plot.supstance).toBeDefined();
+    });
+
+    it('Then techan.plot.supstance can be constructed', function () {
+      expect(techan.plot.supstance()).toBeDefined();
+    });
+
     it('Then techan.plot.trendline should be defined', function () {
       expect(techan.plot.trendline).toBeDefined();
     });

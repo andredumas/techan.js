@@ -2,7 +2,10 @@
 
 module.exports = function() {
   var date = function(d) { return d.date; },
-      value = function(d) { return d.value;},
+      value = function(d, _) {
+        if(arguments.length < 2) return d.value;
+        d.value = _;
+      },
       zero = function(d) { return d.zero; };
 
   function accessor(d) {

@@ -1,10 +1,22 @@
 'use strict';
 
 module.exports = function() {
-  var startDate = function(d) { return d.start.date;},
-      startValue = function(d) { return d.start.value;},
-      endDate = function(d) { return d.end.date;},
-      endValue = function(d) { return d.end.value; };
+  var startDate = function(d, _) {
+        if(arguments.length < 2) return d.start.date;
+        d.start.date = _;
+      },
+      startValue = function(d, _) {
+        if(arguments.length < 2) return d.start.value;
+        d.start.value = _;
+      },
+      endDate = function(d, _) {
+        if(arguments.length < 2) return d.end.date;
+        d.end.date = _;
+      },
+      endValue = function(d, _) {
+        if(arguments.length < 2) return d.end.value;
+        d.end.value = _;
+      };
 
   function accessor(d) {
     return accessor.sv(d);

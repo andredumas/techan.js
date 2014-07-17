@@ -1,39 +1,58 @@
 'use strict';
 
-/*
- Support and resistance analysis line (supstance)
- */
-module.exports = function(d3_scale_linear, techan_scale_financetime, accessor_supstance) {
-  function supstance() {
-    var xScale = techan_scale_financetime(),
-        yScale = d3_scale_linear(),
-        accessor = accessor_supstance();
+module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_value, plot, plotMixin) {  // Injected dependencies
+  return function() { // Closure function
+    var p = {};  // Container for private, direct access mixed in variables
 
-    function analysis(g) {
+    function supstance(g) {
+      var group = plot.groupSelect(g, plot.dataMapper.unity);
+
+      group.entry.append('path').attr({ class: 'supstance' });
+
+      group.entry.append('g').attr({ class: 'interaction' }).style({ opacity: 0, fill: 'none' })
+        .append('path').style({ 'stroke-width': 5 });
+
+      supstance.refresh(g);
     }
 
-    analysis.refresh = function () {
-      refresh(yScale);
+    supstance.refresh = function(g) {
+      refresh(g, p.accessor, p.xScale, p.yScale);
     };
 
-    analysis.xScale = function (_) {
-      if (!arguments.length) return xScale;
-      this.xScale = _;
-      return analysis;
+    supstance.drag = function(g) { // What name?
+      g.selectAll('.interaction path')
+        .call(dragBody(d3_behavior_drag, d3_event, d3_select, p.accessor, p.xScale, p.yScale));
     };
 
-    analysis.yScale = function (_) {
-      if (!arguments.length) return yScale;
-      this.yScale = _;
-      return analysis;
-    };
+    // Mixin 'superclass' methods and variables
+    plotMixin(supstance, p, accessor_value());
 
-    return analysis;
-  }
-
-  return supstance;
+    return supstance;
+  };
 };
 
-function refresh(yScale) {
+function refresh(g, accessor, x, y) {
+  g.selectAll('path.supstance').attr({ d: supstancePath(accessor, x, y) });
+  g.selectAll('.interaction path').attr({ d: supstancePath(accessor, x, y) });
+}
 
+function supstancePath(accessor, x, y) {
+  return function(d) {
+    var path = [],
+        range = x.range();
+
+    path.push('M', range[0], y(accessor.v(d)));
+    path.push('L', range[range.length-1], y(accessor.v(d)));
+
+    return path.join(' ');
+  };
+}
+
+function dragBody(d3_behavior_drag, d3_event, d3_select, accessor, x, y) {
+  return d3_behavior_drag()
+    .origin(function(d) { return { x: 0, y: y(accessor.v(d)) }; })
+    .on('drag', function(d) {
+      accessor.v(d, y.invert(d3_event().y));
+      refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
+    });
 }
