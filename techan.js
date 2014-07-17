@@ -198,10 +198,22 @@ module.exports = function() {
 'use strict';
 
 module.exports = function() {
-  var startDate = function(d) { return d.start.date;},
-      startValue = function(d) { return d.start.value;},
-      endDate = function(d) { return d.end.date;},
-      endValue = function(d) { return d.end.value; };
+  var startDate = function(d, _) {
+        if(arguments.length < 2) return d.start.date;
+        d.start.date = _;
+      },
+      startValue = function(d, _) {
+        if(arguments.length < 2) return d.start.value;
+        d.start.value = _;
+      },
+      endDate = function(d, _) {
+        if(arguments.length < 2) return d.end.date;
+        d.end.date = _;
+      },
+      endValue = function(d, _) {
+        if(arguments.length < 2) return d.end.value;
+        d.end.value = _;
+      };
 
   function accessor(d) {
     return accessor.sv(d);
@@ -248,7 +260,10 @@ module.exports = function() {
 
 module.exports = function() {
   var date = function(d) { return d.date; },
-      value = function(d) { return d.value;},
+      value = function(d, _) {
+        if(arguments.length < 2) return d.value;
+        d.value = _;
+      },
       zero = function(d) { return d.zero; };
 
   function accessor(d) {
@@ -723,10 +738,16 @@ module.exports = function(d3) {
     momentum: line(accessor.value, plot, plotMixin, true),
     moneyflow: line(accessor.value, plot, plotMixin, true),
     sma: line(accessor.value, plot, plotMixin),
-    trendline: _dereq_('./trendline')(accessor.trendline, plot, plotMixin)
+    supstance: _dereq_('./supstance')(d3.behavior.drag, d3_event, d3.select, accessor.value, plot, plotMixin),
+    trendline: _dereq_('./trendline')(d3.behavior.drag, d3_event, d3.select, accessor.trendline, plot, plotMixin)
   };
 };
-},{"../accessor":2,"../scale":26,"./candlestick":15,"./line":17,"./macd":18,"./ohlc":19,"./plot":20,"./plotmixin":21,"./rsi":22,"./trendline":23,"./volume":24}],17:[function(_dereq_,module,exports){
+
+
+function d3_event() {
+  return d3.event;
+}
+},{"../accessor":2,"../scale":27,"./candlestick":15,"./line":17,"./macd":18,"./ohlc":19,"./plot":20,"./plotmixin":21,"./rsi":22,"./supstance":23,"./trendline":24,"./volume":25}],17:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
@@ -1018,35 +1039,106 @@ function refresh(g, accessor, x, y, plot) {
 },{}],23:[function(_dereq_,module,exports){
 'use strict';
 
-module.exports = function(accessor_trendline, plot, plotMixin) {  // Injected dependencies
+module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_value, plot, plotMixin) {  // Injected dependencies
+  return function() { // Closure function
+    var p = {};  // Container for private, direct access mixed in variables
+
+    function supstance(g) {
+      var group = plot.groupSelect(g, plot.dataMapper.unity);
+
+      group.entry.append('path').attr({ class: 'supstance' });
+
+      group.entry.append('g').attr({ class: 'interaction' }).style({ opacity: 0, fill: 'none' })
+        .append('path').style({ 'stroke-width': 5 });
+
+      supstance.refresh(g);
+    }
+
+    supstance.refresh = function(g) {
+      refresh(g, p.accessor, p.xScale, p.yScale);
+    };
+
+    supstance.drag = function(g) { // What name?
+      g.selectAll('.interaction path')
+        .call(dragBody(d3_behavior_drag, d3_event, d3_select, p.accessor, p.xScale, p.yScale));
+    };
+
+    // Mixin 'superclass' methods and variables
+    plotMixin(supstance, p, accessor_value());
+
+    return supstance;
+  };
+};
+
+function refresh(g, accessor, x, y) {
+  g.selectAll('path.supstance').attr({ d: supstancePath(accessor, x, y) });
+  g.selectAll('.interaction path').attr({ d: supstancePath(accessor, x, y) });
+}
+
+function supstancePath(accessor, x, y) {
+  return function(d) {
+    var path = [],
+        range = x.range();
+
+    path.push('M', range[0], y(accessor.v(d)));
+    path.push('L', range[range.length-1], y(accessor.v(d)));
+
+    return path.join(' ');
+  };
+}
+
+function dragBody(d3_behavior_drag, d3_event, d3_select, accessor, x, y) {
+  return d3_behavior_drag()
+    .origin(function(d) { return { x: 0, y: y(accessor.v(d)) }; })
+    .on('drag', function(d) {
+      accessor.v(d, y.invert(d3_event().y));
+      refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
+    });
+}
+},{}],24:[function(_dereq_,module,exports){
+'use strict';
+
+module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_trendline, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
     function trendline(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d);
+      var group = plot.groupSelect(g, plot.dataMapper.unity);
 
       group.entry.append('path').attr({ class: 'trendline' });
-      // TODO End markers?
+
+      var interaction = group.entry.append('g').attr({ class: 'interaction' }).style({ opacity: 0, fill: 'none' });
+      interaction.append('path').attr({ class: 'body' }).style({ 'stroke-width': 5 });
+      interaction.append('circle').attr({ class: 'start', r: 4 });
+      interaction.append('circle').attr({ class: 'end', r: 4 });
 
       trendline.refresh(g);
     }
 
     trendline.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot);
+      refresh(g, p.accessor, p.xScale, p.yScale);
     };
 
-    trendline.drag = function() { // What name?
-      // TODO Setup d3.behaviour.drag() on elements. Emit events, add interaction support, end markers?
-      /*
-      Possible Usage:
-       d3.select("trendlines")
-         .call(trendline.interaction/drag/draggable/notsure())
-            .on('dragstart', dragStart)
-            .on('drag', drag)
-            .on('dragend', dragEnd)
-         )
-       */
+    /*
+     Possible Usage:
+     d3.select("trendlines")
+     .call(trendline.interaction/drag/draggable/notsure())
+     .on('dragstart', dragStart)
+     .on('drag', drag)
+     .on('dragend', dragEnd)
+     )
+     */
+    trendline.drag = function(g) { // What name?
+      // TODO Emit events
+      g.selectAll('.interaction circle.start')
+        .call(dragEnd(d3_behavior_drag, d3_event, d3_select, p.accessor, p.accessor.sd, p.xScale, p.accessor.sv, p.yScale));
+      g.selectAll('.interaction circle.end')
+        .call(dragEnd(d3_behavior_drag, d3_event, d3_select, p.accessor, p.accessor.ed, p.xScale, p.accessor.ev, p.yScale));
+      g.selectAll('.interaction path.body')
+        .call(dragBody(d3_behavior_drag, d3_event, d3_select, p.accessor, p.xScale, p.yScale));
     };
+
+    // TODO Add mouseover, mouseout listener support for drag/user update events
 
     // Mixin 'superclass' methods and variables
     plotMixin(trendline, p, accessor_trendline());
@@ -1057,6 +1149,9 @@ module.exports = function(accessor_trendline, plot, plotMixin) {  // Injected de
 
 function refresh(g, accessor, x, y) {
   g.selectAll('path.trendline').attr({ d: trendlinePath(accessor, x, y) });
+  g.selectAll('.interaction path.body').attr({ d: trendlinePath(accessor, x, y) });
+  g.selectAll('.interaction circle.start').attr(interactionEnds(accessor.sd, x, accessor.sv, y));
+  g.selectAll('.interaction circle.end').attr(interactionEnds(accessor.ed, x, accessor.ev, y));
 }
 
 function trendlinePath(accessor, x, y) {
@@ -1070,7 +1165,47 @@ function trendlinePath(accessor, x, y) {
   };
 }
 
-},{}],24:[function(_dereq_,module,exports){
+function interactionEnds(accessor_x, x, accessor_y, y) {
+  return {
+    cx: function(d) { return x(accessor_x(d)); },
+    cy: function(d) { return y(accessor_y(d)); }
+  };
+}
+
+function dragEnd(d3_behavior_drag, d3_event, d3_select, accessor, accessor_x, x, accessor_y, y) {
+  return d3_behavior_drag()
+    .origin(function(d) { return { x: x(accessor_x(d)), y: y(accessor_y(d)) }; })
+    .on('drag', function(d) {
+      var date = x.invert(d3_event().x);
+      if(date === null) return;
+      accessor_x(d, date);
+      accessor_y(d, y.invert(d3_event().y));
+      refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
+    });
+}
+
+function dragBody(d3_behavior_drag, d3_event, d3_select, accessor, x, y) {
+  var dragStart = {}; // State information, grabs the start coords of the line
+  return d3_behavior_drag()
+    .origin(function(d) {
+      dragStart.start = { date: x(accessor.sd(d)), value: y(accessor.sv(d)) };
+      dragStart.end = { date: x(accessor.ed(d)), value: y(accessor.ev(d)) };
+      return { x: 0, y: 0 };
+    })
+    .on('drag', function(d) {
+      var start = x.invert(d3_event().x + dragStart.start.date),
+        end = x.invert(d3_event().x + dragStart.end.date);
+
+      if(start === null || end === null) return;
+
+      accessor.sd(d, start);
+      accessor.sv(d, y.invert(d3_event().y + dragStart.start.value));
+      accessor.ed(d, end);
+      accessor.ev(d, y.invert(d3_event().y + dragStart.end.value));
+      refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
+    });
+}
+},{}],25:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_volume, plot, plotMixin) {  // Injected dependencies
@@ -1126,7 +1261,7 @@ function volumePath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],25:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 'use strict';
 
 /*
@@ -1343,7 +1478,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
 
   return financetime;
 };
-},{}],26:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -1447,7 +1582,7 @@ function widen(widening, width) {
     return d + (i*2-1)*width*widening;
   };
 }
-},{"../accessor":2,"../util":29,"./financetime":25,"./zoomable":27}],27:[function(_dereq_,module,exports){
+},{"../accessor":2,"../util":30,"./financetime":26,"./zoomable":28}],28:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -1487,7 +1622,7 @@ module.exports = function() {
 
   return zoomable;
 };
-},{}],28:[function(_dereq_,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = (function(d3) {
@@ -1499,7 +1634,7 @@ module.exports = (function(d3) {
     scale: _dereq_('./scale')(d3)
   };
 })(d3);
-},{"../build/version":1,"./accessor":2,"./indicator":10,"./plot":16,"./scale":26}],29:[function(_dereq_,module,exports){
+},{"../build/version":1,"./accessor":2,"./indicator":10,"./plot":16,"./scale":27}],30:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -1531,6 +1666,6 @@ function doRebind(target, source, method, postSetCallback) {
     return value === source ? target : value;
   };
 }
-},{}]},{},[28])
-(28)
+},{}]},{},[29])
+(29)
 });
