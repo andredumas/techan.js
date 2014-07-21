@@ -10,9 +10,9 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_trendl
       group.entry.append('path').attr({ class: 'trendline' });
 
       var interaction = group.entry.append('g').attr({ class: 'interaction' }).style({ opacity: 0, fill: 'none' });
-      interaction.append('path').attr({ class: 'body' }).style({ 'stroke-width': 5 });
-      interaction.append('circle').attr({ class: 'start', r: 4 });
-      interaction.append('circle').attr({ class: 'end', r: 4 });
+      interaction.append('path').attr({ class: 'body' }).style({ 'stroke-width': 16 });
+      interaction.append('circle').attr({ class: 'start', r: 8 });
+      interaction.append('circle').attr({ class: 'end', r: 8 });
 
       trendline.refresh(g);
     }
@@ -21,16 +21,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_trendl
       refresh(g, p.accessor, p.xScale, p.yScale);
     };
 
-    /*
-     Possible Usage:
-     d3.select("trendlines")
-     .call(trendline.interaction/drag/draggable/notsure())
-     .on('dragstart', dragStart)
-     .on('drag', drag)
-     .on('dragend', dragEnd)
-     )
-     */
-    trendline.drag = function(g) { // What name?
+    trendline.drag = function(g) {
       // TODO Emit events
       g.selectAll('.interaction circle.start')
         .call(dragEnd(d3_behavior_drag, d3_event, d3_select, p.accessor, p.accessor.sd, p.xScale, p.accessor.sv, p.yScale));
@@ -76,13 +67,14 @@ function interactionEnds(accessor_x, x, accessor_y, y) {
 
 function dragEnd(d3_behavior_drag, d3_event, d3_select, accessor, accessor_x, x, accessor_y, y) {
   return d3_behavior_drag()
-    .origin(function(d) { return { x: x(accessor_x(d)), y: y(accessor_y(d)) }; })
+    .origin(function(d) {
+      // TODO Fire listeners dragstart
+      return { x: x(accessor_x(d)), y: y(accessor_y(d)) };
+    })
     .on('drag', function(d) {
-      var date = x.invert(d3_event().x);
-      if(date === null) return;
-      accessor_x(d, date);
-      accessor_y(d, y.invert(d3_event().y));
+      updateEnd(accessor_x, x, d3_event().x, accessor_y, y, d3_event().y, d);
       refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
+      // TODO Fire listeners dragging
     });
 }
 
@@ -92,18 +84,25 @@ function dragBody(d3_behavior_drag, d3_event, d3_select, accessor, x, y) {
     .origin(function(d) {
       dragStart.start = { date: x(accessor.sd(d)), value: y(accessor.sv(d)) };
       dragStart.end = { date: x(accessor.ed(d)), value: y(accessor.ev(d)) };
+      // TODO Fire listeners
       return { x: 0, y: 0 };
     })
     .on('drag', function(d) {
-      var start = x.invert(d3_event().x + dragStart.start.date),
-        end = x.invert(d3_event().x + dragStart.end.date);
-
-      if(start === null || end === null) return;
-
-      accessor.sd(d, start);
-      accessor.sv(d, y.invert(d3_event().y + dragStart.start.value));
-      accessor.ed(d, end);
-      accessor.ev(d, y.invert(d3_event().y + dragStart.end.value));
+      updateEnd(
+        accessor.sd, x, d3_event().x + dragStart.start.date,
+        accessor.sv, y, d3_event().y + dragStart.start.value,
+        d);
+      updateEnd(
+        accessor.ed, x, d3_event().x + dragStart.end.date,
+        accessor.ev, y, d3_event().y + dragStart.end.value,
+        d);
       refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
+      // TODO Fire listeners
     });
+}
+
+function updateEnd(accessor_x, x, xValue, accessor_y, y, yValue, d) {
+  var date = x.invert(xValue);
+  if(date) accessor_x(d, date);
+  accessor_y(d, y.invert(yValue));
 }

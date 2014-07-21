@@ -10,7 +10,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_value,
       group.entry.append('path').attr({ class: 'supstance' });
 
       group.entry.append('g').attr({ class: 'interaction' }).style({ opacity: 0, fill: 'none' })
-        .append('path').style({ 'stroke-width': 5 });
+        .append('path').style({ 'stroke-width': 16 });
 
       supstance.refresh(g);
     }
@@ -19,7 +19,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_value,
       refresh(g, p.accessor, p.xScale, p.yScale);
     };
 
-    supstance.drag = function(g) { // What name?
+    supstance.drag = function(g) {
       g.selectAll('.interaction path')
         .call(dragBody(d3_behavior_drag, d3_event, d3_select, p.accessor, p.xScale, p.yScale));
     };
@@ -50,9 +50,13 @@ function supstancePath(accessor, x, y) {
 
 function dragBody(d3_behavior_drag, d3_event, d3_select, accessor, x, y) {
   return d3_behavior_drag()
-    .origin(function(d) { return { x: 0, y: y(accessor.v(d)) }; })
+    .origin(function(d) {
+      // TODO Fire listeners
+      return { x: 0, y: y(accessor.v(d)) };
+    })
     .on('drag', function(d) {
       accessor.v(d, y.invert(d3_event().y));
       refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
+      // TODO Fire listeners
     });
 }
