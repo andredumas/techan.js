@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function() {
-  function indicatorMixin(source, priv, accessor) {
+  return function(source, priv, accessor) {
     // Mixin the functions to the source
     source.accessor = function(_) {
       if (!arguments.length) return accessor;
@@ -17,7 +17,5 @@ module.exports = function() {
     }
 
     bind();
-  }
-
-  return indicatorMixin;
+  };
 };

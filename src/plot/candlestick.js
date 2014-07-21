@@ -5,7 +5,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     var p = {},  // Container for private, direct access mixed in variables
         volumeOpacity = false;
 
-    function candlestickPlot(g) {
+    function candlestick(g) {
       var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d);
 
       // Two path's as wick and body can be styled slightly differently (stroke and fills)
@@ -23,32 +23,32 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
         });
       }
 
-      candlestickPlot.refresh(g);
+      candlestick.refresh(g);
     }
 
-    candlestickPlot.refresh = function(g) {
+    candlestick.refresh = function(g) {
       refresh(g, p.accessor, p.xScale, p.yScale);
     };
 
-    candlestickPlot.volumeOpacity = function(_) {
+    candlestick.volumeOpacity = function(_) {
       if (!arguments.length) return volumeOpacity;
       volumeOpacity = _;
-      return candlestickPlot;
+      return candlestick;
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(candlestickPlot, p, accessor_ohlc());
+    plotMixin(candlestick, p, accessor_ohlc());
 
-    return candlestickPlot;
+    return candlestick;
   };
 };
 
 function refresh(g, accessor, x, y) {
-  g.selectAll('path.candle.body').attr({ d: candleBodyPath(accessor, x, y) });
-  g.selectAll('path.candle.wick').attr({ d: candleWickPath(accessor, x, y) });
+  g.selectAll('path.candle.body').attr({ d: bodyPath(accessor, x, y) });
+  g.selectAll('path.candle.wick').attr({ d: wickPath(accessor, x, y) });
 }
 
-function candleBodyPath(accessor, x, y) {
+function bodyPath(accessor, x, y) {
   return function(d) {
     var path = [],
         open = y(accessor.o(d)),
@@ -70,7 +70,7 @@ function candleBodyPath(accessor, x, y) {
   };
 }
 
-function candleWickPath(accessor, x, y) {
+function wickPath(accessor, x, y) {
   return function(d) {
     var path = [],
         open = y(accessor.o(d)),

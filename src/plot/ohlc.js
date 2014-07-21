@@ -4,21 +4,21 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   return function() { // Closure constructor
     var p = {};  // Container for private, direct access mixed in variables
 
-    function ohlcPlot(g) {
+    function ohlc(g) {
       plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
         .entry.append('path').attr({ class: 'ohlc' }).classed(plot.classedUpDown(p.accessor));
 
-      ohlcPlot.refresh(g);
+      ohlc.refresh(g);
     }
 
-    ohlcPlot.refresh = function(g) {
+    ohlc.refresh = function(g) {
       refresh(g, p.accessor, p.xScale, p.yScale);
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(ohlcPlot, p, accessor_ohlc());
+    plotMixin(ohlc, p, accessor_ohlc());
 
-    return ohlcPlot;
+    return ohlc;
   };
 };
 

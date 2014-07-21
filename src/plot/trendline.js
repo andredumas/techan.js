@@ -88,14 +88,12 @@ function dragBody(d3_behavior_drag, d3_event, d3_select, accessor, x, y) {
       return { x: 0, y: 0 };
     })
     .on('drag', function(d) {
-      updateEnd(
-        accessor.sd, x, d3_event().x + dragStart.start.date,
-        accessor.sv, y, d3_event().y + dragStart.start.value,
-        d);
-      updateEnd(
-        accessor.ed, x, d3_event().x + dragStart.end.date,
-        accessor.ev, y, d3_event().y + dragStart.end.value,
-        d);
+      updateEnd(accessor.sd, x, d3_event().x + dragStart.start.date,
+                accessor.sv, y, d3_event().y + dragStart.start.value,
+                d);
+      updateEnd(accessor.ed, x, d3_event().x + dragStart.end.date,
+                accessor.ev, y, d3_event().y + dragStart.end.value,
+                d);
       refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
       // TODO Fire listeners
     });

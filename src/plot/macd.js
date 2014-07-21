@@ -1,10 +1,10 @@
 'use strict';
 
 module.exports = function(accessor_macd, plot, plotMixin) {  // Injected dependencies
-  function macd() { // Closure function
+  return function() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function macdPlot(g) {
+    function macd(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
       var histogramSelection = group.selection
@@ -18,20 +18,18 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
       group.selection.append('path').attr({ class: 'macd' });
       group.selection.append('path').attr({ class: 'signal' });
 
-      macdPlot.refresh(g);
+      macd.refresh(g);
     }
 
-    macdPlot.refresh = function(g) {
+    macd.refresh = function(g) {
       refresh(g, p.accessor, p.xScale, p.yScale, plot);
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(macdPlot, p, accessor_macd());
+    plotMixin(macd, p, accessor_macd());
 
-    return macdPlot;
-  }
-
-  return macd;
+    return macd;
+  };
 };
 
 function refresh(g, accessor, x, y, plot) {

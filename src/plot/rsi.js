@@ -1,10 +1,10 @@
 'use strict';
 
 module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependencies
-  function rsi() { // Closure function
+  return function() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function rsiPlot(g) {
+    function rsi(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
       group.entry.append('path').attr({ class: 'overbought' });
@@ -12,20 +12,18 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
       group.entry.append('path').attr({ class: 'oversold' });
       group.entry.append('path').attr({ class: 'rsi' });
 
-      rsiPlot.refresh(g);
+      rsi.refresh(g);
     }
 
-    rsiPlot.refresh = function(g) {
+    rsi.refresh = function(g) {
       refresh(g, p.accessor, p.xScale, p.yScale, plot);
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(rsiPlot, p, accessor_rsi());
+    plotMixin(rsi, p, accessor_rsi());
 
-    return rsiPlot;
-  }
-
-  return rsi;
+    return rsi;
+  };
 };
 
 function refresh(g, accessor, x, y, plot) {

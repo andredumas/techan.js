@@ -3,10 +3,10 @@
 module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
   showZero = showZero || false;
 
-  function line() { // Closure function
+  return function() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function linePlot(g) {
+    function line(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.date());
 
       group.entry.append('path').attr({ class: 'line' });
@@ -15,20 +15,18 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
         group.selection.append('path').attr({ class: 'zero' });
       }
 
-      linePlot.refresh(g);
+      line.refresh(g);
     }
 
-    linePlot.refresh = function(g) {
+    line.refresh = function(g) {
       refresh(g, p.accessor, p.xScale, p.yScale, plot, showZero);
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(linePlot, p, accessor_value());
+    plotMixin(line, p, accessor_value());
 
-    return linePlot;
-  }
-
-  return line;
+    return line;
+  };
 };
 
 function refresh(g, accessor, x, y, plot, showZero) {
