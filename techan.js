@@ -410,7 +410,7 @@ module.exports = function() {
 'use strict';
 
 module.exports = function() {
-  function indicatorMixin(source, priv, accessor) {
+  return function(source, priv, accessor) {
     // Mixin the functions to the source
     source.accessor = function(_) {
       if (!arguments.length) return accessor;
@@ -426,9 +426,7 @@ module.exports = function() {
     }
 
     bind();
-  }
-
-  return indicatorMixin;
+  };
 };
 },{}],12:[function(_dereq_,module,exports){
 'use strict';
@@ -622,12 +620,135 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
 },{}],15:[function(_dereq_,module,exports){
 'use strict';
 
+module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
+  return function() { // Closure function
+    var axis = d3_svg_axis(),
+      format,
+      point = 4,
+      height = 14,
+      width = 50;
+
+    function annotation(g) {
+      var group = plot.groupSelect(g, plot.dataMapper.unity);
+
+      group.entry.append('path');
+      group.entry.append('text');
+
+      annotation.refresh(g);
+    }
+
+    annotation.refresh = function(g) {
+      var fmt = format ? format :
+        axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat();
+
+      refresh(g, axis, fmt, height, width, point);
+    };
+
+    annotation.axis = function(_) {
+      if(!arguments.length) return axis;
+      axis = _;
+      return annotation;
+    };
+
+    annotation.format = function(_) {
+      if(!arguments.length) return format;
+      format = _;
+      return annotation;
+    };
+
+    annotation.height = function(_) {
+      if(!arguments.length) return height;
+      height = _;
+      return annotation;
+    };
+
+    annotation.width = function(_) {
+      if(!arguments.length) return width;
+      width = _;
+      return annotation;
+    };
+
+    return annotation;
+  };
+};
+
+function refresh(g, axis, format, height, width, point) {
+  var scale = axis.scale(),
+    neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
+
+  g.selectAll('path').attr('d', backgroundPath(axis, height, width, point, neg));
+
+  var text = g.selectAll('text');
+
+  switch(axis.orient()) {
+    case 'left':
+    case 'right':
+      text.attr('x', neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()))
+        .attr('y', function(d) { return scale(d); })
+        .attr('dy', '.32em').style('text-anchor', neg < 0 ? 'end' : 'start');
+      break;
+    case 'top':
+    case 'bottom':
+      text.attr('x', function(d) { return scale(d); })
+        .attr('y', neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()))
+        .attr('dy', neg < 0 ? '0em' : '.72em').style('text-anchor', 'middle');
+      break;
+  }
+
+  text.text(function(d) { return format(d); });
+}
+
+function backgroundPath(axis, height, width, point, neg) {
+  return function(d) {
+    var scale = axis.scale(),
+      pt = point;
+
+    switch(axis.orient()) {
+      case 'left':
+      case 'right':
+        var h = 0;
+
+        if(height/2 < point) pt = height/2;
+        else h = height/2-point;
+
+        return [
+          'M', 0, scale(d),
+          'l', neg*axis.innerTickSize(), -pt,
+          'l', 0, -h,
+          'l', neg*width, 0,
+          'l', 0, height,
+          'l', neg*-width, 0,
+          'l', 0, -h
+        ].join(' ');
+      case 'top':
+      case 'bottom':
+        var w = 0;
+
+        if(width/2 < point) pt = width/2;
+        else w = width/2-point;
+
+        return [
+          'M', scale(d), 0,
+          'l', -pt, neg*axis.innerTickSize(),
+          'l', -w, 0,
+          'l', 0, neg*height,
+          'l', width, 0,
+          'l', 0, neg*-height,
+          'l', -w, 0
+        ].join(' ');
+      default: throw "Unsupported axis.orient() " + axis.orient();
+    }
+  };
+}
+},{}],16:[function(_dereq_,module,exports){
+'use strict';
+
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure constructor
     var p = {},  // Container for private, direct access mixed in variables
         volumeOpacity = false;
 
-    function candlestickPlot(g) {
+    function candlestick(g) {
       var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d);
 
       // Two path's as wick and body can be styled slightly differently (stroke and fills)
@@ -645,32 +766,32 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
         });
       }
 
-      candlestickPlot.refresh(g);
+      candlestick.refresh(g);
     }
 
-    candlestickPlot.refresh = function(g) {
+    candlestick.refresh = function(g) {
       refresh(g, p.accessor, p.xScale, p.yScale);
     };
 
-    candlestickPlot.volumeOpacity = function(_) {
+    candlestick.volumeOpacity = function(_) {
       if (!arguments.length) return volumeOpacity;
       volumeOpacity = _;
-      return candlestickPlot;
+      return candlestick;
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(candlestickPlot, p, accessor_ohlc());
+    plotMixin(candlestick, p, accessor_ohlc());
 
-    return candlestickPlot;
+    return candlestick;
   };
 };
 
 function refresh(g, accessor, x, y) {
-  g.selectAll('path.candle.body').attr({ d: candleBodyPath(accessor, x, y) });
-  g.selectAll('path.candle.wick').attr({ d: candleWickPath(accessor, x, y) });
+  g.selectAll('path.candle.body').attr({ d: bodyPath(accessor, x, y) });
+  g.selectAll('path.candle.wick').attr({ d: wickPath(accessor, x, y) });
 }
 
-function candleBodyPath(accessor, x, y) {
+function bodyPath(accessor, x, y) {
   return function(d) {
     var path = [],
         open = y(accessor.o(d)),
@@ -692,7 +813,7 @@ function candleBodyPath(accessor, x, y) {
   };
 }
 
-function candleWickPath(accessor, x, y) {
+function wickPath(accessor, x, y) {
   return function(d) {
     var path = [],
         open = y(accessor.o(d)),
@@ -717,7 +838,7 @@ function candleWickPath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],16:[function(_dereq_,module,exports){
+},{}],17:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -728,6 +849,7 @@ module.exports = function(d3) {
       line = _dereq_('./line');
 
   return {
+    axisannotation: _dereq_('./axisannotation')(d3.svg.axis, plot),
     candlestick: _dereq_('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
     ema: line(accessor.value, plot, plotMixin),
     ohlc: _dereq_('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
@@ -743,20 +865,19 @@ module.exports = function(d3) {
   };
 };
 
-
 function d3_event() {
   return d3.event;
 }
-},{"../accessor":2,"../scale":27,"./candlestick":15,"./line":17,"./macd":18,"./ohlc":19,"./plot":20,"./plotmixin":21,"./rsi":22,"./supstance":23,"./trendline":24,"./volume":25}],17:[function(_dereq_,module,exports){
+},{"../accessor":2,"../scale":28,"./axisannotation":15,"./candlestick":16,"./line":18,"./macd":19,"./ohlc":20,"./plot":21,"./plotmixin":22,"./rsi":23,"./supstance":24,"./trendline":25,"./volume":26}],18:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
   showZero = showZero || false;
 
-  function line() { // Closure function
+  return function() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function linePlot(g) {
+    function line(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.date());
 
       group.entry.append('path').attr({ class: 'line' });
@@ -765,20 +886,18 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
         group.selection.append('path').attr({ class: 'zero' });
       }
 
-      linePlot.refresh(g);
+      line.refresh(g);
     }
 
-    linePlot.refresh = function(g) {
+    line.refresh = function(g) {
       refresh(g, p.accessor, p.xScale, p.yScale, plot, showZero);
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(linePlot, p, accessor_value());
+    plotMixin(line, p, accessor_value());
 
-    return linePlot;
-  }
-
-  return line;
+    return line;
+  };
 };
 
 function refresh(g, accessor, x, y, plot, showZero) {
@@ -788,14 +907,14 @@ function refresh(g, accessor, x, y, plot, showZero) {
     g.selectAll('path.zero').attr({ d: plot.horizontalPathLine(x, accessor.z, y) });
   }
 }
-},{}],18:[function(_dereq_,module,exports){
+},{}],19:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_macd, plot, plotMixin) {  // Injected dependencies
-  function macd() { // Closure function
+  return function() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function macdPlot(g) {
+    function macd(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
       var histogramSelection = group.selection
@@ -809,20 +928,18 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
       group.selection.append('path').attr({ class: 'macd' });
       group.selection.append('path').attr({ class: 'signal' });
 
-      macdPlot.refresh(g);
+      macd.refresh(g);
     }
 
-    macdPlot.refresh = function(g) {
+    macd.refresh = function(g) {
       refresh(g, p.accessor, p.xScale, p.yScale, plot);
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(macdPlot, p, accessor_macd());
+    plotMixin(macd, p, accessor_macd());
 
-    return macdPlot;
-  }
-
-  return macd;
+    return macd;
+  };
 };
 
 function refresh(g, accessor, x, y, plot) {
@@ -848,28 +965,28 @@ function differencePath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],19:[function(_dereq_,module,exports){
+},{}],20:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure constructor
     var p = {};  // Container for private, direct access mixed in variables
 
-    function ohlcPlot(g) {
+    function ohlc(g) {
       plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
         .entry.append('path').attr({ class: 'ohlc' }).classed(plot.classedUpDown(p.accessor));
 
-      ohlcPlot.refresh(g);
+      ohlc.refresh(g);
     }
 
-    ohlcPlot.refresh = function(g) {
+    ohlc.refresh = function(g) {
       refresh(g, p.accessor, p.xScale, p.yScale);
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(ohlcPlot, p, accessor_ohlc());
+    plotMixin(ohlc, p, accessor_ohlc());
 
-    return ohlcPlot;
+    return ohlc;
   };
 };
 
@@ -898,7 +1015,7 @@ function ohlcPath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],20:[function(_dereq_,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -958,7 +1075,7 @@ module.exports = function(d3) {
     }
   };
 };
-},{}],21:[function(_dereq_,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, techan_scale_financetime) {
@@ -999,14 +1116,14 @@ module.exports = function(d3_scale_linear, techan_scale_financetime) {
 
   return plotMixin;
 };
-},{}],22:[function(_dereq_,module,exports){
+},{}],23:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependencies
-  function rsi() { // Closure function
+  return function() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function rsiPlot(g) {
+    function rsi(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
       group.entry.append('path').attr({ class: 'overbought' });
@@ -1014,20 +1131,18 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
       group.entry.append('path').attr({ class: 'oversold' });
       group.entry.append('path').attr({ class: 'rsi' });
 
-      rsiPlot.refresh(g);
+      rsi.refresh(g);
     }
 
-    rsiPlot.refresh = function(g) {
+    rsi.refresh = function(g) {
       refresh(g, p.accessor, p.xScale, p.yScale, plot);
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(rsiPlot, p, accessor_rsi());
+    plotMixin(rsi, p, accessor_rsi());
 
-    return rsiPlot;
-  }
-
-  return rsi;
+    return rsi;
+  };
 };
 
 function refresh(g, accessor, x, y, plot) {
@@ -1036,7 +1151,7 @@ function refresh(g, accessor, x, y, plot) {
   g.selectAll('path.oversold').attr({ d: plot.horizontalPathLine(accessor.d, x, accessor.os, y) });
   g.selectAll('path.rsi').attr({ d: plot.pathLine(accessor.d, x, accessor.r, y) });
 }
-},{}],23:[function(_dereq_,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_value, plot, plotMixin) {  // Injected dependencies
@@ -1099,7 +1214,7 @@ function dragBody(d3_behavior_drag, d3_event, d3_select, accessor, x, y) {
       // TODO Fire listeners
     });
 }
-},{}],24:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_trendline, plot, plotMixin) {  // Injected dependencies
@@ -1190,14 +1305,12 @@ function dragBody(d3_behavior_drag, d3_event, d3_select, accessor, x, y) {
       return { x: 0, y: 0 };
     })
     .on('drag', function(d) {
-      updateEnd(
-        accessor.sd, x, d3_event().x + dragStart.start.date,
-        accessor.sv, y, d3_event().y + dragStart.start.value,
-        d);
-      updateEnd(
-        accessor.ed, x, d3_event().x + dragStart.end.date,
-        accessor.ev, y, d3_event().y + dragStart.end.value,
-        d);
+      updateEnd(accessor.sd, x, d3_event().x + dragStart.start.date,
+                accessor.sv, y, d3_event().y + dragStart.start.value,
+                d);
+      updateEnd(accessor.ed, x, d3_event().x + dragStart.end.date,
+                accessor.ev, y, d3_event().y + dragStart.end.value,
+                d);
       refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
       // TODO Fire listeners
     });
@@ -1208,36 +1321,34 @@ function updateEnd(accessor_x, x, xValue, accessor_y, y, yValue, d) {
   if(date) accessor_x(d, date);
   accessor_y(d, y.invert(yValue));
 }
-},{}],25:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_volume, plot, plotMixin) {  // Injected dependencies
-  function volume() { // Closure function
+  return function() { // Closure function
     var p = {};  // Container for private, direct access mixed in variables
 
-    function volumePlot(g) {
-      var volume = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
+    function volume(g) {
+      var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
         .entry.append('path')
           .attr({ class: 'volume' });
 
       if(p.accessor.o && p.accessor.c) {
-        volume.classed(plot.classedUpDown(p.accessor));
+        group.classed(plot.classedUpDown(p.accessor));
       }
 
-      volumePlot.refresh(g);
+      volume.refresh(g);
     }
 
-    volumePlot.refresh = function(g) {
+    volume.refresh = function(g) {
       refresh(g, p.accessor, p.xScale, p.yScale);
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(volumePlot, p, accessor_volume());
+    plotMixin(volume, p, accessor_volume());
 
-    return volumePlot;
-  }
-
-  return volume;
+    return volume;
+  };
 };
 
 function refresh(g, accessor, x, y) {
@@ -1246,13 +1357,13 @@ function refresh(g, accessor, x, y) {
 
 function volumePath(accessor, x, y) {
   return function(d) {
-    var volume = accessor.v(d);
+    var vol = accessor.v(d);
 
-    if(isNaN(volume)) return null;
+    if(isNaN(vol)) return null;
 
     var path = [],
         zero = y(0),
-        height = y(volume) - zero,
+        height = y(vol) - zero,
         rangeBand = x.band(),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
@@ -1264,7 +1375,7 @@ function volumePath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],26:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 'use strict';
 
 /*
@@ -1481,7 +1592,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
 
   return financetime;
 };
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -1585,7 +1696,7 @@ function widen(widening, width) {
     return d + (i*2-1)*width*widening;
   };
 }
-},{"../accessor":2,"../util":30,"./financetime":26,"./zoomable":28}],28:[function(_dereq_,module,exports){
+},{"../accessor":2,"../util":31,"./financetime":27,"./zoomable":29}],29:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -1625,7 +1736,7 @@ module.exports = function() {
 
   return zoomable;
 };
-},{}],29:[function(_dereq_,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = (function(d3) {
@@ -1637,7 +1748,7 @@ module.exports = (function(d3) {
     scale: _dereq_('./scale')(d3)
   };
 })(d3);
-},{"../build/version":1,"./accessor":2,"./indicator":10,"./plot":16,"./scale":27}],30:[function(_dereq_,module,exports){
+},{"../build/version":1,"./accessor":2,"./indicator":10,"./plot":17,"./scale":28}],31:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -1669,6 +1780,6 @@ function doRebind(target, source, method, postSetCallback) {
     return value === source ? target : value;
   };
 }
-},{}]},{},[29])
-(29)
+},{}]},{},[30])
+(30)
 });
