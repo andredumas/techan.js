@@ -8,6 +8,7 @@ module.exports = function(d3) {
       line = require('./line');
 
   return {
+    axisannotation: require('./axisannotation')(d3.svg.axis, plot),
     candlestick: require('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
     ema: line(accessor.value, plot, plotMixin),
     ohlc: require('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
@@ -22,7 +23,6 @@ module.exports = function(d3) {
     trendline: require('./trendline')(d3.behavior.drag, d3_event, d3.select, accessor.trendline, plot, plotMixin)
   };
 };
-
 
 function d3_event() {
   return d3.event;

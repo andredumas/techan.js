@@ -86,6 +86,14 @@ function techanSpec(techan) {
       expect(techan.plot).toBeDefined();
     });
 
+    it('Then techan.plot.axisannotation should be defined', function () {
+      expect(techan.plot.axisannotation).toBeDefined();
+    });
+
+    it('Then techan.plot.axisannotation can be constructed', function () {
+      expect(techan.plot.axisannotation()).toBeDefined();
+    });
+
     it('Then techan.plot.candlestick should be defined', function () {
       expect(techan.plot.candlestick).toBeDefined();
     });

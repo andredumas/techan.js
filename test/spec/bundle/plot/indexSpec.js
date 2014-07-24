@@ -7,6 +7,10 @@ techanModule('plot', function(specBuilder) {
 
   specBuilder.require(require('../../../../src/plot'), function(instanceBuilder) {
     instanceBuilder.index('actual', actualInit, function(bucket) {
+      it('Then plot.axisannotation should be defined', function() {
+        expect(bucket.plot.axisannotation).toBeDefined();
+      });
+
       it('Then plot.candlestick should be defined', function() {
         expect(bucket.plot.candlestick).toBeDefined();
       });
