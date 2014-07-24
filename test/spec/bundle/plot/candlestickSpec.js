@@ -22,7 +22,7 @@ techanModule('plot/candlestick', function(specBuilder) {
         beforeEach(function () {
           candlestick = scope.candlestick;
           candlestick.xScale().domain(data.map(function(d) { return d.date; }));
-          g = domFixtures.g([data]);
+          g = domFixtures.g(data);
         });
 
         it('Then on default invoke, candlesticks should render up & down classes', function() {
@@ -41,7 +41,7 @@ techanModule('plot/candlestick', function(specBuilder) {
         describe('And volume opacity is enabled', function() {
           beforeEach(function() {
             candlestick.volumeOpacity(true);
-            g = domFixtures.g([data]);
+            g = domFixtures.g(data);
           });
 
           it('Then on default invoke, candlesticks should be rendered without error', function() {

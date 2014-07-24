@@ -6,7 +6,7 @@ module.exports = (function(d3) {
       var g = d3.select(document.createElement('g'));
 
       if (data) {
-        g.data(data);
+        g.datum(data);
       }
 
       return g;

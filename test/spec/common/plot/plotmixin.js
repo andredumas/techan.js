@@ -17,7 +17,7 @@ function plotShouldRenderWithoutError(scope, data, domFixtures) {
   beforeEach(function () {
     plot = scope.plot;
     plot.xScale().domain(data.map(function(d) { return d.date; }));
-    g = domFixtures.g([data]);
+    g = domFixtures.g(data);
   });
 
   it('Then on default invoke, it should render without error', function() {

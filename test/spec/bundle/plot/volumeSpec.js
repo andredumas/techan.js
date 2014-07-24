@@ -23,7 +23,7 @@ techanModule('plot/volume', function(specBuilder) {
         beforeEach(function () {
           volume = scope.volume;
           volume.xScale().domain(data.map(function(d) { return d.date; }));
-          g = domFixtures.g([data]);
+          g = domFixtures.g(data);
         });
 
         xit('Then on default invoke, should not render up/down classes', function() {

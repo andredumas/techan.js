@@ -32,7 +32,7 @@ techanModule('plot/supstance', function(specBuilder) {
         beforeEach(function () {
           plot = scope.plot;
           plot.xScale().domain([data[0].start, data[0].end]);
-          g = domFixtures.g([data]);
+          g = domFixtures.g(data);
         });
 
         it('Then on default invoke, it should render without error', function() {

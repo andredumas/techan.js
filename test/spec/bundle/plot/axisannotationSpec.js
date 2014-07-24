@@ -16,7 +16,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
 
         beforeEach(function () {
           axisannotation = scope.plot;
-          g = domFixtures.g([[50]]);
+          g = domFixtures.g([50]);
         });
 
         it('Then on default invoke, it should render without error', function() {
