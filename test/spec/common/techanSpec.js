@@ -102,6 +102,14 @@ function techanSpec(techan) {
       expect(techan.plot.candlestick()).toBeDefined();
     });
 
+    it('Then techan.plot.crosshair should be defined', function () {
+      expect(techan.plot.crosshair).toBeDefined();
+    });
+
+    it('Then techan.plot.crosshair can be constructed', function () {
+      expect(techan.plot.crosshair()).toBeDefined();
+    });
+
     it('Then techan.plot.close should be defined', function () {
       expect(techan.plot.close).toBeDefined();
     });

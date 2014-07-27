@@ -19,6 +19,10 @@ techanModule('plot', function(specBuilder) {
         expect(bucket.plot.close).toBeDefined();
       });
 
+      it('Then plot.crosshair should be defined', function() {
+        expect(bucket.plot.crosshair).toBeDefined();
+      });
+
       it('Then plot.ema should be defined', function() {
         expect(bucket.plot.ema).toBeDefined();
       });

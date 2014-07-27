@@ -8,7 +8,7 @@ module.exports = function(d3) {
   }
 
   function dataEntry(dataSelection) {
-    return dataSelection.enter().append('g').attr({ class: 'data' });
+    return dataSelection.enter().append('g').attr('class', 'data');
   }
 
   return {
@@ -39,14 +39,13 @@ module.exports = function(d3) {
 
     horizontalPathLine: function(accessor_date, x, accessor_value, y) {
       return function(d) {
-        var path = [],
-            firstDatum = d[0],
+        var firstDatum = d[0],
             lastDatum = d[d.length-1];
 
-        path.push('M', x(accessor_date(firstDatum)), y(accessor_value(firstDatum)));
-        path.push('L', x(accessor_date(lastDatum)), y(accessor_value(lastDatum)));
-
-        return path.join(' ');
+        return [
+            'M', x(accessor_date(firstDatum)), y(accessor_value(firstDatum)),
+            'L', x(accessor_date(lastDatum)), y(accessor_value(lastDatum))
+          ].join(' ');
       };
     },
 

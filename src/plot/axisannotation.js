@@ -3,13 +3,17 @@
 module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
   return function() { // Closure function
     var axis = d3_svg_axis(),
-      format,
-      point = 4,
-      height = 14,
-      width = 50;
+        format,
+        point = 4,
+        height = 14,
+        width = 50,
+        translate = [0, 0];
 
     function annotation(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.unity);
+      var group = plot.groupSelect(
+        g.append('g').attr("transform", "translate(" + translate[0] + "," + translate[1] + ")"),
+        plot.dataMapper.unity
+      );
 
       group.entry.append('path');
       group.entry.append('text');
@@ -48,40 +52,66 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
       return annotation;
     };
 
+    annotation.translate = function(_) {
+      if(!arguments.length) return translate;
+      translate = _;
+      return annotation;
+    };
+
     return annotation;
   };
 };
 
 function refresh(g, axis, format, height, width, point) {
   var scale = axis.scale(),
-    neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
+      neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
 
   g.selectAll('path').attr('d', backgroundPath(axis, height, width, point, neg));
 
-  var text = g.selectAll('text');
+  var text = g.selectAll('text').text(textValue(format));
 
   switch(axis.orient()) {
     case 'left':
     case 'right':
-      text.attr('x', neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()))
-        .attr('y', function(d) { return scale(d); })
-        .attr('dy', '.32em').style('text-anchor', neg < 0 ? 'end' : 'start');
+      text.attr({
+        x: neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()),
+        y: textPosition(scale),
+        dy: '.32em'
+      }).style('text-anchor', neg < 0 ? 'end' : 'start');
       break;
     case 'top':
     case 'bottom':
-      text.attr('x', function(d) { return scale(d); })
-        .attr('y', neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()))
-        .attr('dy', neg < 0 ? '0em' : '.72em').style('text-anchor', 'middle');
+      text.attr({
+        x: textPosition(scale),
+        y: neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()),
+        dy: neg < 0 ? '0em' : '.72em'
+      }).style('text-anchor', 'middle');
       break;
   }
+}
 
-  text.text(function(d) { return format(d); });
+function textPosition(scale) {
+  return function(d) {
+    var value = scale(d.value);
+    if(isNaN(value)) return null;
+    return value;
+  };
+}
+
+function textValue(format) {
+  return function(d) {
+    if(!d.value) return null;
+    return format(d.value);
+  };
 }
 
 function backgroundPath(axis, height, width, point, neg) {
   return function(d) {
     var scale = axis.scale(),
-      pt = point;
+        value = scale(d.value),
+        pt = point;
+
+    if(isNaN(value)) return "M 0 0";
 
     switch(axis.orient()) {
       case 'left':
@@ -92,7 +122,7 @@ function backgroundPath(axis, height, width, point, neg) {
         else h = height/2-point;
 
         return [
-          'M', 0, scale(d),
+          'M', 0, value,
           'l', neg*axis.innerTickSize(), -pt,
           'l', 0, -h,
           'l', neg*width, 0,
@@ -108,7 +138,7 @@ function backgroundPath(axis, height, width, point, neg) {
         else w = width/2-point;
 
         return [
-          'M', scale(d), 0,
+          'M', value, 0,
           'l', -pt, neg*axis.innerTickSize(),
           'l', -w, 0,
           'l', 0, neg*height,
