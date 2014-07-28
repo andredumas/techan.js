@@ -620,16 +620,23 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
 },{}],15:[function(_dereq_,module,exports){
 'use strict';
 
+/**
+ * TODO Refactor this to techan.plot.annotation.axis()?
+ */
 module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
   return function() { // Closure function
     var axis = d3_svg_axis(),
-      format,
-      point = 4,
-      height = 14,
-      width = 50;
+        format,
+        point = 4,
+        height = 14,
+        width = 50,
+        translate = [0, 0];
 
     function annotation(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.unity);
+      var group = plot.groupSelect(
+        g.append('g').attr("transform", "translate(" + translate[0] + "," + translate[1] + ")"),
+        plot.dataMapper.unity
+      );
 
       group.entry.append('path');
       group.entry.append('text');
@@ -668,40 +675,68 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
       return annotation;
     };
 
+    annotation.translate = function(_) {
+      if(!arguments.length) return translate;
+      translate = _;
+      return annotation;
+    };
+
     return annotation;
   };
 };
 
 function refresh(g, axis, format, height, width, point) {
   var scale = axis.scale(),
-    neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
+      neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
 
   g.selectAll('path').attr('d', backgroundPath(axis, height, width, point, neg));
 
-  var text = g.selectAll('text');
+  var text = g.selectAll('text').text(textValue(format));
 
   switch(axis.orient()) {
     case 'left':
     case 'right':
-      text.attr('x', neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()))
-        .attr('y', function(d) { return scale(d); })
-        .attr('dy', '.32em').style('text-anchor', neg < 0 ? 'end' : 'start');
+      text.attr({
+        x: neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()),
+        y: textPosition(scale),
+        dy: '.32em'
+      }).style('text-anchor', neg < 0 ? 'end' : 'start');
       break;
     case 'top':
     case 'bottom':
-      text.attr('x', function(d) { return scale(d); })
-        .attr('y', neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()))
-        .attr('dy', neg < 0 ? '0em' : '.72em').style('text-anchor', 'middle');
+      text.attr({
+        x: textPosition(scale),
+        y: neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()),
+        dy: neg < 0 ? '0em' : '.72em'
+      }).style('text-anchor', 'middle');
       break;
   }
+}
 
-  text.text(function(d) { return format(d); });
+function textPosition(scale) {
+  return function(d) {
+    var value = scale(d.value);
+    if(!value || isNaN(value)) return null;
+    return value;
+  };
+}
+
+function textValue(format) {
+  return function(d) {
+    if(!d.value) return null;
+    return format(d.value);
+  };
 }
 
 function backgroundPath(axis, height, width, point, neg) {
   return function(d) {
+    if(!d.value) return "M 0 0";
+
     var scale = axis.scale(),
-      pt = point;
+        value = scale(d.value),
+        pt = point;
+
+    if(isNaN(value)) return "M 0 0";
 
     switch(axis.orient()) {
       case 'left':
@@ -712,7 +747,7 @@ function backgroundPath(axis, height, width, point, neg) {
         else h = height/2-point;
 
         return [
-          'M', 0, scale(d),
+          'M', 0, value,
           'l', neg*axis.innerTickSize(), -pt,
           'l', 0, -h,
           'l', neg*width, 0,
@@ -728,7 +763,7 @@ function backgroundPath(axis, height, width, point, neg) {
         else w = width/2-point;
 
         return [
-          'M', scale(d), 0,
+          'M', value, 0,
           'l', -pt, neg*axis.innerTickSize(),
           'l', -w, 0,
           'l', 0, neg*height,
@@ -841,6 +876,153 @@ function wickPath(accessor, x, y) {
 },{}],17:[function(_dereq_,module,exports){
 'use strict';
 
+module.exports = function(d3_select, d3_event, d3_mouse) { // Injected dependencies
+  return function() { // Closure function
+    var xAnnotation = [],
+        yAnnotation = [],
+        verticalWireRange,
+        horizontalWireRange;
+
+    function crosshair(g) {
+      // TODO Handle this via noop on selection data?
+      if(!xAnnotation.length || !yAnnotation.length) return;
+
+      var xRange = xAnnotation[0].axis().scale().range(),
+          yRange = yAnnotation[0].axis().scale().range(),
+          group = g.selectAll('g.data').data([null]),
+          groupEnter = group.enter().append('g').attr('class', 'data').style('display', 'none');
+
+      groupEnter.append('path').attr('class', 'horizontal wire');
+      groupEnter.append('path').attr('class', 'vertical wire');
+
+      appendAnnotation(group, groupEnter, d3_select, ['axisannotation', 'x'], xAnnotation);
+      appendAnnotation(group, groupEnter, d3_select, ['axisannotation', 'y'], yAnnotation);
+
+      var mouseSelection = g.selectAll('rect').data([null]);
+      mouseSelection.enter().append('rect').style({ fill: 'none', 'pointer-events': 'all'});
+
+      mouseSelection.attr({
+          x: Math.min(xRange[0], xRange[xRange.length-1]),
+          y: Math.min(yRange[0], yRange[yRange.length-1]),
+          height: Math.abs(yRange[yRange.length-1] - yRange[0]),
+          width: Math.abs(xRange[xRange.length-1] - xRange[0])
+        })
+        .on('mouseenter', function() { g.selectAll('g.data').style('display', 'inline'); })
+        .on('mouseout', function() { g.selectAll('g.data').style('display', 'none'); })
+        .on('mousemove', function() {
+          var coords = d3_mouse(this),
+              x = xAnnotation[0].axis().scale(),
+              y = yAnnotation[0].axis().scale();
+
+          refresh(d3_select, xAnnotation, yAnnotation,
+            group.select('path.vertical').datum(x.invert(coords[0])),
+            group.select('path.horizontal').datum(y.invert(coords[1])),
+            group.selectAll('g.axisannotation.x > g').each(updateAnnotationValue(xAnnotation, coords[0])),
+            group.selectAll('g.axisannotation.y > g').each(updateAnnotationValue(yAnnotation, coords[1])),
+            verticalWireRange, horizontalWireRange
+          );
+        });
+
+      crosshair.refresh(g);
+    }
+
+    crosshair.refresh = function(g) {
+      if(!xAnnotation.length || !yAnnotation.length) return;
+      refresh(d3_select, xAnnotation, yAnnotation,
+        g.select('path.vertical'), g.select('path.horizontal'),
+        g.selectAll('g.axisannotation.x > g'), g.selectAll('g.axisannotation.y > g'),
+        verticalWireRange, horizontalWireRange
+      );
+    };
+
+    crosshair.xAnnotation = function(_) {
+      if(!arguments.length) return xAnnotation;
+      xAnnotation = _ instanceof Array ? _ : [_];
+      return crosshair;
+    };
+
+    crosshair.yAnnotation = function(_) {
+      if(!arguments.length) return yAnnotation;
+      yAnnotation = _ instanceof Array ? _ : [_];
+      return crosshair;
+    };
+
+    crosshair.verticalWireRange = function(_) {
+      if(!arguments.length) return verticalWireRange;
+      verticalWireRange = _;
+      return crosshair;
+    };
+
+    crosshair.horizontalWireRange = function(_) {
+      if(!arguments.length) return horizontalWireRange;
+      horizontalWireRange = _;
+      return crosshair;
+    };
+
+    return crosshair;
+  };
+};
+
+function refresh(d3_select, xAnnotation, yAnnotation, xPath, yPath,
+                 xAnnotationSelection, yAnnotationSelection,
+                 verticalWireRange, horizontalWireRange) {
+  var x = xAnnotation[0].axis().scale(),
+      y = yAnnotation[0].axis().scale();
+
+  xPath.attr('d', verticalPathLine(x, y, verticalWireRange));
+  yPath.attr('d', horizontalPathLine(x, y, horizontalWireRange));
+  xAnnotationSelection.each(refreshAnnotation(d3_select, xAnnotation));
+  yAnnotationSelection.each(refreshAnnotation(d3_select, yAnnotation));
+}
+
+function horizontalPathLine(x, y, horizontalWireRange) {
+  return function(d) {
+    if(!d || isNaN(d)) return "M 0 0";
+    var value = y(d),
+        range = horizontalWireRange|| x.range();
+    return ['M', range[0], value, 'L', range[range.length-1], value].join(' ');
+  };
+}
+
+function verticalPathLine(x, y, verticalWireRange) {
+  return function(d) {
+    if(!d || isNaN(d)) return "M 0 0";
+    var value = x(d),
+        range = verticalWireRange || y.range();
+    return ['M', value, range[0], 'L', value, range[range.length-1]].join(' ');
+  };
+}
+
+function updateAnnotationValue(annotations, value) {
+  return function(d, i) {
+    var range = annotations[i].axis().scale().range(),
+        start = range[0],
+        end = range[range.length-1];
+
+    range = start < end ? [start, end] : [end, start];
+
+    // d[0] because only ever 1 value for crosshairs
+    d[0].value = range[0] <= value && value <= range[range.length-1] ? annotations[i].axis().scale().invert(value) : null;
+  };
+}
+
+function appendAnnotation(selection, selectionEnter, d3_select, classes, annotation) {
+  selectionEnter.append('g').attr('class', classes.join(' '));
+  var annotationSelection = selection.select('g.' + classes.join('.')).selectAll('g')
+    .data(annotation.map(function() { return [{ value: null }]; }));
+  annotationSelection.exit().remove();
+  annotationSelection.enter().append('g').attr('class', function(d, i) { return i; })
+    .each(function(d, i) { annotation[i](d3_select(this)); });
+}
+
+function refreshAnnotation(d3_select, annotation) {
+  return function(d, i) {
+    annotation[i].refresh(d3_select(this));
+  };
+}
+},{}],18:[function(_dereq_,module,exports){
+'use strict';
+
 module.exports = function(d3) {
   var scale = _dereq_('../scale')(d3),
       accessor = _dereq_('../accessor')(),
@@ -851,6 +1033,7 @@ module.exports = function(d3) {
   return {
     axisannotation: _dereq_('./axisannotation')(d3.svg.axis, plot),
     candlestick: _dereq_('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
+    crosshair: _dereq_('./crosshair')(d3.select, d3_event, d3.mouse),
     ema: line(accessor.value, plot, plotMixin),
     ohlc: _dereq_('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
     close: line(accessor.ohlc, plot, plotMixin),
@@ -868,7 +1051,7 @@ module.exports = function(d3) {
 function d3_event() {
   return d3.event;
 }
-},{"../accessor":2,"../scale":28,"./axisannotation":15,"./candlestick":16,"./line":18,"./macd":19,"./ohlc":20,"./plot":21,"./plotmixin":22,"./rsi":23,"./supstance":24,"./trendline":25,"./volume":26}],18:[function(_dereq_,module,exports){
+},{"../accessor":2,"../scale":29,"./axisannotation":15,"./candlestick":16,"./crosshair":17,"./line":19,"./macd":20,"./ohlc":21,"./plot":22,"./plotmixin":23,"./rsi":24,"./supstance":25,"./trendline":26,"./volume":27}],19:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
@@ -907,7 +1090,7 @@ function refresh(g, accessor, x, y, plot, showZero) {
     g.selectAll('path.zero').attr({ d: plot.horizontalPathLine(x, accessor.z, y) });
   }
 }
-},{}],19:[function(_dereq_,module,exports){
+},{}],20:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_macd, plot, plotMixin) {  // Injected dependencies
@@ -965,7 +1148,7 @@ function differencePath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],20:[function(_dereq_,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
@@ -1015,7 +1198,7 @@ function ohlcPath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],21:[function(_dereq_,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -1026,7 +1209,7 @@ module.exports = function(d3) {
   }
 
   function dataEntry(dataSelection) {
-    return dataSelection.enter().append('g').attr({ class: 'data' });
+    return dataSelection.enter().append('g').attr('class', 'data');
   }
 
   return {
@@ -1057,14 +1240,13 @@ module.exports = function(d3) {
 
     horizontalPathLine: function(accessor_date, x, accessor_value, y) {
       return function(d) {
-        var path = [],
-            firstDatum = d[0],
+        var firstDatum = d[0],
             lastDatum = d[d.length-1];
 
-        path.push('M', x(accessor_date(firstDatum)), y(accessor_value(firstDatum)));
-        path.push('L', x(accessor_date(lastDatum)), y(accessor_value(lastDatum)));
-
-        return path.join(' ');
+        return [
+            'M', x(accessor_date(firstDatum)), y(accessor_value(firstDatum)),
+            'L', x(accessor_date(lastDatum)), y(accessor_value(lastDatum))
+          ].join(' ');
       };
     },
 
@@ -1075,7 +1257,7 @@ module.exports = function(d3) {
     }
   };
 };
-},{}],22:[function(_dereq_,module,exports){
+},{}],23:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, techan_scale_financetime) {
@@ -1116,7 +1298,7 @@ module.exports = function(d3_scale_linear, techan_scale_financetime) {
 
   return plotMixin;
 };
-},{}],23:[function(_dereq_,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependencies
@@ -1151,7 +1333,7 @@ function refresh(g, accessor, x, y, plot) {
   g.selectAll('path.oversold').attr({ d: plot.horizontalPathLine(accessor.d, x, accessor.os, y) });
   g.selectAll('path.rsi').attr({ d: plot.pathLine(accessor.d, x, accessor.r, y) });
 }
-},{}],24:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_value, plot, plotMixin) {  // Injected dependencies
@@ -1214,7 +1396,7 @@ function dragBody(d3_behavior_drag, d3_event, d3_select, accessor, x, y) {
       // TODO Fire listeners
     });
 }
-},{}],25:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_trendline, plot, plotMixin) {  // Injected dependencies
@@ -1321,7 +1503,7 @@ function updateEnd(accessor_x, x, xValue, accessor_y, y, yValue, d) {
   if(date) accessor_x(d, date);
   accessor_y(d, y.invert(yValue));
 }
-},{}],26:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(accessor_volume, plot, plotMixin) {  // Injected dependencies
@@ -1375,7 +1557,7 @@ function volumePath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 'use strict';
 
 /*
@@ -1592,7 +1774,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
 
   return financetime;
 };
-},{}],28:[function(_dereq_,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -1696,7 +1878,7 @@ function widen(widening, width) {
     return d + (i*2-1)*width*widening;
   };
 }
-},{"../accessor":2,"../util":31,"./financetime":27,"./zoomable":29}],29:[function(_dereq_,module,exports){
+},{"../accessor":2,"../util":32,"./financetime":28,"./zoomable":30}],30:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -1736,7 +1918,7 @@ module.exports = function() {
 
   return zoomable;
 };
-},{}],30:[function(_dereq_,module,exports){
+},{}],31:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = (function(d3) {
@@ -1748,7 +1930,7 @@ module.exports = (function(d3) {
     scale: _dereq_('./scale')(d3)
   };
 })(d3);
-},{"../build/version":1,"./accessor":2,"./indicator":10,"./plot":17,"./scale":28}],31:[function(_dereq_,module,exports){
+},{"../build/version":1,"./accessor":2,"./indicator":10,"./plot":18,"./scale":29}],32:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -1780,6 +1962,6 @@ function doRebind(target, source, method, postSetCallback) {
     return value === source ? target : value;
   };
 }
-},{}]},{},[30])
-(30)
+},{}]},{},[31])
+(31)
 });
