@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * TODO Refactor this to techan.plot.annotation.axis()?
+ */
 module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
   return function() { // Closure function
     var axis = d3_svg_axis(),
@@ -93,7 +96,7 @@ function refresh(g, axis, format, height, width, point) {
 function textPosition(scale) {
   return function(d) {
     var value = scale(d.value);
-    if(isNaN(value)) return null;
+    if(!value || isNaN(value)) return null;
     return value;
   };
 }
@@ -107,6 +110,8 @@ function textValue(format) {
 
 function backgroundPath(axis, height, width, point, neg) {
   return function(d) {
+    if(!d.value) return "M 0 0";
+
     var scale = axis.scale(),
         value = scale(d.value),
         pt = point;
