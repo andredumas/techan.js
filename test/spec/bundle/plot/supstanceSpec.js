@@ -46,54 +46,54 @@ techanModule('plot/supstance', function(specBuilder) {
           expect(g[0][0].innerHTML).not.toContain('NaN');
         });
       });
+    });
 
-      instanceBuilder.instance('mocked drag', mockDragInit, function(scope) {
-        describe('And drag is initialised', function() {
-          var supstance,
-              origin,
-              drag,
-              dragSpies = {},
-              selectSpies = {};
+    instanceBuilder.instance('mocked drag', mockDragInit, function(scope) {
+      describe('And drag is initialised', function() {
+        var supstance,
+          origin,
+          drag,
+          dragSpies = {},
+          selectSpies = {};
 
-          beforeEach(function() {
-            supstance = scope.supstance;
+        beforeEach(function() {
+          supstance = scope.supstance;
 
-            // Easier way to mock this?
-            spies.g.selectAll = jasmine.createSpy('selectAll');
-            selectSpies.call = jasmine.createSpy('call');
-            dragSpies.origin = jasmine.createSpy('origin');
-            dragSpies.on = jasmine.createSpy('on');
-            spies.g.selectAll.and.returnValue(selectSpies);
-            spies.d3_behaviour_drag.and.returnValue(dragSpies);
-            dragSpies.origin.and.returnValue(dragSpies);
+          // Easier way to mock this?
+          spies.g.selectAll = jasmine.createSpy('selectAll');
+          selectSpies.call = jasmine.createSpy('call');
+          dragSpies.origin = jasmine.createSpy('origin');
+          dragSpies.on = jasmine.createSpy('on');
+          spies.g.selectAll.and.returnValue(selectSpies);
+          spies.d3_behaviour_drag.and.returnValue(dragSpies);
+          dragSpies.origin.and.returnValue(dragSpies);
 
-            supstance.drag(spies.g);
+          supstance.drag(spies.g);
 
-            origin = dragSpies.origin.calls.argsFor(0)[0];
-            drag = dragSpies.on.calls.argsFor(0)[1];
+          origin = dragSpies.origin.calls.argsFor(0)[0];
+          drag = dragSpies.on.calls.argsFor(0)[1];
 
-            selectSpies.attr = jasmine.createSpy('attr');
-            spies.d3_event.and.returnValue({ x:0, y:16 });
-            spies.d3_select.and.returnValue(spies.g);
-          });
+          selectSpies.attr = jasmine.createSpy('attr');
+          spies.d3_event.and.returnValue({ x:0, y:16 });
+          spies.d3_select.and.returnValue(spies.g);
+        });
 
-          it('Then origin should be defined', function() {
-            expect(origin).toBeDefined();
-          });
+        it('Then origin should be defined', function() {
+          expect(origin).toBeDefined();
+        });
 
-          it('Then origin invoke returns the correct location of x:0 and y current value', function() {
-            expect(origin(data[0])).toEqual({x:0, y:15.54});
-          });
+        it('Then origin invoke returns the correct location of x:0 and y current value', function() {
+          expect(origin(data[0])).toEqual({x:0, y:15.54});
+        });
 
-          it('Then drag should be defined', function() {
-            expect(drag).toBeDefined();
-          });
+        it('Then drag should be defined', function() {
+          expect(drag).toBeDefined();
+        });
 
-          it('Then drag invoke should update the model', function() {
-            var datum = { value:15.54 };
-            drag.call(spies.g, datum);
-            expect(datum).toEqual({ value:16 });
-          });
+        it('Then drag invoke should update the model', function() {
+          var datum = { value:15.54 };
+          drag.call(spies.g, datum);
+          expect(datum).toEqual({ value:16 });
         });
       });
     });
