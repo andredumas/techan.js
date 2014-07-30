@@ -99,6 +99,7 @@ function refresh(d3_select, xAnnotation, yAnnotation, xPath, yPath,
   yAnnotationSelection.each(refreshAnnotation(d3_select, yAnnotation));
 }
 
+// TODO Remove isNaN checks to support other scales such as ordinals
 function horizontalPathLine(x, y, horizontalWireRange) {
   return function(d) {
     if(!d || isNaN(d)) return "M 0 0";
@@ -108,6 +109,7 @@ function horizontalPathLine(x, y, horizontalWireRange) {
   };
 }
 
+// TODO Remove isNaN checks to support other scales such as ordinals
 function verticalPathLine(x, y, verticalWireRange) {
   return function(d) {
     if(!d || isNaN(d)) return "M 0 0";

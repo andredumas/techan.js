@@ -13,15 +13,15 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
         translate = [0, 0];
 
     function annotation(g) {
-      var group = plot.groupSelect(
-        g.append('g').attr("transform", "translate(" + translate[0] + "," + translate[1] + ")"),
-        plot.dataMapper.unity
-      );
+      var group = g.selectAll('g.translate').data(plot.dataMapper.array);
+      group.enter().append('g').attr('class', 'translate');
+      group.attr("transform", "translate(" + translate[0] + "," + translate[1] + ")");
 
-      group.entry.append('path');
-      group.entry.append('text');
+      var dataGroup = plot.groupSelect(group, plot.dataMapper.unity);
+      dataGroup.entry.append('path');
+      dataGroup.entry.append('text');
 
-      annotation.refresh(g);
+      annotation.refresh(dataGroup.selection);
     }
 
     annotation.refresh = function(g) {
@@ -66,12 +66,14 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
 };
 
 function refresh(g, axis, format, height, width, point) {
-  var scale = axis.scale(),
-      neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
-
+  // TODO Ensure values are within the current domain before plotting
+  var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
   g.selectAll('path').attr('d', backgroundPath(axis, height, width, point, neg));
+  g.selectAll('text').text(textValue(format)).call(textAttributes, axis, neg);
+}
 
-  var text = g.selectAll('text').text(textValue(format));
+function textAttributes(text, axis, neg) {
+  var scale = axis.scale();
 
   switch(axis.orient()) {
     case 'left':
@@ -96,13 +98,15 @@ function refresh(g, axis, format, height, width, point) {
 function textPosition(scale) {
   return function(d) {
     var value = scale(d.value);
-    if(!value || isNaN(value)) return null;
+    // TODO Or is not in domain
+    if(!value || isNaN(value) /* || util.isBetween(scale.range, value) */) return null;
     return value;
   };
 }
 
 function textValue(format) {
   return function(d) {
+    // TODO Or is not in domain
     if(!d.value) return null;
     return format(d.value);
   };
@@ -110,13 +114,14 @@ function textValue(format) {
 
 function backgroundPath(axis, height, width, point, neg) {
   return function(d) {
+    // TODO Or is not in domain
     if(!d.value) return "M 0 0";
 
     var scale = axis.scale(),
         value = scale(d.value),
         pt = point;
 
-    if(isNaN(value)) return "M 0 0";
+    if(isNaN(value) /* || util.isBetween(scale.range, value) */) return "M 0 0";
 
     switch(axis.orient()) {
       case 'left':
