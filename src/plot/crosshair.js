@@ -1,20 +1,17 @@
 'use strict';
 
-module.exports = function(d3_select, d3_event, d3_mouse) { // Injected dependencies
+module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // Injected dependencies
   return function() { // Closure function
-    var xAnnotation = [],
-        yAnnotation = [],
+    var xAnnotation = [axisannotation()],
+        yAnnotation = [axisannotation()],
         verticalWireRange,
         horizontalWireRange;
 
     function crosshair(g) {
-      // TODO Handle this via noop on selection data?
-      if(!xAnnotation.length || !yAnnotation.length) return;
-
       var xRange = xAnnotation[0].axis().scale().range(),
           yRange = yAnnotation[0].axis().scale().range(),
-          group = g.selectAll('g.data').data([null]),
-          groupEnter = group.enter().append('g').attr('class', 'data').style('display', 'none');
+          group = g.selectAll('g.data').data([0]),
+          groupEnter = group.enter().append('g').attr('class', 'data').call(display, 'none');//style('display', 'none');
 
       groupEnter.append('path').attr('class', 'horizontal wire');
       groupEnter.append('path').attr('class', 'vertical wire');
@@ -22,7 +19,7 @@ module.exports = function(d3_select, d3_event, d3_mouse) { // Injected dependenc
       appendAnnotation(group, groupEnter, d3_select, ['axisannotation', 'x'], xAnnotation);
       appendAnnotation(group, groupEnter, d3_select, ['axisannotation', 'y'], yAnnotation);
 
-      var mouseSelection = g.selectAll('rect').data([null]);
+      var mouseSelection = g.selectAll('rect').data([0]);
       mouseSelection.enter().append('rect').style({ fill: 'none', 'pointer-events': 'all'});
 
       mouseSelection.attr({
@@ -31,8 +28,8 @@ module.exports = function(d3_select, d3_event, d3_mouse) { // Injected dependenc
           height: Math.abs(yRange[yRange.length-1] - yRange[0]),
           width: Math.abs(xRange[xRange.length-1] - xRange[0])
         })
-        .on('mouseenter', function() { g.selectAll('g.data').style('display', 'inline'); })
-        .on('mouseout', function() { g.selectAll('g.data').style('display', 'none'); })
+        .on('mouseenter', display(g, 'inline'))
+        .on('mouseout', display(g, 'none'))
         .on('mousemove', function() {
           var coords = d3_mouse(this),
               x = xAnnotation[0].axis().scale(),
@@ -51,7 +48,6 @@ module.exports = function(d3_select, d3_event, d3_mouse) { // Injected dependenc
     }
 
     crosshair.refresh = function(g) {
-      if(!xAnnotation.length || !yAnnotation.length) return;
       refresh(d3_select, xAnnotation, yAnnotation,
         g.select('path.vertical'), g.select('path.horizontal'),
         g.selectAll('g.axisannotation.x > g'), g.selectAll('g.axisannotation.y > g'),
@@ -87,55 +83,53 @@ module.exports = function(d3_select, d3_event, d3_mouse) { // Injected dependenc
   };
 };
 
+function display(g, style) {
+  return function() {
+    g.selectAll('g.data').style('display', style);
+  };
+}
+
 function refresh(d3_select, xAnnotation, yAnnotation, xPath, yPath,
                  xAnnotationSelection, yAnnotationSelection,
                  verticalWireRange, horizontalWireRange) {
   var x = xAnnotation[0].axis().scale(),
       y = yAnnotation[0].axis().scale();
 
-  xPath.attr('d', verticalPathLine(x, y, verticalWireRange));
-  yPath.attr('d', horizontalPathLine(x, y, horizontalWireRange));
+  xPath.attr('d', verticalPathLine(x, verticalWireRange || y.range()));
+  yPath.attr('d', horizontalPathLine(y, horizontalWireRange || x.range()));
   xAnnotationSelection.each(refreshAnnotation(d3_select, xAnnotation));
   yAnnotationSelection.each(refreshAnnotation(d3_select, yAnnotation));
 }
 
-// TODO Remove isNaN checks to support other scales such as ordinals
-function horizontalPathLine(x, y, horizontalWireRange) {
+function horizontalPathLine(y, range) {
   return function(d) {
-    if(!d || isNaN(d)) return "M 0 0";
-    var value = y(d),
-        range = horizontalWireRange|| x.range();
+    if(!d) return "M 0 0";
+    var value = y(d);
     return ['M', range[0], value, 'L', range[range.length-1], value].join(' ');
   };
 }
 
-// TODO Remove isNaN checks to support other scales such as ordinals
-function verticalPathLine(x, y, verticalWireRange) {
+function verticalPathLine(x, range) {
   return function(d) {
-    if(!d || isNaN(d)) return "M 0 0";
-    var value = x(d),
-        range = verticalWireRange || y.range();
+    if(!d) return "M 0 0";
+    var value = x(d);
     return ['M', value, range[0], 'L', value, range[range.length-1]].join(' ');
   };
 }
 
 function updateAnnotationValue(annotations, value) {
   return function(d, i) {
-    var range = annotations[i].axis().scale().range(),
-        start = range[0],
-        end = range[range.length-1];
-
-    range = start < end ? [start, end] : [end, start];
-
     // d[0] because only ever 1 value for crosshairs
-    d[0].value = range[0] <= value && value <= range[range.length-1] ? annotations[i].axis().scale().invert(value) : null;
+    d[0].value = annotations[i].axis().scale().invert(value);
   };
 }
 
 function appendAnnotation(selection, selectionEnter, d3_select, classes, annotation) {
   selectionEnter.append('g').attr('class', classes.join(' '));
+
   var annotationSelection = selection.select('g.' + classes.join('.')).selectAll('g')
     .data(annotation.map(function() { return [{ value: null }]; }));
+
   annotationSelection.exit().remove();
   annotationSelection.enter().append('g').attr('class', function(d, i) { return i; })
     .each(function(d, i) { annotation[i](d3_select(this)); });

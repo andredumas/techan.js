@@ -4,7 +4,7 @@
  * TODO Refactor this to techan.plot.annotation.axis()?
  */
 module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
-  return function() { // Closure function
+  function Annotation() { // Closure function
     var axis = d3_svg_axis(),
         format,
         point = 4,
@@ -17,18 +17,12 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
       group.enter().append('g').attr('class', 'translate');
       group.attr("transform", "translate(" + translate[0] + "," + translate[1] + ")");
 
-      var dataGroup = plot.groupSelect(group, plot.dataMapper.unity);
-      dataGroup.entry.append('path');
-      dataGroup.entry.append('text');
-
-      annotation.refresh(dataGroup.selection);
+      annotation.refresh(g);
     }
 
     annotation.refresh = function(g) {
-      var fmt = format ? format :
-        axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat();
-
-      refresh(g, axis, fmt, height, width, point);
+      var fmt = format ? format : (axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat());
+      refresh(g, plot, axis, fmt, height, width, point);
     };
 
     annotation.axis = function(_) {
@@ -62,14 +56,38 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
     };
 
     return annotation;
-  };
+  }
+
+  // Testing access only
+  Annotation.t = {f:filterInvalidValues,ta:textAttributes,tp:textPosition,b:backgroundPath};
+
+  return Annotation;
 };
 
-function refresh(g, axis, format, height, width, point) {
-  // TODO Ensure values are within the current domain before plotting
-  var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
-  g.selectAll('path').attr('d', backgroundPath(axis, height, width, point, neg));
-  g.selectAll('text').text(textValue(format)).call(textAttributes, axis, neg);
+function refresh(g, plot, axis, format, height, width, point) {
+  var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1,
+      dataGroup = plot.groupSelect(g.select('g.translate'), filterInvalidValues(axis.scale()));
+  dataGroup.entry.append('path');
+  dataGroup.entry.append('text');
+
+  dataGroup.selection.selectAll('path').attr('d', backgroundPath(axis, height, width, point, neg));
+  dataGroup.selection.selectAll('text').text(textValue(format)).call(textAttributes, axis, neg);
+}
+
+function filterInvalidValues(scale) {
+  return function(data) {
+    var range = scale.range(),
+        start = range[0],
+        end = range[range.length - 1];
+
+    range = start < end ? [start, end] : [end, start];
+
+    return data.filter(function (d) {
+      if (!d.value) return false;
+      var value = scale(d.value);
+      return value && !isNaN(value) && range[0] <= value && value <= range[1];
+    });
+  };
 }
 
 function textAttributes(text, axis, neg) {
@@ -97,31 +115,21 @@ function textAttributes(text, axis, neg) {
 
 function textPosition(scale) {
   return function(d) {
-    var value = scale(d.value);
-    // TODO Or is not in domain
-    if(!value || isNaN(value) /* || util.isBetween(scale.range, value) */) return null;
-    return value;
+    return scale(d.value);
   };
 }
 
 function textValue(format) {
   return function(d) {
-    // TODO Or is not in domain
-    if(!d.value) return null;
     return format(d.value);
   };
 }
 
 function backgroundPath(axis, height, width, point, neg) {
   return function(d) {
-    // TODO Or is not in domain
-    if(!d.value) return "M 0 0";
-
     var scale = axis.scale(),
         value = scale(d.value),
         pt = point;
-
-    if(isNaN(value) /* || util.isBetween(scale.range, value) */) return "M 0 0";
 
     switch(axis.orient()) {
       case 'left':
@@ -156,7 +164,7 @@ function backgroundPath(axis, height, width, point, neg) {
           'l', 0, neg*-height,
           'l', -w, 0
         ].join(' ');
-      default: throw "Unsupported axis.orient() " + axis.orient();
+      default: throw "Unsupported axis.orient() = " + axis.orient();
     }
   };
 }
