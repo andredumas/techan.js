@@ -7,10 +7,10 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_trendl
     function trendline(g) {
       var group = plot.groupSelect(g, plot.dataMapper.unity);
 
-      group.entry.append('path').attr({ class: 'trendline' });
+      group.entry.append('path').attr('class', 'trendline');
 
-      var interaction = group.entry.append('g').attr({ class: 'interaction' }).style({ opacity: 0, fill: 'none' });
-      interaction.append('path').attr({ class: 'body' }).style({ 'stroke-width': 16 });
+      var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' });
+      interaction.append('path').attr('class', 'body').style('stroke-width', 16);
       interaction.append('circle').attr({ class: 'start', r: 8 });
       interaction.append('circle').attr({ class: 'end', r: 8 });
 
@@ -41,8 +41,8 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_trendl
 };
 
 function refresh(g, accessor, x, y) {
-  g.selectAll('path.trendline').attr({ d: trendlinePath(accessor, x, y) });
-  g.selectAll('.interaction path.body').attr({ d: trendlinePath(accessor, x, y) });
+  g.selectAll('path.trendline').attr('d', trendlinePath(accessor, x, y));
+  g.selectAll('.interaction path.body').attr('d', trendlinePath(accessor, x, y));
   g.selectAll('.interaction circle.start').attr(interactionEnds(accessor.sd, x, accessor.sv, y));
   g.selectAll('.interaction circle.end').attr(interactionEnds(accessor.ed, x, accessor.ev, y));
 }

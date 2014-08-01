@@ -9,10 +9,10 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
     function line(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.date());
 
-      group.entry.append('path').attr({ class: 'line' });
+      group.entry.append('path').attr('class', 'line');
 
       if(showZero) {
-        group.selection.append('path').attr({ class: 'zero' });
+        group.selection.append('path').attr('class', 'zero');
       }
 
       line.refresh(g);
@@ -30,9 +30,9 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
 };
 
 function refresh(g, accessor, x, y, plot, showZero) {
-  g.selectAll('path.line').attr({ d: plot.pathLine(accessor.d, x, accessor, y) });
+  g.selectAll('path.line').attr('d', plot.pathLine(accessor.d, x, accessor, y));
 
   if(showZero) {
-    g.selectAll('path.zero').attr({ d: plot.horizontalPathLine(x, accessor.z, y) });
+    g.selectAll('path.zero').attr('d', plot.horizontalPathLine(x, accessor.z, y));
   }
 }

@@ -15,7 +15,7 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
     function annotation(g) {
       var group = g.selectAll('g.translate').data(plot.dataMapper.array);
       group.enter().append('g').attr('class', 'translate');
-      group.attr("transform", "translate(" + translate[0] + "," + translate[1] + ")");
+      group.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
 
       annotation.refresh(g);
     }

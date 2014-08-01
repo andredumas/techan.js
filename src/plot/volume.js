@@ -7,7 +7,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
     function volume(g) {
       var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
         .entry.append('path')
-          .attr({ class: 'volume' });
+          .attr('class', 'volume');
 
       if(p.accessor.o && p.accessor.c) {
         group.classed(plot.classedUpDown(p.accessor));
@@ -28,7 +28,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
 };
 
 function refresh(g, accessor, x, y) {
-  g.selectAll('path.volume').attr({ d: volumePath(accessor, x, y) });
+  g.selectAll('path.volume').attr('d', volumePath(accessor, x, y));
 }
 
 function volumePath(accessor, x, y) {
@@ -37,17 +37,16 @@ function volumePath(accessor, x, y) {
 
     if(isNaN(vol)) return null;
 
-    var path = [],
-        zero = y(0),
+    var zero = y(0),
         height = y(vol) - zero,
         rangeBand = x.band(),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
-    path.push('M', xValue, zero);
-    path.push('l', 0, height);
-    path.push('l', rangeBand, 0);
-    path.push('l', 0, -height);
-
-    return path.join(' ');
+    return [
+        'M', xValue, zero,
+        'l', 0, height,
+        'l', rangeBand, 0,
+        'l', 0, -height
+      ].join(' ');
   };
 }

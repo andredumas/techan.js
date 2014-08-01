@@ -28,22 +28,19 @@ function refresh(g, accessor, x, y) {
 
 function ohlcPath(accessor, x, y) {
   return function(d) {
-    var path = [],
-        open = y(accessor.o(d)),
+    var open = y(accessor.o(d)),
         close = y(accessor.c(d)),
         rangeBand = x.band(),
         xPoint = x(accessor.d(d)),
         xValue = xPoint - rangeBand/2;
 
-    path.push('M', xValue, open);
-    path.push('l', rangeBand/2, 0);
-
-    path.push('M', xPoint, y(accessor.h(d)));
-    path.push('L', xPoint, y(accessor.l(d)));
-
-    path.push('M', xPoint, close);
-    path.push('l', rangeBand/2, 0);
-
-    return path.join(' ');
+    return [
+        'M', xValue, open,
+        'l', rangeBand/2, 0,
+        'M', xPoint, y(accessor.h(d)),
+        'L', xPoint, y(accessor.l(d)),
+        'M', xPoint, close,
+        'l', rangeBand/2, 0
+      ].join(' ');
   };
 }

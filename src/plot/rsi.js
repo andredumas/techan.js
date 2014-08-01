@@ -7,10 +7,10 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
     function rsi(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
-      group.entry.append('path').attr({ class: 'overbought' });
-      group.entry.append('path').attr({ class: 'middle' });
-      group.entry.append('path').attr({ class: 'oversold' });
-      group.entry.append('path').attr({ class: 'rsi' });
+      group.entry.append('path').attr('class', 'overbought');
+      group.entry.append('path').attr('class', 'middle');
+      group.entry.append('path').attr('class', 'oversold');
+      group.entry.append('path').attr('class', 'rsi');
 
       rsi.refresh(g);
     }
@@ -27,8 +27,8 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
 };
 
 function refresh(g, accessor, x, y, plot) {
-  g.selectAll('path.overbought').attr({ d: plot.horizontalPathLine(accessor.d, x, accessor.ob, y) });
-  g.selectAll('path.middle').attr({ d: plot.horizontalPathLine(accessor.d, x, accessor.m, y) });
-  g.selectAll('path.oversold').attr({ d: plot.horizontalPathLine(accessor.d, x, accessor.os, y) });
-  g.selectAll('path.rsi').attr({ d: plot.pathLine(accessor.d, x, accessor.r, y) });
+  g.selectAll('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
+  g.selectAll('path.middle').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.m, y));
+  g.selectAll('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
+  g.selectAll('path.rsi').attr('d', plot.pathLine(accessor.d, x, accessor.r, y));
 }

@@ -9,8 +9,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
       var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d);
 
       // Two path's as wick and body can be styled slightly differently (stroke and fills)
-      group.entry.append('path').attr({ class: 'candle body' }).classed(plot.classedUpDown(p.accessor));
-      group.entry.append('path').attr({ class: 'candle wick' }).classed(plot.classedUpDown(p.accessor));
+      group.entry.append('path').attr('class', 'candle body').classed(plot.classedUpDown(p.accessor));
+      group.entry.append('path').attr('class', 'candle wick').classed(plot.classedUpDown(p.accessor));
 
       if(volumeOpacity) {
         var volumeOpacityScale = d3_scale_linear()
@@ -44,8 +44,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 };
 
 function refresh(g, accessor, x, y) {
-  g.selectAll('path.candle.body').attr({ d: bodyPath(accessor, x, y) });
-  g.selectAll('path.candle.wick').attr({ d: wickPath(accessor, x, y) });
+  g.selectAll('path.candle.body').attr('d', bodyPath(accessor, x, y));
+  g.selectAll('path.candle.wick').attr('d', wickPath(accessor, x, y));
 }
 
 function bodyPath(accessor, x, y) {
@@ -56,14 +56,18 @@ function bodyPath(accessor, x, y) {
         rangeBand = x.band(),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
-    path.push('M', xValue, open);
-    path.push('l', rangeBand, 0);
+    path.push(
+        'M', xValue, open,
+        'l', rangeBand, 0
+      );
 
     // Draw body only if there is a body (there is no stroke, so will not appear anyway)
     if(open != close) {
-      path.push('L', xValue + rangeBand, close);
-      path.push('l', -rangeBand, 0);
-      path.push('L', xValue, open);
+      path.push(
+          'L', xValue + rangeBand, close,
+          'l', -rangeBand, 0,
+          'L', xValue, open
+        );
     }
 
     return path.join(' ');
@@ -80,17 +84,23 @@ function wickPath(accessor, x, y) {
         xValue = xPoint - rangeBand/2;
 
     // Top
-    path.push('M', xPoint, y(accessor.h(d)));
-    path.push('L', xPoint, Math.min(open, close));
+    path.push(
+        'M', xPoint, y(accessor.h(d)),
+        'L', xPoint, Math.min(open, close)
+      );
 
     // Draw another cross wick if there is no body
     if(open == close) {
-      path.push('M', xValue, open);
-      path.push('l', rangeBand, 0);
+      path.push(
+          'M', xValue, open,
+          'l', rangeBand, 0
+        );
     }
     // Bottom
-    path.push('M', xPoint, Math.max(open, close));
-    path.push('L', xPoint, y(accessor.l(d)));
+    path.push(
+        'M', xPoint, Math.max(open, close),
+        'L', xPoint, y(accessor.l(d))
+      );
 
     return path.join(' ');
   };

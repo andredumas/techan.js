@@ -11,7 +11,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
       var xRange = xAnnotation[0].axis().scale().range(),
           yRange = yAnnotation[0].axis().scale().range(),
           group = g.selectAll('g.data').data([0]),
-          groupEnter = group.enter().append('g').attr('class', 'data').call(display, 'none');//style('display', 'none');
+          groupEnter = group.enter().append('g').attr('class', 'data').call(display, 'none');
 
       groupEnter.append('path').attr('class', 'horizontal wire');
       groupEnter.append('path').attr('class', 'vertical wire');

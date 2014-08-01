@@ -7,10 +7,10 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_value,
     function supstance(g) {
       var group = plot.groupSelect(g, plot.dataMapper.unity);
 
-      group.entry.append('path').attr({ class: 'supstance' });
+      group.entry.append('path').attr('class', 'supstance');
 
-      group.entry.append('g').attr({ class: 'interaction' }).style({ opacity: 0, fill: 'none' })
-        .append('path').style({ 'stroke-width': 16 });
+      group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
+        .append('path').style('stroke-width', 16);
 
       supstance.refresh(g);
     }
@@ -32,8 +32,8 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_value,
 };
 
 function refresh(g, accessor, x, y) {
-  g.selectAll('path.supstance').attr({ d: supstancePath(accessor, x, y) });
-  g.selectAll('.interaction path').attr({ d: supstancePath(accessor, x, y) });
+  g.selectAll('path.supstance').attr('d', supstancePath(accessor, x, y));
+  g.selectAll('.interaction path').attr('d', supstancePath(accessor, x, y));
 }
 
 function supstancePath(accessor, x, y) {
