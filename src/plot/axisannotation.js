@@ -4,7 +4,7 @@
  * TODO Refactor this to techan.plot.annotation.axis()?
  */
 module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
-  function Annotation() { // Closure function
+  return function() { // Closure function
     var axis = d3_svg_axis(),
         format,
         point = 4,
@@ -56,12 +56,7 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
     };
 
     return annotation;
-  }
-
-  // Testing access only
-  Annotation.t = {f:filterInvalidValues,ta:textAttributes,tp:textPosition,b:backgroundPath};
-
-  return Annotation;
+  };
 };
 
 function refresh(g, plot, axis, format, height, width, point) {
