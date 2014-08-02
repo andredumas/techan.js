@@ -39,7 +39,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
     instanceBuilder.instance('mocked', mockInit, function(scope) {
       describe('And axisannotation is initialised with defaults', function () {
         beforeEach(function () {
-          axisannotation = scope.plot;
+          axisannotation = scope.axisannotation;
           g = domFixtures.g([{ value: 50 }]);
         });
 
@@ -47,7 +47,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
           var selectSpies = {};
 
           beforeEach(function() {
-            // Too many spies?
+            // Too many spies much???
             spies.plot.groupSelect = jasmine.createSpy('groupSelect');
             spies.plot.groupSelect.and.returnValue({entry: selectSpies, selection: selectSpies});
             spies.g.selectAll = jasmine.createSpy('selectAll');
@@ -63,6 +63,207 @@ techanModule('plot/axisannotation', function(specBuilder) {
             selectSpies.text.and.returnValue(selectSpies);
             selectSpies.style = jasmine.createSpy('style');
             selectSpies.call = jasmine.createSpy('call');
+          });
+
+          describe('And on refresh with defaults', function() {
+            var filterInvalidValues,
+                text,
+                textAttributes;
+
+            beforeEach(function() {
+              axisannotation.refresh(spies.g);
+              filterInvalidValues = spies.plot.groupSelect.calls.argsFor(0)[1];
+              text = selectSpies.text.calls.argsFor(0)[0];
+              textAttributes = selectSpies.call.calls.argsFor(0)[0];
+            });
+
+            it('Then plot.groupSelect filter should be defined', function() {
+              expect(filterInvalidValues).toBeDefined();
+            });
+
+            it('Then plot.groupSelect should filter undefined objects', function() {
+              expect(filterInvalidValues([{}])).toEqual([]);
+            });
+
+            it('Then plot.groupSelect should filter null values', function() {
+              expect(filterInvalidValues([{value:null}])).toEqual([]);
+            });
+
+            it('Then plot.groupSelect should filter domain values that scale out of range greater', function() {
+              expect(filterInvalidValues([{value:2}])).toEqual([]);
+            });
+
+            it('Then plot.groupSelect should filter domain values that scale out of range less', function() {
+              expect(filterInvalidValues([{value: -0.1}])).toEqual([]);
+            });
+
+            it('Then plot.groupSelect should not filter domain values that scale inside of range', function() {
+              expect(filterInvalidValues([{value:0.5}])).toEqual([{value:0.5}]);
+            });
+
+            it('Then plot.groupSelect should not filter domain values that scale to not a number', function() {
+              expect(filterInvalidValues([{value:'abc'}])).toEqual([]);
+            });
+
+            it('Then text function should be defined', function() {
+              expect(text).toBeDefined();
+            });
+
+            it('Then text function invoke should return formatted value', function() {
+              expect(text({value:123})).toEqual('123.0');
+            });
+
+            it('Then textAttributes function should be defined', function() {
+              expect(textAttributes).toBeDefined();
+            });
+
+            describe('And axis is left and neg(ation) is left (-1)', function() {
+              var attr,
+                  styleArgs;
+
+              beforeEach(function() {
+                axisannotation.axis().orient('left');
+                textAttributes(selectSpies, axisannotation.axis(), -1);
+                attr = selectSpies.attr.calls.argsFor(1)[0]; // It is the second call because it is initially invoked in earlier setup
+                styleArgs = selectSpies.style.calls.argsFor(0);
+              });
+
+              it('Then attr should have been called on the selection', function() {
+                expect(attr).toBeDefined();
+              });
+
+              it('Then textAttributes should set tick padded x coordinate', function() {
+                expect(attr.x).toBeDefined();
+                expect(attr.x).toBe(-9);
+              });
+
+              it('Then textAttributes should be a function that scales value to y coordinate', function() {
+                expect(attr.y).toBeDefined();
+                expect(attr.y({ value:1 })).toBe(1);
+              });
+
+              it('Then textAttributes should set dy coordinate', function() {
+                expect(attr.dy).toBeDefined();
+                expect(attr.dy).toBe('.32em');
+              });
+
+              it('Then textAttributes should set end text anchor style', function() {
+                expect(styleArgs).toBeDefined();
+                expect(styleArgs[0]).toBe('text-anchor');
+                expect(styleArgs[1]).toBe('end');
+              });
+            });
+
+            describe('And axis is right', function() {
+              var attr,
+                  styleArgs;
+
+              beforeEach(function() {
+                axisannotation.axis().orient('right');
+                textAttributes(selectSpies, axisannotation.axis(), 1);
+                attr = selectSpies.attr.calls.argsFor(1)[0]; // It is the second call because it is initially invoked in earlier setup
+                styleArgs = selectSpies.style.calls.argsFor(0);
+              });
+
+              it('Then attr should have been called on the selection', function() {
+                expect(attr).toBeDefined();
+              });
+
+              it('Then textAttributes should set tick padded x coordinate', function() {
+                expect(attr.x).toBeDefined();
+                expect(attr.x).toBe(9);
+              });
+
+              it('Then textAttributes should set scaled value y coordinate', function() {
+                expect(attr.y).toBeDefined();
+                expect(attr.y({ value:1 })).toBe(1);
+              });
+
+              it('Then textAttributes should set dy coordinate', function() {
+                expect(attr.dy).toBeDefined();
+                expect(attr.dy).toBe('.32em');
+              });
+
+              it('Then textAttributes should set start text anchor style', function() {
+                expect(styleArgs).toBeDefined();
+                expect(styleArgs[0]).toBe('text-anchor');
+                expect(styleArgs[1]).toBe('start');
+              });
+            });
+
+            describe('And axis is top', function() {
+              var attr,
+                  styleArgs;
+
+              beforeEach(function() {
+                axisannotation.axis().orient('top');
+                textAttributes(selectSpies, axisannotation.axis(), -1);
+                attr = selectSpies.attr.calls.argsFor(1)[0]; // It is the second call because it is initially invoked in earlier setup
+                styleArgs = selectSpies.style.calls.argsFor(0);
+              });
+
+              it('Then attr should have been called on the selection', function() {
+                expect(attr).toBeDefined();
+              });
+
+              it('Then textAttributes should set tick padded y coordinate', function() {
+                expect(attr.y).toBeDefined();
+                expect(attr.y).toBe(-9);
+              });
+
+              it('Then textAttributes should set scaled value x coordinate', function() {
+                expect(attr.x).toBeDefined();
+                expect(attr.x({ value:1 })).toBe(1);
+              });
+
+              it('Then textAttributes should set dy coordinate', function() {
+                expect(attr.dy).toBeDefined();
+                expect(attr.dy).toBe('0em');
+              });
+
+              it('Then textAttributes should set middle text anchor style', function() {
+                expect(styleArgs).toBeDefined();
+                expect(styleArgs[0]).toBe('text-anchor');
+                expect(styleArgs[1]).toBe('middle');
+              });
+            });
+
+            describe('And axis is bottom', function() {
+              var attr,
+                  styleArgs;
+
+              beforeEach(function() {
+                axisannotation.axis().orient('bottom');
+                textAttributes(selectSpies, axisannotation.axis(), 1);
+                attr = selectSpies.attr.calls.argsFor(1)[0]; // It is the second call because it is initially invoked in earlier setup
+                styleArgs = selectSpies.style.calls.argsFor(0);
+              });
+
+              it('Then attr should have been called on the selection', function() {
+                expect(attr).toBeDefined();
+              });
+
+              it('Then textAttributes should set tick padded y coordinate', function() {
+                expect(attr.y).toBeDefined();
+                expect(attr.y).toBe(9);
+              });
+
+              it('Then textAttributes should set scaled value x coordinate', function() {
+                expect(attr.x).toBeDefined();
+                expect(attr.x({ value:1 })).toBe(1);
+              });
+
+              it('Then textAttributes should set dy coordinate', function() {
+                expect(attr.dy).toBeDefined();
+                expect(attr.dy).toBe('.72em');
+              });
+
+              it('Then textAttributes should set middle text anchor style', function() {
+                expect(styleArgs).toBeDefined();
+                expect(styleArgs[0]).toBe('text-anchor');
+                expect(styleArgs[1]).toBe('middle');
+              });
+            });
           });
 
           describe('And axis is left', function() {
