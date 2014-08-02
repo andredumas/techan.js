@@ -624,7 +624,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
  * TODO Refactor this to techan.plot.annotation.axis()?
  */
 module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
-  return function() { // Closure function
+  function Annotation() { // Closure function
     var axis = d3_svg_axis(),
         format,
         point = 4,
@@ -633,22 +633,16 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
         translate = [0, 0];
 
     function annotation(g) {
-      var group = plot.groupSelect(
-        g.append('g').attr("transform", "translate(" + translate[0] + "," + translate[1] + ")"),
-        plot.dataMapper.unity
-      );
-
-      group.entry.append('path');
-      group.entry.append('text');
+      var group = g.selectAll('g.translate').data(plot.dataMapper.array);
+      group.enter().append('g').attr('class', 'translate');
+      group.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
 
       annotation.refresh(g);
     }
 
     annotation.refresh = function(g) {
-      var fmt = format ? format :
-        axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat();
-
-      refresh(g, axis, fmt, height, width, point);
+      var fmt = format ? format : (axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat());
+      refresh(g, plot, axis, fmt, height, width, point);
     };
 
     annotation.axis = function(_) {
@@ -682,16 +676,42 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
     };
 
     return annotation;
-  };
+  }
+
+  // Testing access only
+  Annotation.t = {f:filterInvalidValues,ta:textAttributes,tp:textPosition,b:backgroundPath};
+
+  return Annotation;
 };
 
-function refresh(g, axis, format, height, width, point) {
-  var scale = axis.scale(),
-      neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
+function refresh(g, plot, axis, format, height, width, point) {
+  var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1,
+      dataGroup = plot.groupSelect(g.select('g.translate'), filterInvalidValues(axis.scale()));
+  dataGroup.entry.append('path');
+  dataGroup.entry.append('text');
 
-  g.selectAll('path').attr('d', backgroundPath(axis, height, width, point, neg));
+  dataGroup.selection.selectAll('path').attr('d', backgroundPath(axis, height, width, point, neg));
+  dataGroup.selection.selectAll('text').text(textValue(format)).call(textAttributes, axis, neg);
+}
 
-  var text = g.selectAll('text').text(textValue(format));
+function filterInvalidValues(scale) {
+  return function(data) {
+    var range = scale.range(),
+        start = range[0],
+        end = range[range.length - 1];
+
+    range = start < end ? [start, end] : [end, start];
+
+    return data.filter(function (d) {
+      if (!d.value) return false;
+      var value = scale(d.value);
+      return value && !isNaN(value) && range[0] <= value && value <= range[1];
+    });
+  };
+}
+
+function textAttributes(text, axis, neg) {
+  var scale = axis.scale();
 
   switch(axis.orient()) {
     case 'left':
@@ -715,28 +735,21 @@ function refresh(g, axis, format, height, width, point) {
 
 function textPosition(scale) {
   return function(d) {
-    var value = scale(d.value);
-    if(!value || isNaN(value)) return null;
-    return value;
+    return scale(d.value);
   };
 }
 
 function textValue(format) {
   return function(d) {
-    if(!d.value) return null;
     return format(d.value);
   };
 }
 
 function backgroundPath(axis, height, width, point, neg) {
   return function(d) {
-    if(!d.value) return "M 0 0";
-
     var scale = axis.scale(),
         value = scale(d.value),
         pt = point;
-
-    if(isNaN(value)) return "M 0 0";
 
     switch(axis.orient()) {
       case 'left':
@@ -771,7 +784,7 @@ function backgroundPath(axis, height, width, point, neg) {
           'l', 0, neg*-height,
           'l', -w, 0
         ].join(' ');
-      default: throw "Unsupported axis.orient() " + axis.orient();
+      default: throw "Unsupported axis.orient() = " + axis.orient();
     }
   };
 }
@@ -787,8 +800,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
       var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d);
 
       // Two path's as wick and body can be styled slightly differently (stroke and fills)
-      group.entry.append('path').attr({ class: 'candle body' }).classed(plot.classedUpDown(p.accessor));
-      group.entry.append('path').attr({ class: 'candle wick' }).classed(plot.classedUpDown(p.accessor));
+      group.entry.append('path').attr('class', 'candle body').classed(plot.classedUpDown(p.accessor));
+      group.entry.append('path').attr('class', 'candle wick').classed(plot.classedUpDown(p.accessor));
 
       if(volumeOpacity) {
         var volumeOpacityScale = d3_scale_linear()
@@ -822,8 +835,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 };
 
 function refresh(g, accessor, x, y) {
-  g.selectAll('path.candle.body').attr({ d: bodyPath(accessor, x, y) });
-  g.selectAll('path.candle.wick').attr({ d: wickPath(accessor, x, y) });
+  g.selectAll('path.candle.body').attr('d', bodyPath(accessor, x, y));
+  g.selectAll('path.candle.wick').attr('d', wickPath(accessor, x, y));
 }
 
 function bodyPath(accessor, x, y) {
@@ -834,14 +847,18 @@ function bodyPath(accessor, x, y) {
         rangeBand = x.band(),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
-    path.push('M', xValue, open);
-    path.push('l', rangeBand, 0);
+    path.push(
+        'M', xValue, open,
+        'l', rangeBand, 0
+      );
 
     // Draw body only if there is a body (there is no stroke, so will not appear anyway)
     if(open != close) {
-      path.push('L', xValue + rangeBand, close);
-      path.push('l', -rangeBand, 0);
-      path.push('L', xValue, open);
+      path.push(
+          'L', xValue + rangeBand, close,
+          'l', -rangeBand, 0,
+          'L', xValue, open
+        );
     }
 
     return path.join(' ');
@@ -858,17 +875,23 @@ function wickPath(accessor, x, y) {
         xValue = xPoint - rangeBand/2;
 
     // Top
-    path.push('M', xPoint, y(accessor.h(d)));
-    path.push('L', xPoint, Math.min(open, close));
+    path.push(
+        'M', xPoint, y(accessor.h(d)),
+        'L', xPoint, Math.min(open, close)
+      );
 
     // Draw another cross wick if there is no body
     if(open == close) {
-      path.push('M', xValue, open);
-      path.push('l', rangeBand, 0);
+      path.push(
+          'M', xValue, open,
+          'l', rangeBand, 0
+        );
     }
     // Bottom
-    path.push('M', xPoint, Math.max(open, close));
-    path.push('L', xPoint, y(accessor.l(d)));
+    path.push(
+        'M', xPoint, Math.max(open, close),
+        'L', xPoint, y(accessor.l(d))
+      );
 
     return path.join(' ');
   };
@@ -876,21 +899,18 @@ function wickPath(accessor, x, y) {
 },{}],17:[function(_dereq_,module,exports){
 'use strict';
 
-module.exports = function(d3_select, d3_event, d3_mouse) { // Injected dependencies
+module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // Injected dependencies
   return function() { // Closure function
-    var xAnnotation = [],
-        yAnnotation = [],
+    var xAnnotation = [axisannotation()],
+        yAnnotation = [axisannotation()],
         verticalWireRange,
         horizontalWireRange;
 
     function crosshair(g) {
-      // TODO Handle this via noop on selection data?
-      if(!xAnnotation.length || !yAnnotation.length) return;
-
       var xRange = xAnnotation[0].axis().scale().range(),
           yRange = yAnnotation[0].axis().scale().range(),
-          group = g.selectAll('g.data').data([null]),
-          groupEnter = group.enter().append('g').attr('class', 'data').style('display', 'none');
+          group = g.selectAll('g.data').data([0]),
+          groupEnter = group.enter().append('g').attr('class', 'data').call(display, 'none');
 
       groupEnter.append('path').attr('class', 'horizontal wire');
       groupEnter.append('path').attr('class', 'vertical wire');
@@ -898,7 +918,7 @@ module.exports = function(d3_select, d3_event, d3_mouse) { // Injected dependenc
       appendAnnotation(group, groupEnter, d3_select, ['axisannotation', 'x'], xAnnotation);
       appendAnnotation(group, groupEnter, d3_select, ['axisannotation', 'y'], yAnnotation);
 
-      var mouseSelection = g.selectAll('rect').data([null]);
+      var mouseSelection = g.selectAll('rect').data([0]);
       mouseSelection.enter().append('rect').style({ fill: 'none', 'pointer-events': 'all'});
 
       mouseSelection.attr({
@@ -907,8 +927,8 @@ module.exports = function(d3_select, d3_event, d3_mouse) { // Injected dependenc
           height: Math.abs(yRange[yRange.length-1] - yRange[0]),
           width: Math.abs(xRange[xRange.length-1] - xRange[0])
         })
-        .on('mouseenter', function() { g.selectAll('g.data').style('display', 'inline'); })
-        .on('mouseout', function() { g.selectAll('g.data').style('display', 'none'); })
+        .on('mouseenter', display(g, 'inline'))
+        .on('mouseout', display(g, 'none'))
         .on('mousemove', function() {
           var coords = d3_mouse(this),
               x = xAnnotation[0].axis().scale(),
@@ -927,7 +947,6 @@ module.exports = function(d3_select, d3_event, d3_mouse) { // Injected dependenc
     }
 
     crosshair.refresh = function(g) {
-      if(!xAnnotation.length || !yAnnotation.length) return;
       refresh(d3_select, xAnnotation, yAnnotation,
         g.select('path.vertical'), g.select('path.horizontal'),
         g.selectAll('g.axisannotation.x > g'), g.selectAll('g.axisannotation.y > g'),
@@ -963,53 +982,53 @@ module.exports = function(d3_select, d3_event, d3_mouse) { // Injected dependenc
   };
 };
 
+function display(g, style) {
+  return function() {
+    g.selectAll('g.data').style('display', style);
+  };
+}
+
 function refresh(d3_select, xAnnotation, yAnnotation, xPath, yPath,
                  xAnnotationSelection, yAnnotationSelection,
                  verticalWireRange, horizontalWireRange) {
   var x = xAnnotation[0].axis().scale(),
       y = yAnnotation[0].axis().scale();
 
-  xPath.attr('d', verticalPathLine(x, y, verticalWireRange));
-  yPath.attr('d', horizontalPathLine(x, y, horizontalWireRange));
+  xPath.attr('d', verticalPathLine(x, verticalWireRange || y.range()));
+  yPath.attr('d', horizontalPathLine(y, horizontalWireRange || x.range()));
   xAnnotationSelection.each(refreshAnnotation(d3_select, xAnnotation));
   yAnnotationSelection.each(refreshAnnotation(d3_select, yAnnotation));
 }
 
-function horizontalPathLine(x, y, horizontalWireRange) {
+function horizontalPathLine(y, range) {
   return function(d) {
-    if(!d || isNaN(d)) return "M 0 0";
-    var value = y(d),
-        range = horizontalWireRange|| x.range();
+    if(!d) return "M 0 0";
+    var value = y(d);
     return ['M', range[0], value, 'L', range[range.length-1], value].join(' ');
   };
 }
 
-function verticalPathLine(x, y, verticalWireRange) {
+function verticalPathLine(x, range) {
   return function(d) {
-    if(!d || isNaN(d)) return "M 0 0";
-    var value = x(d),
-        range = verticalWireRange || y.range();
+    if(!d) return "M 0 0";
+    var value = x(d);
     return ['M', value, range[0], 'L', value, range[range.length-1]].join(' ');
   };
 }
 
 function updateAnnotationValue(annotations, value) {
   return function(d, i) {
-    var range = annotations[i].axis().scale().range(),
-        start = range[0],
-        end = range[range.length-1];
-
-    range = start < end ? [start, end] : [end, start];
-
     // d[0] because only ever 1 value for crosshairs
-    d[0].value = range[0] <= value && value <= range[range.length-1] ? annotations[i].axis().scale().invert(value) : null;
+    d[0].value = annotations[i].axis().scale().invert(value);
   };
 }
 
 function appendAnnotation(selection, selectionEnter, d3_select, classes, annotation) {
   selectionEnter.append('g').attr('class', classes.join(' '));
+
   var annotationSelection = selection.select('g.' + classes.join('.')).selectAll('g')
     .data(annotation.map(function() { return [{ value: null }]; }));
+
   annotationSelection.exit().remove();
   annotationSelection.enter().append('g').attr('class', function(d, i) { return i; })
     .each(function(d, i) { annotation[i](d3_select(this)); });
@@ -1028,12 +1047,13 @@ module.exports = function(d3) {
       accessor = _dereq_('../accessor')(),
       plot = _dereq_('./plot')(d3),
       plotMixin = _dereq_('./plotmixin')(d3.scale.linear, scale.financetime),
-      line = _dereq_('./line');
+      line = _dereq_('./line'),
+      axisannotation = _dereq_('./axisannotation')(d3.svg.axis, plot);
 
   return {
-    axisannotation: _dereq_('./axisannotation')(d3.svg.axis, plot),
+    axisannotation: axisannotation,
     candlestick: _dereq_('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
-    crosshair: _dereq_('./crosshair')(d3.select, d3_event, d3.mouse),
+    crosshair: _dereq_('./crosshair')(d3.select, d3_event, d3.mouse, axisannotation),
     ema: line(accessor.value, plot, plotMixin),
     ohlc: _dereq_('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
     close: line(accessor.ohlc, plot, plotMixin),
@@ -1063,10 +1083,10 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
     function line(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.date());
 
-      group.entry.append('path').attr({ class: 'line' });
+      group.entry.append('path').attr('class', 'line');
 
       if(showZero) {
-        group.selection.append('path').attr({ class: 'zero' });
+        group.selection.append('path').attr('class', 'zero');
       }
 
       line.refresh(g);
@@ -1084,10 +1104,10 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
 };
 
 function refresh(g, accessor, x, y, plot, showZero) {
-  g.selectAll('path.line').attr({ d: plot.pathLine(accessor.d, x, accessor, y) });
+  g.selectAll('path.line').attr('d', plot.pathLine(accessor.d, x, accessor, y));
 
   if(showZero) {
-    g.selectAll('path.zero').attr({ d: plot.horizontalPathLine(x, accessor.z, y) });
+    g.selectAll('path.zero').attr('d', plot.horizontalPathLine(x, accessor.z, y));
   }
 }
 },{}],20:[function(_dereq_,module,exports){
@@ -1101,15 +1121,15 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
       var histogramSelection = group.selection
-        .append('g').attr({ class: 'difference' })
+        .append('g').attr('class', 'difference')
         .selectAll('g.difference').data(function(data) { return data; });
 
       histogramSelection.exit().remove();
-      histogramSelection.enter().append('path').attr({ class: 'difference' });
+      histogramSelection.enter().append('path').attr('class', 'difference');
 
-      group.selection.append('path').attr({ class: 'zero' });
-      group.selection.append('path').attr({ class: 'macd' });
-      group.selection.append('path').attr({ class: 'signal' });
+      group.selection.append('path').attr('class', 'zero');
+      group.selection.append('path').attr('class', 'macd');
+      group.selection.append('path').attr('class', 'signal');
 
       macd.refresh(g);
     }
@@ -1126,26 +1146,25 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
 };
 
 function refresh(g, accessor, x, y, plot) {
-  g.selectAll('path.difference').attr({ d: differencePath(accessor, x, y) });
-  g.selectAll('path.zero').attr({ d: plot.horizontalPathLine(accessor.d, x, accessor.z, y) });
-  g.selectAll('path.macd').attr({ d: plot.pathLine(accessor.d, x, accessor.m, y) });
-  g.selectAll('path.signal').attr({ d: plot.pathLine(accessor.d, x, accessor.s, y) });
+  g.selectAll('path.difference').attr('d', differencePath(accessor, x, y));
+  g.selectAll('path.zero').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.z, y));
+  g.selectAll('path.macd').attr('d', plot.pathLine(accessor.d, x, accessor.m, y));
+  g.selectAll('path.signal').attr('d', plot.pathLine(accessor.d, x, accessor.s, y));
 }
 
 function differencePath(accessor, x, y) {
   return function(d) {
-    var path = [],
-        zero = y(0),
+    var zero = y(0),
         height = y(accessor.dif(d)) - zero,
         rangeBand = x.band(),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
-    path.push('M', xValue, zero);
-    path.push('l', 0, height);
-    path.push('l', rangeBand, 0);
-    path.push('l', 0, -height);
-
-    return path.join(' ');
+    return [
+        'M', xValue, zero,
+        'l', 0, height,
+        'l', rangeBand, 0,
+        'l', 0, -height
+      ].join(' ');
   };
 }
 },{}],21:[function(_dereq_,module,exports){
@@ -1179,23 +1198,20 @@ function refresh(g, accessor, x, y) {
 
 function ohlcPath(accessor, x, y) {
   return function(d) {
-    var path = [],
-        open = y(accessor.o(d)),
+    var open = y(accessor.o(d)),
         close = y(accessor.c(d)),
         rangeBand = x.band(),
         xPoint = x(accessor.d(d)),
         xValue = xPoint - rangeBand/2;
 
-    path.push('M', xValue, open);
-    path.push('l', rangeBand/2, 0);
-
-    path.push('M', xPoint, y(accessor.h(d)));
-    path.push('L', xPoint, y(accessor.l(d)));
-
-    path.push('M', xPoint, close);
-    path.push('l', rangeBand/2, 0);
-
-    return path.join(' ');
+    return [
+        'M', xValue, open,
+        'l', rangeBand/2, 0,
+        'M', xPoint, y(accessor.h(d)),
+        'L', xPoint, y(accessor.l(d)),
+        'M', xPoint, close,
+        'l', rangeBand/2, 0
+      ].join(' ');
   };
 }
 },{}],22:[function(_dereq_,module,exports){
@@ -1308,10 +1324,10 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
     function rsi(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
-      group.entry.append('path').attr({ class: 'overbought' });
-      group.entry.append('path').attr({ class: 'middle' });
-      group.entry.append('path').attr({ class: 'oversold' });
-      group.entry.append('path').attr({ class: 'rsi' });
+      group.entry.append('path').attr('class', 'overbought');
+      group.entry.append('path').attr('class', 'middle');
+      group.entry.append('path').attr('class', 'oversold');
+      group.entry.append('path').attr('class', 'rsi');
 
       rsi.refresh(g);
     }
@@ -1328,10 +1344,10 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
 };
 
 function refresh(g, accessor, x, y, plot) {
-  g.selectAll('path.overbought').attr({ d: plot.horizontalPathLine(accessor.d, x, accessor.ob, y) });
-  g.selectAll('path.middle').attr({ d: plot.horizontalPathLine(accessor.d, x, accessor.m, y) });
-  g.selectAll('path.oversold').attr({ d: plot.horizontalPathLine(accessor.d, x, accessor.os, y) });
-  g.selectAll('path.rsi').attr({ d: plot.pathLine(accessor.d, x, accessor.r, y) });
+  g.selectAll('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
+  g.selectAll('path.middle').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.m, y));
+  g.selectAll('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
+  g.selectAll('path.rsi').attr('d', plot.pathLine(accessor.d, x, accessor.r, y));
 }
 },{}],25:[function(_dereq_,module,exports){
 'use strict';
@@ -1343,10 +1359,10 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_value,
     function supstance(g) {
       var group = plot.groupSelect(g, plot.dataMapper.unity);
 
-      group.entry.append('path').attr({ class: 'supstance' });
+      group.entry.append('path').attr('class', 'supstance');
 
-      group.entry.append('g').attr({ class: 'interaction' }).style({ opacity: 0, fill: 'none' })
-        .append('path').style({ 'stroke-width': 16 });
+      group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
+        .append('path').style('stroke-width', 16);
 
       supstance.refresh(g);
     }
@@ -1368,8 +1384,8 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_value,
 };
 
 function refresh(g, accessor, x, y) {
-  g.selectAll('path.supstance').attr({ d: supstancePath(accessor, x, y) });
-  g.selectAll('.interaction path').attr({ d: supstancePath(accessor, x, y) });
+  g.selectAll('path.supstance').attr('d', supstancePath(accessor, x, y));
+  g.selectAll('.interaction path').attr('d', supstancePath(accessor, x, y));
 }
 
 function supstancePath(accessor, x, y) {
@@ -1406,10 +1422,10 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_trendl
     function trendline(g) {
       var group = plot.groupSelect(g, plot.dataMapper.unity);
 
-      group.entry.append('path').attr({ class: 'trendline' });
+      group.entry.append('path').attr('class', 'trendline');
 
-      var interaction = group.entry.append('g').attr({ class: 'interaction' }).style({ opacity: 0, fill: 'none' });
-      interaction.append('path').attr({ class: 'body' }).style({ 'stroke-width': 16 });
+      var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' });
+      interaction.append('path').attr('class', 'body').style('stroke-width', 16);
       interaction.append('circle').attr({ class: 'start', r: 8 });
       interaction.append('circle').attr({ class: 'end', r: 8 });
 
@@ -1440,8 +1456,8 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, accessor_trendl
 };
 
 function refresh(g, accessor, x, y) {
-  g.selectAll('path.trendline').attr({ d: trendlinePath(accessor, x, y) });
-  g.selectAll('.interaction path.body').attr({ d: trendlinePath(accessor, x, y) });
+  g.selectAll('path.trendline').attr('d', trendlinePath(accessor, x, y));
+  g.selectAll('.interaction path.body').attr('d', trendlinePath(accessor, x, y));
   g.selectAll('.interaction circle.start').attr(interactionEnds(accessor.sd, x, accessor.sv, y));
   g.selectAll('.interaction circle.end').attr(interactionEnds(accessor.ed, x, accessor.ev, y));
 }
@@ -1513,7 +1529,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
     function volume(g) {
       var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
         .entry.append('path')
-          .attr({ class: 'volume' });
+          .attr('class', 'volume');
 
       if(p.accessor.o && p.accessor.c) {
         group.classed(plot.classedUpDown(p.accessor));
@@ -1534,7 +1550,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
 };
 
 function refresh(g, accessor, x, y) {
-  g.selectAll('path.volume').attr({ d: volumePath(accessor, x, y) });
+  g.selectAll('path.volume').attr('d', volumePath(accessor, x, y));
 }
 
 function volumePath(accessor, x, y) {
@@ -1543,18 +1559,17 @@ function volumePath(accessor, x, y) {
 
     if(isNaN(vol)) return null;
 
-    var path = [],
-        zero = y(0),
+    var zero = y(0),
         height = y(vol) - zero,
         rangeBand = x.band(),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
-    path.push('M', xValue, zero);
-    path.push('l', 0, height);
-    path.push('l', rangeBand, 0);
-    path.push('l', 0, -height);
-
-    return path.join(' ');
+    return [
+        'M', xValue, zero,
+        'l', 0, height,
+        'l', rangeBand, 0,
+        'l', 0, -height
+      ].join(' ');
   };
 }
 },{}],28:[function(_dereq_,module,exports){
