@@ -30,19 +30,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
         })
         .on('mouseenter', display(g, 'inline'))
         .on('mouseout', display(g, 'none'))
-        .on('mousemove', function() {
-          var coords = d3_mouse(this),
-              x = xAnnotation[0].axis().scale(),
-              y = yAnnotation[0].axis().scale();
-
-          refresh(d3_select, xAnnotation, yAnnotation,
-            group.select('path.vertical').datum(x.invert(coords[0])),
-            group.select('path.horizontal').datum(y.invert(coords[1])),
-            group.selectAll('g.axisannotation.x > g').each(updateAnnotationValue(xAnnotation, coords[0])),
-            group.selectAll('g.axisannotation.y > g').each(updateAnnotationValue(yAnnotation, coords[1])),
-            verticalWireRange, horizontalWireRange
-          );
-        });
+        .on('mousemove', mousemoveRefresh(group, d3_select, d3_mouse, xAnnotation, yAnnotation, verticalWireRange, horizontalWireRange));
 
       crosshair.refresh(g);
     }
@@ -86,6 +74,22 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
 function display(g, style) {
   return function() {
     g.selectAll('g.data').style('display', style);
+  };
+}
+
+function mousemoveRefresh(group, d3_select, d3_mouse, xAnnotation, yAnnotation, verticalWireRange, horizontalWireRange) {
+  return function() {
+    var coords = d3_mouse(this),
+        x = xAnnotation[0].axis().scale(),
+        y = yAnnotation[0].axis().scale();
+
+    refresh(d3_select, xAnnotation, yAnnotation,
+      group.select('path.vertical').datum(x.invert(coords[0])),
+      group.select('path.horizontal').datum(y.invert(coords[1])),
+      group.selectAll('g.axisannotation.x > g').each(updateAnnotationValue(xAnnotation, coords[0])),
+      group.selectAll('g.axisannotation.y > g').each(updateAnnotationValue(yAnnotation, coords[1])),
+      verticalWireRange, horizontalWireRange
+    );
   };
 }
 
