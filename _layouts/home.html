@@ -1,0 +1,21 @@
+---
+layout: default
+---
+<div class="site-wrapper-inner">
+    <div class="cover-container">
+        <div class="masthead clearfix">
+            <div class="inner">
+                <!--<h3 class="masthead-brand">TechanJS</h3>-->
+                <ul class="nav masthead-nav">
+                    <li {% if page.title == 'Home' %}class="active"{% endif %}><a href="http://techanjs.org">Home</a></li>
+                    <li><a href="https://github.com/andredumas/techan.js/wiki/Gallery">Examples</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="inner cover">
+            {{ content }}
+        </div>
+
+        {% include footer.html %}
+    </div>
+</div>

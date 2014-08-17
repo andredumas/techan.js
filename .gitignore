@@ -1,2 +1,6 @@
 .idea
 *.iml
+
+_site
+
+.vagrant

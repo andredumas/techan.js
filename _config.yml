@@ -1,0 +1,8 @@
+title:        TechanJS
+description:  "A visual, technical trade analysis, JavaScript library built on d3."
+url:          "http://techanjs.org"
+author:       André Dumas
+
+markdown:     kramdown
+permalink:    pretty
+exclude:      [Vagrantfile, README.md, src, CNAME]
