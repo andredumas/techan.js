@@ -155,6 +155,7 @@ techanModule('plot/crosshair', function(specBuilder) {
 
           beforeEach(function () {
             // Too many spies MUCH???
+            // Convert to spies on actuals?
             spies.plot.groupSelect = jasmine.createSpy('groupSelect');
             spies.plot.groupSelect.and.returnValue({entry: selectSpies, selection: selectSpies});
             spies.g.selectAll = jasmine.createSpy('selectAll');
@@ -255,10 +256,39 @@ techanModule('plot/crosshair', function(specBuilder) {
                 spies.d3_mouse.and.returnValue([1,2]);
                 selectSpies.datum = jasmine.createSpy('datum');
                 selectSpies.datum.and.returnValue(selectSpies);
+                // Redefine the annotation refresh
+                crosshair.xAnnotation()[0].refresh = jasmine.createSpy('refresh');
+                crosshair.yAnnotation()[0].refresh = jasmine.createSpy('refresh');
                 mousemoveRefresh();
               });
 
-              it('Then should execute without error', function() {});
+              it('Then should execute without error', function() {
+                expect(spies.d3_mouse).toHaveBeenCalled();
+              });
+
+              it('Then should set correct path.vertical datum', function() {
+                expect(selectSpies.select.calls.argsFor(4)[0]).toEqual('path.vertical');
+                expect(selectSpies.datum.calls.argsFor(0)[0]).toEqual(1);
+              });
+
+              it('Then should set correct path.horizontal datum', function() {
+                expect(selectSpies.select.calls.argsFor(5)[0]).toEqual('path.horizontal');
+                expect(selectSpies.datum.calls.argsFor(1)[0]).toEqual(2);
+              });
+
+              it('Then should refresh x annotation', function() {
+                expect(selectSpies.selectAll.calls.argsFor(6)[0]).toEqual('g.axisannotation.x > g');
+                selectSpies.each.calls.argsFor(6)[0](undefined, 0);
+                expect(crosshair.xAnnotation()[0].refresh).toHaveBeenCalled();
+                expect(crosshair.yAnnotation()[0].refresh).not.toHaveBeenCalled();
+              });
+
+              it('Then should refresh y annotation', function() {
+                expect(selectSpies.selectAll.calls.argsFor(7)[0]).toEqual('g.axisannotation.y > g');
+                selectSpies.each.calls.argsFor(7)[0](undefined, 0);
+                expect(crosshair.xAnnotation()[0].refresh).not.toHaveBeenCalled();
+                expect(crosshair.yAnnotation()[0].refresh).toHaveBeenCalled();
+              });
             });
           });
         });

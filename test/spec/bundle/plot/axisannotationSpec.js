@@ -48,6 +48,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
 
           beforeEach(function() {
             // Too many spies much???
+            // Convert to spies on actuals?
             spies.plot.groupSelect = jasmine.createSpy('groupSelect');
             spies.plot.groupSelect.and.returnValue({entry: selectSpies, selection: selectSpies});
             spies.g.selectAll = jasmine.createSpy('selectAll');
