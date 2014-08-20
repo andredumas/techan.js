@@ -8,7 +8,8 @@ module.exports = function(grunt) {
       banner: '/*\n' +
         ' TechanJS v<%= pkg.version %>\n' +
         " (c) 2014 - <%= grunt.template.today('yyyy') %> Andre Dumas | https://github.com/andredumas/techan.js\n" +
-        '*/'
+        '*/',
+      dist: 'techanjs-<%= pkg.version %>'
     },
 
     clean: {
@@ -141,6 +142,18 @@ module.exports = function(grunt) {
       }
     },
 
+    compress: {
+      dist: {
+        options: {
+          archive: 'dist/techanjs.zip'
+        },
+        expand: true,
+        cwd: 'dist',
+        src: ['*.js*'],
+        dest: '<%= config.dist %>'
+      }
+    },
+
     connect: {
       server: {}
     }
@@ -155,5 +168,5 @@ module.exports = function(grunt) {
   grunt.registerTask('minify', ['uglify', 'jasmine:minify']);
   grunt.registerTask('serve', ['connect', 'watch']);
 
-  grunt.registerTask('default', ['jsonlint', 'bower', 'clean', 'dev', 'dist', 'minify']);
+  grunt.registerTask('default', ['jsonlint', 'bower', 'clean', 'dev', 'dist', 'minify', 'compress']);
 };

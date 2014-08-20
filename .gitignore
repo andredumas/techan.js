@@ -4,6 +4,6 @@
 *.iml
 bower_components
 build
-dist
+dist/*.zip
 node_modules
 test/html/gist
