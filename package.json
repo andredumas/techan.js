@@ -1,6 +1,6 @@
 {
   "name": "techanjs",
-  "version": "0.1.0",
+  "version": "0.2.0-0",
   "repository": {
     "type": "git",
     "url": "https://github.com/andredumas/techan.js.git"
@@ -27,7 +27,8 @@
     "grunt-browserify": "~2.1.4",
     "grunt-banner": "~0.2.3",
     "grunt-contrib-connect": "~0.8.0",
-    "grunt-contrib-compress": "~0.10.0"
+    "grunt-contrib-compress": "~0.10.0",
+    "grunt-bump": "0.0.15"
   },
   "scripts": {
     "watch": "grunt serve",
