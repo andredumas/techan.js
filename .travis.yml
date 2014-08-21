@@ -5,7 +5,7 @@ deploy:
   provider: releases
   api_key:
     secure: p5M9v2K55YHKq4GmBkP+Lgj/TlDcGUKlR0Cpl+Ne30iF6xXJrbQqLF8THB2ysWT5VaaYKq/4MMYBYLFABnpkLrUBjoGw+fDo3jJZ7h1lO3jrMlnvdNAjcmzGHVbsYi9wljSocaJE/JSgy4xb81IX8xkIdQY8IJnRNoi22Df2DkM=
-  file: dist/techanjs.zip
+  file: dist/techan.zip
   skip_cleanup: true
   on:
     tags: true
