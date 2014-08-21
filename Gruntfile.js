@@ -9,7 +9,7 @@ module.exports = function(grunt) {
         ' TechanJS v<%= pkg.version %>\n' +
         " (c) 2014 - <%= grunt.template.today('yyyy') %> Andre Dumas | https://github.com/andredumas/techan.js\n" +
         '*/',
-      dist: 'techanjs-<%= pkg.version %>'
+      dist: 'techan-<%= pkg.version %>'
     },
 
     clean: {
@@ -145,7 +145,7 @@ module.exports = function(grunt) {
     compress: {
       dist: {
         options: {
-          archive: 'dist/techanjs.zip'
+          archive: 'dist/techan.zip'
         },
         expand: true,
         cwd: 'dist',
