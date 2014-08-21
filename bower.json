@@ -1,6 +1,5 @@
 {
   "name": "TechanJS",
-  "version": "0.1.0",
   "main": "dist/techan.js",
   "ignore": [
     "Gruntfile.js",
@@ -8,10 +7,9 @@
     "package.json",
     "src",
     "test",
-    "*.md",
-    ".*"
+    "/.*"
   ],
   "dependencies": {
-    "d3": "3.4.8"
+    "d3": "3.4.11"
   }
 }
