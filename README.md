@@ -2,8 +2,8 @@
 
 > <strong>Te</strong>chnical <strong>Ch</strong>art <strong>An</strong>alysis
 
-A visual, technical trade analysis library built on [D3](https://github.com/mbostock/d3). Build interactive financial 
-charts for modern and mobile browsers. 
+A visual, technical analysis and charting library built on [D3](https://github.com/mbostock/d3). Build interactive 
+financial charts for modern and mobile browsers. 
 
 [Examples Gallery](https://github.com/andredumas/techan.js/wiki/Gallery)
 
