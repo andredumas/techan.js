@@ -1,5 +1,5 @@
 title:        TechanJS
-description:  "A visual, technical trade analysis, JavaScript library built on d3."
+description:  "A visual, technical trade analysis (Candlestick, OHLC, indicators), JavaScript library built on D3."
 url:          "http://techanjs.org"
 author:       André Dumas
 

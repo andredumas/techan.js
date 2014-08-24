@@ -1,9 +1,9 @@
 /*
- TechanJS v0.1.0
+ TechanJS v0.2.0-0
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-'use strict';module.exports='0.1.0';
+'use strict';module.exports='0.2.0-0';
 },{}],2:[function(_dereq_,module,exports){
 'use strict';
 
@@ -624,7 +624,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
  * TODO Refactor this to techan.plot.annotation.axis()?
  */
 module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
-  function Annotation() { // Closure function
+  return function() { // Closure function
     var axis = d3_svg_axis(),
         format,
         point = 4,
@@ -676,12 +676,7 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
     };
 
     return annotation;
-  }
-
-  // Testing access only
-  Annotation.t = {f:filterInvalidValues,ta:textAttributes,tp:textPosition,b:backgroundPath};
-
-  return Annotation;
+  };
 };
 
 function refresh(g, plot, axis, format, height, width, point) {
@@ -929,19 +924,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
         })
         .on('mouseenter', display(g, 'inline'))
         .on('mouseout', display(g, 'none'))
-        .on('mousemove', function() {
-          var coords = d3_mouse(this),
-              x = xAnnotation[0].axis().scale(),
-              y = yAnnotation[0].axis().scale();
-
-          refresh(d3_select, xAnnotation, yAnnotation,
-            group.select('path.vertical').datum(x.invert(coords[0])),
-            group.select('path.horizontal').datum(y.invert(coords[1])),
-            group.selectAll('g.axisannotation.x > g').each(updateAnnotationValue(xAnnotation, coords[0])),
-            group.selectAll('g.axisannotation.y > g').each(updateAnnotationValue(yAnnotation, coords[1])),
-            verticalWireRange, horizontalWireRange
-          );
-        });
+        .on('mousemove', mousemoveRefresh(group, d3_select, d3_mouse, xAnnotation, yAnnotation, verticalWireRange, horizontalWireRange));
 
       crosshair.refresh(g);
     }
@@ -985,6 +968,22 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
 function display(g, style) {
   return function() {
     g.selectAll('g.data').style('display', style);
+  };
+}
+
+function mousemoveRefresh(group, d3_select, d3_mouse, xAnnotation, yAnnotation, verticalWireRange, horizontalWireRange) {
+  return function() {
+    var coords = d3_mouse(this),
+        x = xAnnotation[0].axis().scale(),
+        y = yAnnotation[0].axis().scale();
+
+    refresh(d3_select, xAnnotation, yAnnotation,
+      group.select('path.vertical').datum(x.invert(coords[0])),
+      group.select('path.horizontal').datum(y.invert(coords[1])),
+      group.selectAll('g.axisannotation.x > g').each(updateAnnotationValue(xAnnotation, coords[0])),
+      group.selectAll('g.axisannotation.y > g').each(updateAnnotationValue(yAnnotation, coords[1])),
+      verticalWireRange, horizontalWireRange
+    );
   };
 }
 
