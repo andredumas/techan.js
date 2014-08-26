@@ -179,10 +179,9 @@ module.exports = function(grunt) {
   grunt.registerTask('dist', ['browserify:dist', 'usebanner', 'jasmine:dist']);
   grunt.registerTask('minify', ['uglify', 'jasmine:minify']);
   grunt.registerTask('serve', ['connect', 'watch']);
-  grunt.registerTask('prerelease', ['bump-only:prerelease', 'default']);
-  // Test on next release
-//  grunt.registerTask('release:minor', ['bump-only:minor', 'default', 'bump-commit']);
-//  grunt.registerTask('release:major', ['bump-only:major', 'default', 'bump-commit']);
+  grunt.registerTask('release:pre', ['bump-only:prerelease', 'default']);
+  grunt.registerTask('release:minor', ['bump-only:minor', 'default', 'bump-commit']);
+  grunt.registerTask('release:major', ['bump-only:major', 'default', 'bump-commit']);
 
   grunt.registerTask('default', ['jsonlint', 'bower', 'clean', 'dev', 'dist', 'minify', 'compress']);
 };
