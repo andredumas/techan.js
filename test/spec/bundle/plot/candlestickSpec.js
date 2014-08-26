@@ -44,15 +44,35 @@ techanModule('plot/candlestick', function(specBuilder) {
             g = domFixtures.g(data);
           });
 
-          it('Then on default invoke, candlesticks should be rendered without error', function() {
-            candlestick(g);
-            expect(g[0][0].innerHTML).not.toContain('NaN');
+          describe('And on default invoke', function() {
+            beforeEach(function() {
+              candlestick(g);
+            });
+
+            it('Then candlesticks should be rendered without error', function() {
+              expect(g[0][0].innerHTML).not.toContain('NaN');
+            });
+
+            it('Then candlesticks opacity should be rendered', function() {
+              // g > g.data > g.path
+              expect(g[0][0].childNodes[0].childNodes[0].style.opacity).toEqual('0.27272727272727276');
+            });
           });
 
-          it('Then on refresh invoke, candlesticks should be refreshed only', function() {
-            candlestick(g);
-            candlestick.refresh(g);
-            expect(g[0][0].innerHTML).not.toContain('NaN');
+          describe('And on refresh invoke', function() {
+            beforeEach(function() {
+              candlestick(g);
+              candlestick.refresh(g);
+            });
+
+            it('Then candlesticks should be refreshed only', function() {
+              expect(g[0][0].innerHTML).not.toContain('NaN');
+            });
+
+            it('Then candlesticks opacity should be rendered', function() {
+              // g > g.data > g.path
+              expect(g[0][0].childNodes[0].childNodes[0].style.opacity).toEqual('0.27272727272727276');
+            });
           });
 
           describe('And data contains invalid volume entry', function() {

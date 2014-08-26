@@ -12,21 +12,11 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
       group.entry.append('path').attr('class', 'candle body').classed(plot.classedUpDown(p.accessor));
       group.entry.append('path').attr('class', 'candle wick').classed(plot.classedUpDown(p.accessor));
 
-      if(volumeOpacity) {
-        var volumeOpacityScale = d3_scale_linear()
-          .domain(d3_extent(group.selection.data().map(p.accessor.v).filter(isNaN)))
-          .range([0.2, 1]);
-
-        group.selection.selectAll('path').style('opacity', function(d) {
-          var volume = p.accessor.v(d);
-          return isNaN(volume) ? null : volumeOpacityScale(volume);
-        });
-      }
-
       candlestick.refresh(g);
     }
 
     candlestick.refresh = function(g) {
+      if(volumeOpacity) opacity(g, d3_scale_linear, d3_extent, p.accessor.v);
       refresh(g, p.accessor, p.xScale, p.yScale);
     };
 
@@ -104,4 +94,16 @@ function wickPath(accessor, x, y) {
 
     return path.join(' ');
   };
+}
+
+function opacity(g, d3_scale_linear, d3_extent, accessor_volume) {
+  var selection = g.selectAll('g.data'),
+      volumeOpacityScale = d3_scale_linear()
+        .domain(d3_extent(selection.data().map(accessor_volume).filter(function(d) { return !isNaN(d); })))
+        .range([0.2, 1]);
+
+  selection.selectAll('path.candle').style('opacity', function(d) {
+    var volume = accessor_volume(d);
+    return isNaN(volume) ? null : volumeOpacityScale(volume);
+  });
 }
