@@ -6,13 +6,13 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 
     function ohlc(g) {
       plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
-        .entry.append('path').attr({ class: 'ohlc' }).classed(plot.classedUpDown(p.accessor));
+        .entry.append('path').attr({ class: 'ohlc' });
 
       ohlc.refresh(g);
     }
 
     ohlc.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale);
+      refresh(g, plot, p.accessor, p.xScale, p.yScale);
     };
 
     // Mixin 'superclass' methods and variables
@@ -22,8 +22,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   };
 };
 
-function refresh(g, accessor, x, y) {
-  g.selectAll('path.ohlc').attr({ d: ohlcPath(accessor, x, y) });
+function refresh(g, plot, accessor, x, y) {
+  g.selectAll('path.ohlc').attr({ d: ohlcPath(accessor, x, y) }).classed(plot.classedUpDown(accessor));
 }
 
 function ohlcPath(accessor, x, y) {

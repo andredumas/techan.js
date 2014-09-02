@@ -9,15 +9,15 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
       var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d);
 
       // Two path's as wick and body can be styled slightly differently (stroke and fills)
-      group.entry.append('path').attr('class', 'candle body').classed(plot.classedUpDown(p.accessor));
-      group.entry.append('path').attr('class', 'candle wick').classed(plot.classedUpDown(p.accessor));
+      group.entry.append('path').attr('class', 'candle body');
+      group.entry.append('path').attr('class', 'candle wick');
 
       candlestick.refresh(g);
     }
 
     candlestick.refresh = function(g) {
       if(volumeOpacity) opacity(g, d3_scale_linear, d3_extent, p.accessor.v);
-      refresh(g, p.accessor, p.xScale, p.yScale);
+      refresh(g, plot, p.accessor, p.xScale, p.yScale);
     };
 
     candlestick.volumeOpacity = function(_) {
@@ -33,9 +33,9 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   };
 };
 
-function refresh(g, accessor, x, y) {
-  g.selectAll('path.candle.body').attr('d', bodyPath(accessor, x, y));
-  g.selectAll('path.candle.wick').attr('d', wickPath(accessor, x, y));
+function refresh(g, plot, accessor, x, y) {
+  g.selectAll('path.candle.body').attr('d', bodyPath(accessor, x, y)).classed(plot.classedUpDown(accessor));
+  g.selectAll('path.candle.wick').attr('d', wickPath(accessor, x, y)).classed(plot.classedUpDown(accessor));
 }
 
 function bodyPath(accessor, x, y) {

@@ -7,7 +7,7 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
     var p = {};  // Container for private, direct access mixed in variables
 
     function line(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.date());
+      var group = plot.groupSelect(g, plot.dataMapper.array);
 
       group.entry.append('path').attr('class', 'line');
 

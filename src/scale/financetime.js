@@ -14,8 +14,30 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     index = index || d3_scale_linear();
     domain = domain || [new Date(0), new Date(1)];
 
+    /**
+     * Scales the value to domain. If the value is not within the domain, will currently brutally round the data:
+     * - If before min domain, will round to 1 index value before min domain
+     * - If after max domain, will round to 1 index value after min domain
+     * - If within domain, but not mapped to domain value, uses d3.bisect to find nearest domain index
+     *
+     * This logic was not required until the domain was being updated and scales re-rendered and this line
+     * https://github.com/mbostock/d3/blob/abbe1c75c16c3e9cb08b1d0872f4a19890d3bb58/src/svg/axis.js#L107 was causing error.
+     * New scale generated ticks that old scale did not have, causing error during transform. To avoid error this logic
+     * was added.
+     *
+     * @param x The value to scale
+     * @returns {*}
+     */
     function scale(x) {
-      return index(dateIndexMap[+x]);
+      var mappedIndex = dateIndexMap[+x];
+
+      // Make sure the value has been mapped, if not, determine if it's just before, round in, or just after domain
+      if(mappedIndex === undefined) {
+        if(domain[0] > x) mappedIndex = -1; // Less than min, round just out of domain
+        else mappedIndex = d3_bisect(domain, x); // else let bisect determine where in or just after than domain it is
+      }
+
+      return index(mappedIndex);
     }
 
     scale.invert = function(y) {

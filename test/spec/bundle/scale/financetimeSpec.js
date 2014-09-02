@@ -36,6 +36,18 @@ techanModule('scale/financetime', function(specBuilder) {
           expect(financetime(data[0])).toEqual(100);
         });
 
+        it('Then scale of a value less than minimum should return less than minimum range', function() {
+          expect(financetime(+data[0] - 100)).toEqual(0); // just a bit less, should round down
+        });
+
+        it('Then scale of a value greater than maximum should return greater than maximum range', function() {
+          expect(financetime(+data[data.length-1] + 10)).toEqual(1100); // Just a bit more, should round up
+        });
+
+        it('Then scale of a value between domain min/max but not exact value should return nearest range', function() {
+          expect(financetime(+data[3]+100)).toEqual(500);
+        });
+
         it('Then invert of just over min range should return the first domain', function() {
           expect(financetime.invert(101)).toEqual(data[0]);
         });
