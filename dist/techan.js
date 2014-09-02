@@ -1,9 +1,9 @@
 /*
- TechanJS v0.2.0-1
+ TechanJS v0.2.0-2
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-'use strict';module.exports='0.2.0-1';
+'use strict';module.exports='0.2.0-2';
 },{}],2:[function(_dereq_,module,exports){
 'use strict';
 
@@ -795,15 +795,15 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
       var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d);
 
       // Two path's as wick and body can be styled slightly differently (stroke and fills)
-      group.entry.append('path').attr('class', 'candle body').classed(plot.classedUpDown(p.accessor));
-      group.entry.append('path').attr('class', 'candle wick').classed(plot.classedUpDown(p.accessor));
+      group.entry.append('path').attr('class', 'candle body');
+      group.entry.append('path').attr('class', 'candle wick');
 
       candlestick.refresh(g);
     }
 
     candlestick.refresh = function(g) {
       if(volumeOpacity) opacity(g, d3_scale_linear, d3_extent, p.accessor.v);
-      refresh(g, p.accessor, p.xScale, p.yScale);
+      refresh(g, plot, p.accessor, p.xScale, p.yScale);
     };
 
     candlestick.volumeOpacity = function(_) {
@@ -819,9 +819,9 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   };
 };
 
-function refresh(g, accessor, x, y) {
-  g.selectAll('path.candle.body').attr('d', bodyPath(accessor, x, y));
-  g.selectAll('path.candle.wick').attr('d', wickPath(accessor, x, y));
+function refresh(g, plot, accessor, x, y) {
+  g.selectAll('path.candle.body').attr('d', bodyPath(accessor, x, y)).classed(plot.classedUpDown(accessor));
+  g.selectAll('path.candle.wick').attr('d', wickPath(accessor, x, y)).classed(plot.classedUpDown(accessor));
 }
 
 function bodyPath(accessor, x, y) {
@@ -1082,7 +1082,7 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
     var p = {};  // Container for private, direct access mixed in variables
 
     function line(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.date());
+      var group = plot.groupSelect(g, plot.dataMapper.array);
 
       group.entry.append('path').attr('class', 'line');
 
@@ -1177,13 +1177,13 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 
     function ohlc(g) {
       plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
-        .entry.append('path').attr({ class: 'ohlc' }).classed(plot.classedUpDown(p.accessor));
+        .entry.append('path').attr({ class: 'ohlc' });
 
       ohlc.refresh(g);
     }
 
     ohlc.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale);
+      refresh(g, plot, p.accessor, p.xScale, p.yScale);
     };
 
     // Mixin 'superclass' methods and variables
@@ -1193,8 +1193,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   };
 };
 
-function refresh(g, accessor, x, y) {
-  g.selectAll('path.ohlc').attr({ d: ohlcPath(accessor, x, y) });
+function refresh(g, plot, accessor, x, y) {
+  g.selectAll('path.ohlc').attr({ d: ohlcPath(accessor, x, y) }).classed(plot.classedUpDown(accessor));
 }
 
 function ohlcPath(accessor, x, y) {
@@ -1590,8 +1590,30 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     index = index || d3_scale_linear();
     domain = domain || [new Date(0), new Date(1)];
 
+    /**
+     * Scales the value to domain. If the value is not within the domain, will currently brutally round the data:
+     * - If before min domain, will round to 1 index value before min domain
+     * - If after max domain, will round to 1 index value after min domain
+     * - If within domain, but not mapped to domain value, uses d3.bisect to find nearest domain index
+     *
+     * This logic was not required until the domain was being updated and scales re-rendered and this line
+     * https://github.com/mbostock/d3/blob/abbe1c75c16c3e9cb08b1d0872f4a19890d3bb58/src/svg/axis.js#L107 was causing error.
+     * New scale generated ticks that old scale did not have, causing error during transform. To avoid error this logic
+     * was added.
+     *
+     * @param x The value to scale
+     * @returns {*}
+     */
     function scale(x) {
-      return index(dateIndexMap[+x]);
+      var mappedIndex = dateIndexMap[+x];
+
+      // Make sure the value has been mapped, if not, determine if it's just before, round in, or just after domain
+      if(mappedIndex === undefined) {
+        if(domain[0] > x) mappedIndex = -1; // Less than min, round just out of domain
+        else mappedIndex = d3_bisect(domain, x); // else let bisect determine where in or just after than domain it is
+      }
+
+      return index(mappedIndex);
     }
 
     scale.invert = function(y) {
