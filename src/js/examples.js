@@ -1,0 +1,1 @@
+var examples = {version: 123};

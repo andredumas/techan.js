@@ -6,3 +6,9 @@ _site
 .vagrant
 
 bower_components
+node_modules
+
+src/dist
+src/build
+
+.grunt

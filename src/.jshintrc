@@ -1,0 +1,8 @@
+{
+  "globals": {
+    "d3": false
+  },
+  "node": true,
+  "browser": true,
+  "strict": true
+}
