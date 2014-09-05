@@ -20,8 +20,9 @@ range of [static and interactive plots](http://bl.ocks.org/andredumas/edf630690c
 * [RSI](http://bl.ocks.org/andredumas/6da267f1c51a13dea35b) - Including calculation
 * [MACD](http://bl.ocks.org/andredumas/10d701ccb3b8b1e99878)
 
-## Interactive Plots
+## Interactive & Dynamic Plots
 
+* [Updating Data Feed](http://bl.ocks.org/andredumas/95f1f22130fb1a3a8181)
 * [Crosshair](http://bl.ocks.org/andredumas/045f550b72ad46301130)
 * [Trendlines](http://bl.ocks.org/andredumas/69f49097e9bb5c0c6e4d)
 * [Support & Resistence Lines](http://bl.ocks.org/andredumas/10194a84a3e46fe127d4)
