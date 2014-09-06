@@ -3,7 +3,7 @@ describe('Given I have index', function() {
 
   describe('When I load the page', function() {
     it('Then loads without error', function() {
-      expect(chart.version).toBeDefined();
+      expect(techanSite.bigchart).toBeDefined();
     });
   });
 });

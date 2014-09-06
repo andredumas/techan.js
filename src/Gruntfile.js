@@ -16,7 +16,7 @@ module.exports = function(grunt) {
         jshintrc: ".jshintrc"
       },
       dev: {
-        src: ['js/**/*.js', 'lib/**/*.js', 'Gruntfile.js', 'test/**/*.js']
+        src: ['js/**/*.js', 'lib/**/*.js', 'Gruntfile.js', 'test/spec/**/*.js']
       }
     },
 
@@ -24,7 +24,7 @@ module.exports = function(grunt) {
       options: {
         config: '.jscs.json'
       },
-      dev: ['js/**/*.js', 'Gruntfile.js', 'test/**/*.js']
+      dev: ['js/**/*.js', 'Gruntfile.js', 'test/spec/**/*.js']
     },
 
     concat: {
@@ -37,11 +37,16 @@ module.exports = function(grunt) {
         src: ['js/**/*.js'],
         dest: 'build/dev.js'
       },
-      dist: {
+      dep: {
         src: [
           'bower_components/jquery/dist/jquery.min.js',
           'bower_components/bootstrap/dist/js/bootstrap.min.js',
           'bower_components/d3/d3.min.js',
+        ],
+        dest: 'dist/dependencies.js'
+      },
+      dist: {
+        src: [
           'bower_components/techanjs/dist/techan.min.js',
           '<%= uglify.dist.dest %>'
         ],
@@ -61,7 +66,7 @@ module.exports = function(grunt) {
       },
       dest: {
         options: {
-          specs: 'test/**/*.js',
+          specs: 'test/spec/**/*.js',
           outfile: 'build/specRunner.html'
         },
         src: '<%= uglify.dist.dest %>'
@@ -82,9 +87,33 @@ module.exports = function(grunt) {
     copy: {
       deploy: {
         files: [
-          { expand: true, flatten: true, src: ['<%= concat.dist.dest %>'], dest: '../js/' }
+          {
+            expand: true,
+            flatten: true,
+            src: [
+              '<%= concat.dep.dest %>',
+              '<%= concat.dist.dest %>',
+              'bower_components/techanjs/dist/techan.min.js.map',
+              'build/dev.min.js.map'
+            ],
+            dest: '../js/'
+          },
+          {
+            expand: true,
+            flatten: true,
+            src: 'bower_components/techanjs/dist/*',
+            dest: '../'
+          }
           // TODO Copy css
         ]
+      }
+    },
+
+    connect: {
+      server: {
+        options: {
+          base: '../'
+        }
       }
     }
 
@@ -99,6 +128,7 @@ module.exports = function(grunt) {
   grunt.registerTask('lint', ['jshint', 'jscs']);
   grunt.registerTask('dev', ['lint', 'concat:dev', 'uglify', 'concat:dist', 'jasmine']);
   grunt.registerTask('deploy', ['copy:deploy']);
+  grunt.registerTask('serve', ['connect', 'watch']);
 
-  grunt.registerTask('default', ['jsonlint', 'bower', 'dev', 'deploy']);
+  grunt.registerTask('default', ['jsonlint', 'bower', 'concat:dep', 'dev', 'deploy']);
 };
