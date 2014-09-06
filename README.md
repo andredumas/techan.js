@@ -16,8 +16,8 @@ range of [static and interactive plots](http://bl.ocks.org/andredumas/edf630690c
 * [OHLC](http://bl.ocks.org/andredumas/06ad3573c0053d0e1fc7)
 * [Volume](http://bl.ocks.org/andredumas/f9cb47fa9e32ce34011a)
 * [Axis Annotations](http://bl.ocks.org/andredumas/06d462978e089323a116)
-* [Moving Averages (Simple & Exponential)](http://bl.ocks.org/andredumas/274b54b4d2c2ffa19fca) - Including calculation
-* [RSI](http://bl.ocks.org/andredumas/6da267f1c51a13dea35b) - Including calculation
+* [Moving Averages (Simple & Exponential)](http://bl.ocks.org/andredumas/274b54b4d2c2ffa19fca)
+* [RSI](http://bl.ocks.org/andredumas/6da267f1c51a13dea35b)
 * [MACD](http://bl.ocks.org/andredumas/10d701ccb3b8b1e99878)
 
 ## Interactive & Dynamic Plots
@@ -30,6 +30,6 @@ range of [static and interactive plots](http://bl.ocks.org/andredumas/edf630690c
 
 ## Algorithms
 
-* [Moving Averages (Simple & Exponential)](http://bl.ocks.org/andredumas/274b54b4d2c2ffa19fca) - Including calculation
-* [RSI](http://bl.ocks.org/andredumas/6da267f1c51a13dea35b) - Including calculation
+* [Moving Averages (Simple & Exponential)](http://bl.ocks.org/andredumas/274b54b4d2c2ffa19fca)
+* [RSI](http://bl.ocks.org/andredumas/6da267f1c51a13dea35b)
 * [MACD](http://bl.ocks.org/andredumas/10d701ccb3b8b1e99878)
