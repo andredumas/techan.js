@@ -1,9 +1,9 @@
 /*
- TechanJS v0.2.0-2
+ TechanJS v0.2.0-3
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-'use strict';module.exports='0.2.0-2';
+'use strict';module.exports='0.2.0-3';
 },{}],2:[function(_dereq_,module,exports){
 'use strict';
 
@@ -633,16 +633,15 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
         translate = [0, 0];
 
     function annotation(g) {
-      var group = g.selectAll('g.translate').data(plot.dataMapper.array);
-      group.enter().append('g').attr('class', 'translate');
-      group.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
+      g.selectAll('g.translate').data(plot.dataMapper.array).enter()
+        .append('g').attr('class', 'translate');
 
       annotation.refresh(g);
     }
 
     annotation.refresh = function(g) {
       var fmt = format ? format : (axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat());
-      refresh(g, plot, axis, fmt, height, width, point);
+      refresh(g, plot, axis, fmt, height, width, point, translate);
     };
 
     annotation.axis = function(_) {
@@ -679,12 +678,14 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
   };
 };
 
-function refresh(g, plot, axis, format, height, width, point) {
+function refresh(g, plot, axis, format, height, width, point, translate) {
   var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1,
-      dataGroup = plot.groupSelect(g.select('g.translate'), filterInvalidValues(axis.scale()));
+      translateSelection = g.select('g.translate'),
+      dataGroup = plot.groupSelect(translateSelection, filterInvalidValues(axis.scale()));
   dataGroup.entry.append('path');
   dataGroup.entry.append('text');
 
+  translateSelection.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
   dataGroup.selection.selectAll('path').attr('d', backgroundPath(axis, height, width, point, neg));
   dataGroup.selection.selectAll('text').text(textValue(format)).call(textAttributes, axis, neg);
 }
@@ -904,9 +905,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
         horizontalWireRange;
 
     function crosshair(g) {
-      var xRange = xAnnotation[0].axis().scale().range(),
-          yRange = yAnnotation[0].axis().scale().range(),
-          group = g.selectAll('g.data').data([0]),
+      var group = g.selectAll('g.data').data([0]),
           groupEnter = group.enter().append('g').attr('class', 'data').call(display, 'none');
 
       groupEnter.append('path').attr('class', 'horizontal wire');
@@ -915,8 +914,17 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
       appendAnnotation(group, groupEnter, d3_select, ['axisannotation', 'x'], xAnnotation);
       appendAnnotation(group, groupEnter, d3_select, ['axisannotation', 'y'], yAnnotation);
 
-      var mouseSelection = g.selectAll('rect').data([0]);
-      mouseSelection.enter().append('rect').style({ fill: 'none', 'pointer-events': 'all'});
+      g.selectAll('rect').data([0]).enter()
+        .append('rect').style({ fill: 'none', 'pointer-events': 'all'});
+
+      crosshair.refresh(g);
+    }
+
+    crosshair.refresh = function(g) {
+      var xRange = xAnnotation[0].axis().scale().range(),
+          yRange = yAnnotation[0].axis().scale().range(),
+          group = g.selectAll('g.data'),
+          mouseSelection = g.selectAll('rect');
 
       mouseSelection.attr({
           x: Math.min(xRange[0], xRange[xRange.length-1]),
@@ -928,10 +936,6 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
         .on('mouseout', display(g, 'none'))
         .on('mousemove', mousemoveRefresh(group, d3_select, d3_mouse, xAnnotation, yAnnotation, verticalWireRange, horizontalWireRange));
 
-      crosshair.refresh(g);
-    }
-
-    crosshair.refresh = function(g) {
       refresh(d3_select, xAnnotation, yAnnotation,
         g.select('path.vertical'), g.select('path.horizontal'),
         g.selectAll('g.axisannotation.x > g'), g.selectAll('g.axisannotation.y > g'),
