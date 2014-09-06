@@ -8,9 +8,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
         horizontalWireRange;
 
     function crosshair(g) {
-      var xRange = xAnnotation[0].axis().scale().range(),
-          yRange = yAnnotation[0].axis().scale().range(),
-          group = g.selectAll('g.data').data([0]),
+      var group = g.selectAll('g.data').data([0]),
           groupEnter = group.enter().append('g').attr('class', 'data').call(display, 'none');
 
       groupEnter.append('path').attr('class', 'horizontal wire');
@@ -19,8 +17,17 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
       appendAnnotation(group, groupEnter, d3_select, ['axisannotation', 'x'], xAnnotation);
       appendAnnotation(group, groupEnter, d3_select, ['axisannotation', 'y'], yAnnotation);
 
-      var mouseSelection = g.selectAll('rect').data([0]);
-      mouseSelection.enter().append('rect').style({ fill: 'none', 'pointer-events': 'all'});
+      g.selectAll('rect').data([0]).enter()
+        .append('rect').style({ fill: 'none', 'pointer-events': 'all'});
+
+      crosshair.refresh(g);
+    }
+
+    crosshair.refresh = function(g) {
+      var xRange = xAnnotation[0].axis().scale().range(),
+          yRange = yAnnotation[0].axis().scale().range(),
+          group = g.selectAll('g.data'),
+          mouseSelection = g.selectAll('rect');
 
       mouseSelection.attr({
           x: Math.min(xRange[0], xRange[xRange.length-1]),
@@ -32,10 +39,6 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
         .on('mouseout', display(g, 'none'))
         .on('mousemove', mousemoveRefresh(group, d3_select, d3_mouse, xAnnotation, yAnnotation, verticalWireRange, horizontalWireRange));
 
-      crosshair.refresh(g);
-    }
-
-    crosshair.refresh = function(g) {
       refresh(d3_select, xAnnotation, yAnnotation,
         g.select('path.vertical'), g.select('path.horizontal'),
         g.selectAll('g.axisannotation.x > g'), g.selectAll('g.axisannotation.y > g'),

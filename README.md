@@ -27,3 +27,9 @@ range of [static and interactive plots](http://bl.ocks.org/andredumas/edf630690c
 * [Trendlines](http://bl.ocks.org/andredumas/69f49097e9bb5c0c6e4d)
 * [Support & Resistence Lines](http://bl.ocks.org/andredumas/10194a84a3e46fe127d4)
 * [Plot Zooming](http://bl.ocks.org/andredumas/a48008ea8e2c832144db)
+
+## Algorithms
+
+* [Moving Averages (Simple & Exponential)](http://bl.ocks.org/andredumas/274b54b4d2c2ffa19fca) - Including calculation
+* [RSI](http://bl.ocks.org/andredumas/6da267f1c51a13dea35b) - Including calculation
+* [MACD](http://bl.ocks.org/andredumas/10d701ccb3b8b1e99878)

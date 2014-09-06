@@ -125,7 +125,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
               beforeEach(function() {
                 axisannotation.axis().orient('left');
                 textAttributes(selectSpies, axisannotation.axis(), -1);
-                attr = selectSpies.attr.calls.argsFor(1)[0]; // It is the second call because it is initially invoked in earlier setup
+                attr = selectSpies.attr.calls.argsFor(2)[0]; // It is the second call because it is initially invoked in earlier setup
                 styleArgs = selectSpies.style.calls.argsFor(0);
               });
 
@@ -155,6 +155,24 @@ techanModule('plot/axisannotation', function(specBuilder) {
               });
             });
 
+            describe('And translate is 10 across and 15 down', function() {
+              var attr;
+
+              beforeEach(function() {
+                axisannotation.translate([10,15]).axis().orient('right');
+                axisannotation.refresh(spies.g);
+                attr = selectSpies.attr.calls.argsFor(2)[1]; // It is the second call because it is initially invoked in earlier setup
+              });
+
+              it('Then attr should have been called on the selection', function() {
+                expect(attr).toBeDefined();
+              });
+
+              it('Then translate should be 10,15', function() {
+                expect(attr).toBe('translate(10,15)');
+              });
+            });
+
             describe('And axis is right', function() {
               var attr,
                   styleArgs;
@@ -162,7 +180,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
               beforeEach(function() {
                 axisannotation.axis().orient('right');
                 textAttributes(selectSpies, axisannotation.axis(), 1);
-                attr = selectSpies.attr.calls.argsFor(1)[0]; // It is the second call because it is initially invoked in earlier setup
+                attr = selectSpies.attr.calls.argsFor(2)[0]; // It is the second call because it is initially invoked in earlier setup
                 styleArgs = selectSpies.style.calls.argsFor(0);
               });
 
@@ -199,7 +217,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
               beforeEach(function() {
                 axisannotation.axis().orient('top');
                 textAttributes(selectSpies, axisannotation.axis(), -1);
-                attr = selectSpies.attr.calls.argsFor(1)[0]; // It is the second call because it is initially invoked in earlier setup
+                attr = selectSpies.attr.calls.argsFor(2)[0]; // It is the second call because it is initially invoked in earlier setup
                 styleArgs = selectSpies.style.calls.argsFor(0);
               });
 
@@ -236,7 +254,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
               beforeEach(function() {
                 axisannotation.axis().orient('bottom');
                 textAttributes(selectSpies, axisannotation.axis(), 1);
-                attr = selectSpies.attr.calls.argsFor(1)[0]; // It is the second call because it is initially invoked in earlier setup
+                attr = selectSpies.attr.calls.argsFor(2)[0]; // It is the second call because it is initially invoked in earlier setup
                 styleArgs = selectSpies.style.calls.argsFor(0);
               });
 
@@ -274,11 +292,11 @@ techanModule('plot/axisannotation', function(specBuilder) {
             });
 
             it('Then path attribute function should be passed', function() {
-              expect(selectSpies.attr.calls.argsFor(0)[1]).toBeDefined();
+              expect(selectSpies.attr.calls.argsFor(1)[1]).toBeDefined();
             });
 
             it('Then path attribute function execution should generate correct path', function() {
-              expect(selectSpies.attr.calls.argsFor(0)[1]({value:1})).toEqual('M 0 1 l -6 -4 l 0 -3 l -50 0 l 0 14 l 50 0 l 0 -3');
+              expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 0 1 l -6 -4 l 0 -3 l -50 0 l 0 14 l 50 0 l 0 -3');
             });
           });
 
@@ -289,11 +307,11 @@ techanModule('plot/axisannotation', function(specBuilder) {
             });
 
             it('Then path attribute function should be passed', function() {
-              expect(selectSpies.attr.calls.argsFor(0)[1]).toBeDefined();
+              expect(selectSpies.attr.calls.argsFor(1)[1]).toBeDefined();
             });
 
             it('Then path attribute function execution should generate correct path', function() {
-              expect(selectSpies.attr.calls.argsFor(0)[1]({value:1})).toEqual('M 0 1 l 6 -4 l 0 -3 l 50 0 l 0 14 l -50 0 l 0 -3');
+              expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 0 1 l 6 -4 l 0 -3 l 50 0 l 0 14 l -50 0 l 0 -3');
             });
           });
 
@@ -304,11 +322,11 @@ techanModule('plot/axisannotation', function(specBuilder) {
             });
 
             it('Then path attribute function should be passed', function() {
-              expect(selectSpies.attr.calls.argsFor(0)[1]).toBeDefined();
+              expect(selectSpies.attr.calls.argsFor(1)[1]).toBeDefined();
             });
 
             it('Then path attribute function execution should generate correct path', function() {
-              expect(selectSpies.attr.calls.argsFor(0)[1]({value:1})).toEqual('M 1 0 l -4 -6 l -21 0 l 0 -14 l 50 0 l 0 14 l -21 0');
+              expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 1 0 l -4 -6 l -21 0 l 0 -14 l 50 0 l 0 14 l -21 0');
             });
           });
 
@@ -319,11 +337,11 @@ techanModule('plot/axisannotation', function(specBuilder) {
             });
 
             it('Then path attribute function should be passed', function() {
-              expect(selectSpies.attr.calls.argsFor(0)[1]).toBeDefined();
+              expect(selectSpies.attr.calls.argsFor(1)[1]).toBeDefined();
             });
 
             it('Then path attribute function execution should generate correct path', function() {
-              expect(selectSpies.attr.calls.argsFor(0)[1]({value:1})).toEqual('M 1 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0');
+              expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 1 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0');
             });
           });
         });

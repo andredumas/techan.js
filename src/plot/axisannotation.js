@@ -13,16 +13,15 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
         translate = [0, 0];
 
     function annotation(g) {
-      var group = g.selectAll('g.translate').data(plot.dataMapper.array);
-      group.enter().append('g').attr('class', 'translate');
-      group.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
+      g.selectAll('g.translate').data(plot.dataMapper.array).enter()
+        .append('g').attr('class', 'translate');
 
       annotation.refresh(g);
     }
 
     annotation.refresh = function(g) {
       var fmt = format ? format : (axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat());
-      refresh(g, plot, axis, fmt, height, width, point);
+      refresh(g, plot, axis, fmt, height, width, point, translate);
     };
 
     annotation.axis = function(_) {
@@ -59,12 +58,14 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
   };
 };
 
-function refresh(g, plot, axis, format, height, width, point) {
+function refresh(g, plot, axis, format, height, width, point, translate) {
   var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1,
-      dataGroup = plot.groupSelect(g.select('g.translate'), filterInvalidValues(axis.scale()));
+      translateSelection = g.select('g.translate'),
+      dataGroup = plot.groupSelect(translateSelection, filterInvalidValues(axis.scale()));
   dataGroup.entry.append('path');
   dataGroup.entry.append('text');
 
+  translateSelection.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
   dataGroup.selection.selectAll('path').attr('d', backgroundPath(axis, height, width, point, neg));
   dataGroup.selection.selectAll('text').text(textValue(format)).call(textAttributes, axis, neg);
 }
