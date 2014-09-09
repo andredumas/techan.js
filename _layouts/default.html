@@ -2,9 +2,25 @@
 <html lang="en">
     {% include head.html %}
     <body>
-        <div class="site-wrapper">
-            {{ content }}
+        <div class="navbar navbar-inverse navbar-static-top">
+            <div class="container">
+                <header class="clearfix">
+                    <h3 class="brand"><a href="/">TechanJS</a></h3>
+                    <ul class="nav masthead-nav">
+                        <li {% if page.title == 'Home' %}class="active"{% endif %}><a href="http://techanjs.org">Home</a></li>
+                        <li><a href="https://github.com/andredumas/techan.js/wiki">Documentation</a></li>
+                        <li><a href="https://github.com/andredumas/techan.js">Source</a></li>
+                        <li><a href="https://github.com/andredumas/techan.js/wiki/Gallery">Examples</a></li>
+                    </ul>
+                </header>
+            </div>
         </div>
+        {{ content }}
+
+        {% include footer.html %}
     </body>
+    <script src="js/dependencies.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
     <script src="js/site.js"></script>
 </html>

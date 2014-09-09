@@ -3,17 +3,7 @@ var techanSite = techanSite || {};
 (function(d3, techan) {
   'use strict';
 
-  techanSite.bigchart = function() {
-
-    var trendlineData = [
-      { start: { date: new Date(2014, 2, 11), value: 72.50 }, end: { date: new Date(2014, 5, 9), value: 63.34 } },
-      { start: { date: new Date(2013, 10, 21), value: 43 }, end: { date: new Date(2014, 2, 17), value: 70.50 } }
-    ];
-
-    var supstanceData = [
-      { start: new Date(2014, 2, 11), end: new Date(2014, 5, 9), value: 63.64 },
-      { start: new Date(2013, 10, 21), end: new Date(2014, 2, 17), value: 55.50 }
-    ];
+  techanSite.bigchart = function(stock) {
 
     var dim = {
       width: null, height: null,
@@ -23,7 +13,8 @@ var techanSite = techanSite || {};
       indicator: { height: null, padding: null, top: null, bottom: null }
     };
 
-    var x = techan.scale.financetime(),
+    var data = stock.ohlc,
+        x = techan.scale.financetime(),
         y = d3.scale.linear(),
         yPercent = y.copy(),
         indicatorTop = d3.scale.linear(),
@@ -88,9 +79,9 @@ var techanSite = techanSite || {};
 
         svg.append('text')
           .attr("class", "symbol")
-          .attr("x", 20)
+          .attr("x", 5)
           .attr("y", 15)
-          .text("Twitter, Inc. (TWTR)");
+          .text(stock.name);
 
         svg.append("g")
           .attr("class", "x axis bottom");
@@ -166,14 +157,13 @@ var techanSite = techanSite || {};
           .attr("clip-path", "url(#ohlcClip)");
 
         var accessor = candlestick.accessor(),
-          indicatorPreRoll = 33;  // Don't show where indicators don't have data
-
-        var data = techanSite.aapl;
+            indicatorPreRoll = stock.preroll,
+            postRollData = data.slice(indicatorPreRoll);  // Don't show where indicators don't have data
 
         x.domain(techan.scale.plot.time(data).domain());
-        y.domain(techan.scale.plot.ohlc(data.slice(indicatorPreRoll)).domain());
+        y.domain(techan.scale.plot.ohlc(postRollData).domain());
         yPercent.domain(techan.scale.plot.percent(y, accessor(data[indicatorPreRoll])).domain());
-        yVolume.domain(techan.scale.plot.volume(data).domain());
+        yVolume.domain(techan.scale.plot.volume(postRollData).domain());
 
         var macdData = techan.indicator.macd()(data);
         macdScale.domain(techan.scale.plot.macd(macdData).domain());
@@ -195,8 +185,8 @@ var techanSite = techanSite || {};
         svg.select("g.crosshair.ohlc").call(ohlcCrosshair);
         svg.select("g.crosshair.macd").call(macdCrosshair);
         svg.select("g.crosshair.rsi").call(rsiCrosshair);
-      //    svg.select("g.trendlines").datum(trendlineData).call(trendline);//.call(trendline.drag);
-      //    svg.select("g.supstances").datum(supstanceData).call(supstance);//.call(supstance.drag);
+        svg.select("g.trendlines").datum(stock.trendlines).call(trendline).call(trendline.drag);
+        svg.select("g.supstances").datum(stock.supstances).call(supstance).call(supstance.drag);
       });
     }
 
@@ -306,7 +296,8 @@ var techanSite = techanSite || {};
     return bigchart;
   };
 
-  var bigchart = techanSite.bigchart();
+  // Randomly choose between item 0 or 1
+  var bigchart = techanSite.bigchart(techanSite.data.array[Math.round(Math.random())]);
 
   d3.select('div#bigChart').call(bigchart);
 

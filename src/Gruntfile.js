@@ -41,7 +41,7 @@ module.exports = function(grunt) {
         src: [
           'bower_components/jquery/dist/jquery.min.js',
           'bower_components/bootstrap/dist/js/bootstrap.min.js',
-          'bower_components/d3/d3.min.js',
+          'bower_components/d3/d3.min.js'
         ],
         dest: 'dist/dependencies.js'
       },
@@ -92,9 +92,7 @@ module.exports = function(grunt) {
             flatten: true,
             src: [
               '<%= concat.dep.dest %>',
-              '<%= concat.dist.dest %>',
-              'bower_components/techanjs/dist/techan.min.js.map',
-              'build/dev.min.js.map'
+              '<%= concat.dist.dest %>'
             ],
             dest: '../js/'
           },
@@ -120,7 +118,6 @@ module.exports = function(grunt) {
   });
 
   // TODO CSS: Combination, Minifaction
-
 
   require('load-grunt-tasks')(grunt);
   grunt.loadTasks('lib/grunt');

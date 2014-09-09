@@ -107,6 +107,7 @@ div#bigChart {
 
     .jumbotron {
         height: 80%;
+        min-height: 500px;
     }
 
     .masthead-nav > li {
@@ -230,7 +231,7 @@ path.middle, path.zero {
 }
 
 .analysis path {
-    stroke: blue;
+    stroke: yellow;
     stroke-width: 1;
 }
 
