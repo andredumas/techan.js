@@ -1,27 +1,26 @@
 /* General Site */
 html, body {
     height: 100%;
-    background-color: #333;
 }
 
 body {
+    background-color: #f2f2f2;
+}
+
+.navbar {
+    margin-bottom: 0px;
+}
+
+.brand a,
+.brand a:focus,
+.brand a:hover {
     color: #fff;
-    text-shadow: 0 1px 3px rgba(0,0,0,.5);
-}
-
-.shadow-wrap {
-    -webkit-box-shadow: inset 0 0 100px rgba(0,0,0,.5);
-    box-shadow: inset 0 0 100px rgba(0,0,0,.5);
-}
-
-.content {
-    padding-top: 30px;
 }
 
 a,
 a:focus,
 a:hover {
-    color: #fff;
+    color: #555;
 }
 
 .btn-default,
@@ -33,10 +32,11 @@ a:hover {
 }
 
 .jumbotron {
-    background-color: #222;
+    -webkit-box-shadow: inset 0 0 100px rgba(0,0,0,.5);
+    box-shadow: inset 0 0 100px rgba(0,0,0,.5);
+    background-color: #333;
     height: 60%;
-    min-height: 350px;
-    margin-bottom: 0px;
+    min-height: 300px;
     padding: 20px 0px;
 }
 
@@ -48,9 +48,22 @@ a:hover {
 
 footer {
     text-align: center;
-    color: #999; /* IE8 proofing */
-    color: rgba(255,255,255,.5);
+    /*color: #999; *//* IE8 proofing */
+    /*color: rgba(255,255,255,.5);*/
+    /*-webkit-box-shadow: inset 0 0 100px rgba(0,0,0,.5);*/
+    /*box-shadow: inset 0 0 100px rgba(0,0,0,.5);*/
+    /*background-color: #333;*/
+    margin-top: 30px;
+    /*padding-top: 20px;*/
+    /*padding-bottom: 20px;*/
+    /*border-top: 1px solid #ddd;*/
 }
+
+/*footer a,*/
+/*footer a:focus,*/
+/*footer a:hover {*/
+    /*color: #fff;*/
+/*}*/
 
 header {
     text-align: center;
@@ -62,6 +75,9 @@ header h3 {
     margin-top: 10px;
 }
 
+/*
+    Header inspired by Layout inspired by @mdo's (https://twitter.com/mdo) Cover Template (http://getbootstrap.com/examples/cover/)
+ */
 .masthead-nav > li {
     display: inline-block;
     margin: 0 15px;
@@ -104,7 +120,6 @@ div#bigChart {
     }
 
     .jumbotron {
-        background-color: #222;
         height: 80%;
     }
 
