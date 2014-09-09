@@ -1,3 +1,123 @@
+/* General Site */
+html, body {
+    height: 100%;
+    background-color: #333;
+}
+
+body {
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,.5);
+}
+
+.shadow-wrap {
+    -webkit-box-shadow: inset 0 0 100px rgba(0,0,0,.5);
+    box-shadow: inset 0 0 100px rgba(0,0,0,.5);
+}
+
+.content {
+    padding-top: 30px;
+}
+
+a,
+a:focus,
+a:hover {
+    color: #fff;
+}
+
+.btn-default,
+.btn-default:focus {
+    color: #333;
+    text-shadow: none; /* Prevent inheritence from `body` */
+    background-color: #fff;
+    border: 1px solid #fff;
+}
+
+.jumbotron {
+    background-color: #222;
+    height: 60%;
+    min-height: 350px;
+    margin-bottom: 0px;
+    padding: 20px 0px;
+}
+
+.jumbotron .container {
+    height: 100%;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+footer {
+    text-align: center;
+    color: #999; /* IE8 proofing */
+    color: rgba(255,255,255,.5);
+}
+
+header {
+    text-align: center;
+    padding-top: 15px;
+    margin-bottom: 15px;
+}
+
+header h3 {
+    margin-top: 10px;
+}
+
+.masthead-nav > li {
+    display: inline-block;
+    margin: 0 15px;
+}
+
+.masthead-nav > li + li {
+    margin-left: 0;
+}
+.masthead-nav > li > a {
+    padding-right: 0;
+    padding-left: 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff; /* IE8 proofing */
+    color: rgba(255,255,255,.75);
+    border-bottom: 2px solid transparent;
+}
+.masthead-nav > li > a:hover,
+.masthead-nav > li > a:focus {
+    background-color: transparent;
+    border-bottom-color: rgba(255,255,255,.25);
+}
+.masthead-nav > .active > a,
+.masthead-nav > .active > a:hover,
+.masthead-nav > .active > a:focus {
+    color: #fff;
+    border-bottom-color: #fff;
+}
+
+div#bigChart {
+    height: 100%;
+}
+
+@media (min-width: 768px) {
+    header .brand {
+        float: left;
+    }
+    header .masthead-nav {
+        float: right;
+    }
+
+    .jumbotron {
+        background-color: #222;
+        height: 80%;
+    }
+
+    .masthead-nav > li {
+        margin: 0;
+    }
+
+    .masthead-nav > li + li {
+        margin-left: 20px;
+    }
+}
+
+/* Chart specific styling */
 svg {
     font: 10px sans-serif;
 }
@@ -145,9 +265,4 @@ path.supstance {
 
 .crosshair .axisannotation path {
     fill: #777777;
-}
-
-div#bigChart {
-    width: 100%;
-    height: 100%;
 }

@@ -17,7 +17,7 @@ var techanSite = techanSite || {};
 
     var dim = {
       width: null, height: null,
-      margin: { top: 20, right: 50, bottom: 30, left: 50 },
+      margin: { top: 25, right: 50, bottom: 25, left: 50 },
       plot: { width: null, height: null },
       ohlc: { height: null },
       indicator: { height: null, padding: null, top: null, bottom: null }
@@ -36,7 +36,9 @@ var techanSite = techanSite || {};
         trendline = techan.plot.trendline().xScale(x).yScale(y),
         supstance = techan.plot.supstance().xScale(x).yScale(y),
         xAxis = d3.svg.axis().scale(x).orient("bottom"),
+        xAxisTop = d3.svg.axis().scale(x).orient("top"),
         timeAnnotation = techan.plot.axisannotation().axis(xAxis).format(d3.time.format('%Y-%m-%d')).width(65),
+        timeAnnotationTop = techan.plot.axisannotation().axis(xAxisTop).format(d3.time.format('%Y-%m-%d')).width(65),
         yAxis = d3.svg.axis().scale(y).orient("right"),
         ohlcAnnotation = techan.plot.axisannotation().axis(yAxis).format(d3.format(',.2fs')),
         closeAnnotation = techan.plot.axisannotation().axis(yAxis).format(d3.format(',.2fs')),
@@ -56,9 +58,9 @@ var techanSite = techanSite || {};
         rsiAnnotation = techan.plot.axisannotation().axis(rsiAxis).format(d3.format(',.2fs')),
         rsiAxisLeft = d3.svg.axis().scale(rsiScale).ticks(3).orient("left"),
         rsiAnnotationLeft = techan.plot.axisannotation().axis(rsiAxisLeft).format(d3.format(',.2fs')),
-        ohlcCrosshair = techan.plot.crosshair().xAnnotation(timeAnnotation).yAnnotation([ohlcAnnotation, percentAnnotation, volumeAnnotation]),
-        macdCrosshair = techan.plot.crosshair().xAnnotation(timeAnnotation).yAnnotation([macdAnnotation, macdAnnotationLeft]),
-        rsiCrosshair = techan.plot.crosshair().xAnnotation(timeAnnotation).yAnnotation([rsiAnnotation, rsiAnnotationLeft]);
+        ohlcCrosshair = techan.plot.crosshair().xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([ohlcAnnotation, percentAnnotation, volumeAnnotation]),
+        macdCrosshair = techan.plot.crosshair().xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([macdAnnotation, macdAnnotationLeft]),
+        rsiCrosshair = techan.plot.crosshair().xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([rsiAnnotation, rsiAnnotationLeft]);
 
     function bigchart(selection) {
       selection.each(function() {
@@ -81,15 +83,20 @@ var techanSite = techanSite || {};
             .attr("x", 0);
 
         svg = svg.append("g")
-          .attr("class", "chart");
+          .attr("class", "chart")
+          .attr("transform", "translate(" + dim.margin.left + "," + dim.margin.top + ")");
 
         svg.append('text')
           .attr("class", "symbol")
           .attr("x", 20)
+          .attr("y", 15)
           .text("Twitter, Inc. (TWTR)");
 
         svg.append("g")
-          .attr("class", "x axis");
+          .attr("class", "x axis bottom");
+
+        svg.append("g")
+          .attr("class", "x axis top");
 
         var ohlcSelection = svg.append("g")
           .attr("class", "ohlc")
@@ -195,9 +202,8 @@ var techanSite = techanSite || {};
 
     bigchart.resize = function(selection) {
       selection.each(function() {
-        // TODO Ensure the aspect ratio is within 'pretty' limits
-        dim.width = this.offsetWidth;
-        dim.height = this.offsetHeight;
+        dim.width = this.clientWidth;
+        dim.height = this.clientHeight;
         dim.plot.width = dim.width - dim.margin.left - dim.margin.right;
         dim.plot.height = dim.height - dim.margin.top - dim.margin.bottom;
         dim.ohlc.height = dim.plot.height * 0.67777777;
@@ -208,13 +214,20 @@ var techanSite = techanSite || {};
 
         var xRange = [0, dim.plot.width],
             yRange = [dim.ohlc.height, 0],
-            selection = d3.select(this);
+            selection = d3.select(this),
+            ohlcVerticalTicks = Math.min(10, Math.round(dim.height/70)),
+            xTicks = Math.min(10, Math.round(dim.width/130));
 
         indicatorTop.range([dim.indicator.top, dim.indicator.bottom]);
         x.range(xRange);
+        xAxis.ticks(xTicks);
+        xAxisTop.ticks(xTicks);
         y.range(yRange);
-        yPercent.range(y.range());   // Same as y at this stage, will get a different domain later
+        yAxis.ticks(ohlcVerticalTicks);
+        yPercent.range(y.range());
+        percentAxis.ticks(ohlcVerticalTicks);
         yVolume.range([yRange[0], yRange[0]-0.2*yRange[0]]);
+        volumeAxis.ticks(Math.min(3, Math.round(dim.height/150)));
         timeAnnotation.translate([0, dim.plot.height]);
         ohlcAnnotation.translate([xRange[1], 0]);
         closeAnnotation.translate([xRange[1], 0]);
@@ -225,8 +238,6 @@ var techanSite = techanSite || {};
         ohlcCrosshair.verticalWireRange([0, dim.plot.height]);
         macdCrosshair.verticalWireRange([0, dim.plot.height]);
         rsiCrosshair.verticalWireRange([0, dim.plot.height]);
-
-        // TODO Adjust tick count when chart gets too small, ticks get a bit crowded
 
         selection.select("svg")
           .attr("width", dim.width)
@@ -243,10 +254,7 @@ var techanSite = techanSite || {};
           .attr("width", dim.plot.width)
           .attr("height", dim.indicator.height);
 
-        selection.select("g.chart")
-          .attr("transform", "translate(" + dim.margin.left + "," + dim.margin.top + ")");
-
-        selection.select("g.x.axis")
+        selection.select("g.x.axis.bottom")
           .attr("transform", "translate(0," + dim.plot.height + ")");
 
         selection.select("g.ohlc g.y.axis")
@@ -269,7 +277,8 @@ var techanSite = techanSite || {};
     };
 
     function draw(svg) {
-      svg.select("g.x.axis").call(xAxis);
+      svg.select("g.x.axis.bottom").call(xAxis);
+      svg.select("g.x.axis.top").call(xAxisTop);
       svg.select("g.ohlc .axis").call(yAxis);
       svg.select("g.volume.axis").call(volumeAxis);
       svg.select("g.percent.axis").call(percentAxis);
