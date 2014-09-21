@@ -1,9 +1,9 @@
 /*
- TechanJS v0.3.0-0
+ TechanJS v0.3.0-1
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-'use strict';module.exports='0.3.0-0';
+'use strict';module.exports='0.3.0-1';
 },{}],2:[function(_dereq_,module,exports){
 'use strict';
 
@@ -337,7 +337,7 @@ module.exports = function() {
 },{}],9:[function(_dereq_,module,exports){
 'use strict';
 
-module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
+module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
       period = 10,
@@ -353,7 +353,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
 
     indicator.init = function() {
       previous = null;
-      alpha = 2/(period+1);
+      alpha = alpha_init(period);
       initialTotal = 0;
       initialCount = 0;
       return indicator;
@@ -397,15 +397,25 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
 module.exports = function() {
   var indicatorMixin = _dereq_('./indicatormixin')(),
       accessor = _dereq_('../accessor')(),
-      ema = _dereq_('./ema')(indicatorMixin, accessor.ohlc);
+      ema_init = _dereq_('./ema'),
+      ema = ema_init(indicatorMixin, accessor.ohlc, ema_alpha_init);
 
   return {
     ema: ema,
     macd: _dereq_('./macd')(indicatorMixin, accessor.ohlc, ema),
     rsi: _dereq_('./rsi')(indicatorMixin, accessor.ohlc, ema),
-    sma: _dereq_('./sma')(indicatorMixin, accessor.ohlc)
+    sma: _dereq_('./sma')(indicatorMixin, accessor.ohlc),
+    wilderma: ema_init(indicatorMixin, accessor.ohlc, wilder_alpha_init)
   };
 };
+
+function ema_alpha_init(period) {
+  return 2/(period+1);
+}
+
+function wilder_alpha_init(period) {
+  return 1/period;
+}
 },{"../accessor":2,"./ema":9,"./indicatormixin":11,"./macd":12,"./rsi":13,"./sma":14}],11:[function(_dereq_,module,exports){
 'use strict';
 
@@ -1069,7 +1079,8 @@ module.exports = function(d3) {
     moneyflow: line(accessor.value, plot, plotMixin, true),
     sma: line(accessor.value, plot, plotMixin),
     supstance: _dereq_('./supstance')(d3.behavior.drag, d3_event, d3.select, accessor.value, plot, plotMixin),
-    trendline: _dereq_('./trendline')(d3.behavior.drag, d3_event, d3.select, accessor.trendline, plot, plotMixin)
+    trendline: _dereq_('./trendline')(d3.behavior.drag, d3_event, d3.select, accessor.trendline, plot, plotMixin),
+    wilderma: line(accessor.value, plot, plotMixin)
   };
 };
 
