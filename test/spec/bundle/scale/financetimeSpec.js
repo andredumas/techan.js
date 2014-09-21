@@ -8,11 +8,11 @@ techanModule('scale/financetime', function(specBuilder) {
   };
 
   var data = require('../_fixtures/data/ohlc').facebook.slice(0, 10).map(function(d) { return d.date; }),
-      timeData = require('../_fixtures/data/time').input;
+      timeData = require('../_fixtures/data/time').intraday;
 
   specBuilder.require(require('../../../../src/scale/financetime'), function(instanceBuilder) {
     instanceBuilder.instance('actual', actualInit, function(scope) {
-      var financetime = null;
+      var financetime;
 
       describe('And domain and range is initialised', function() {
         beforeEach(function() {
@@ -269,6 +269,65 @@ techanModule('scale/financetime', function(specBuilder) {
               it('Then ticks should return same offset tick values', function() {
                 expect(cloned.ticks()).toEqual(financetime.ticks());
               });
+            });
+          });
+        });
+
+        describe('And initialised with 1 item', function() {
+          beforeEach(function() {
+            financetime.domain([new Date(0)]);
+          });
+
+          it('Then ticks should return a single tick', function() {
+            expect(financetime.ticks()).toEqual([
+              new Date(0)
+            ]);
+          });
+
+          describe('And ticks invoked (for tickFormat state)', function() {
+            beforeEach(function() {
+              financetime.ticks();
+            });
+
+            it('Then tickFormat should be generic format', function() {
+              expect(financetime.tickFormat()(new Date(1000))).toEqual(':01');
+            });
+
+            it('Then tickFormat should be generic format', function() {
+              expect(financetime.tickFormat()(new Date(1000))).toEqual(':01');
+              expect(financetime.tickFormat()(new Date(2014, 1, 24))).toEqual('Feb 24');
+            });
+          });
+        });
+
+        describe('And initialised with intraday data', function() {
+          beforeEach(function() {
+            financetime.domain(timeData);
+          });
+
+          it('Then ticks should return a distributed range of ticks', function() {
+            expect(financetime.ticks()).toEqual([
+              new Date(0),
+              new Date(1000),
+              new Date(2000),
+              new Date(3000),
+              new Date(4000),
+              new Date(5000),
+              new Date(6000),
+              new Date(7000),
+              new Date(8000),
+              new Date(9000)
+            ]);
+          });
+
+          describe('And ticks invoked (for tickFormat state)', function() {
+            beforeEach(function() {
+              financetime.ticks();
+            });
+
+            it('Then tickFormat should be intraday format', function() {
+              expect(financetime.tickFormat()(new Date(1000))).toEqual(':01');
+              expect(financetime.tickFormat()(new Date(2014, 1, 24, 9, 35))).toEqual('09:35');
             });
           });
         });

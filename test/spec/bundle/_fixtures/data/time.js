@@ -1,5 +1,5 @@
 module.exports = {
-  input: [
+  intraday: [
     new Date(0),
     new Date(1000),
     new Date(2000),

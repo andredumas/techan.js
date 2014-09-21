@@ -167,17 +167,30 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
 
   var dayFormat = d3_time.format('%b %e'),
       yearFormat = d3_time.format.multi([
-    ['%b %Y', function(d) { return d.getMonth(); }],
-    ['%Y', function() { return true; }]
-  ]);
+        ['%b %Y', function(d) { return d.getMonth(); }],
+        ['%Y', function() { return true; }]
+      ]),
+      intraDayFormat = d3_time.format.multi([
+        [":%S", function(d) { return d.getSeconds(); }],
+        ["%I:%M", function(d) { return d.getMinutes(); }],
+        ["%I %p", function(d) { return d.getHours(); }]
+      ]),
+      genericTickMethod = [d3_time.second, 1, d3_time.format.multi([
+          [":%S", function(d) { return d.getSeconds(); }],
+          ["%I:%M", function(d) { return d.getMinutes(); }],
+          ["%I %p", function(d) { return d.getHours(); }],
+          ['%b %e', function() { return true; }]
+        ])
+      ];
 
-  var dailyTickSteps = [
-    864e5,  // 1-day
-    6048e5, // 1-week
-    2592e6, // 1-month
-    7776e6, // 3-month
-    31536e6 // 1-year
-  ];
+  var dailyStep = 864e5,
+      dailyTickSteps = [
+        dailyStep,  // 1-day
+        6048e5,     // 1-week
+        2592e6,     // 1-month
+        7776e6,     // 3-month
+        31536e6     // 1-year
+      ];
 
   var dailyTickMethod = [
     [d3_time.day, 1, dayFormat],
@@ -188,6 +201,14 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
   ];
 
   var intraDayTickSteps = [
+    1e3,    // 1-second
+    5e3,    // 5-second
+    15e3,   // 15-second
+    3e4,    // 30-second
+    6e4,    // 1-minute
+    3e5,    // 5-minute
+    9e5,    // 15-minute
+    18e5,   // 30-minute
     36e5,   // 1-hour
     108e5,  // 3-hour
     216e5,  // 6-hour
@@ -196,20 +217,31 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
   ];
 
   var intraDayTickMethod = [
-    [d3_time.hour, 1],
-    [d3_time.hour, 3],
-    [d3_time.hour, 6],
-    [d3_time.hour, 12],
-    [d3_time.day, 1]
+    [d3_time.second, 1, intraDayFormat],
+    [d3_time.second, 5, intraDayFormat],
+    [d3_time.second, 15, intraDayFormat],
+    [d3_time.second, 30, intraDayFormat],
+    [d3_time.minute, 1, intraDayFormat],
+    [d3_time.minute, 5, intraDayFormat],
+    [d3_time.minute, 15, intraDayFormat],
+    [d3_time.minute, 30, intraDayFormat],
+    [d3_time.hour, 1, intraDayFormat],
+    [d3_time.hour, 3, intraDayFormat],
+    [d3_time.hour, 6, intraDayFormat],
+    [d3_time.hour, 12, intraDayFormat],
+    [d3_time.day, 1, dayFormat]
   ];
 
   function tickMethod(visibleDomain, count) {
-    // TODO Is this daily data or intra day data? This will dictate which 'mode' to select.
-    var tickMethods = dailyTickMethod,
-        tickSteps = dailyTickSteps;
+    if(visibleDomain.length == 1) return genericTickMethod; // If we only have 1 to display, show the generic tick method
 
-    var target = (visibleDomain[visibleDomain.length-1] - visibleDomain[0])/count,
+    // Determine whether we're showing daily or intraday data
+    var intraDay = (visibleDomain[visibleDomain.length-1] - visibleDomain[0])/dailyStep < 1,
+        tickMethods = intraDay ? intraDayTickMethod : dailyTickMethod,
+        tickSteps = intraDay ? intraDayTickSteps : dailyTickSteps,
+        target = (visibleDomain[visibleDomain.length-1] - visibleDomain[0])/count,
         i = d3_bisect(tickSteps, target);
+
     return i ? tickMethods[target/tickSteps[i-1] < tickSteps[i]/target ? i-1 : i] : tickMethods[i];
   }
 
