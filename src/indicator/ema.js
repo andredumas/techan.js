@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
+module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
       period = 10,
@@ -16,7 +16,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
 
     indicator.init = function() {
       previous = null;
-      alpha = 2/(period+1);
+      alpha = alpha_init(period);
       initialTotal = 0;
       initialCount = 0;
       return indicator;

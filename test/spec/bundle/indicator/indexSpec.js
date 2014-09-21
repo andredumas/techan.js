@@ -22,6 +22,10 @@ techanModule('indicator', function(specBuilder) {
       it('Then indicator.sma should be defined', function() {
         expect(scope.indicator.sma).toBeDefined();
       });
+
+      it('Then indicator.wilderma should be defined', function() {
+        expect(scope.indicator.wilderma).toBeDefined();
+      });
     });
   });
 });

@@ -82,6 +82,14 @@ function techanSpec(techan) {
       expect(techan.indicator.sma()).toBeDefined();
     });
 
+    it('Then techan.indicator.wilderma should be defined', function () {
+      expect(techan.indicator.wilderma).toBeDefined();
+    });
+
+    it('Then techan.indicator.wilderma can be constructed', function () {
+      expect(techan.indicator.wilderma()).toBeDefined();
+    });
+
     it('Then techan.plot should be defined', function () {
       expect(techan.plot).toBeDefined();
     });
@@ -196,6 +204,14 @@ function techanSpec(techan) {
 
     it('Then techan.plot.volume can be constructed', function () {
       expect(techan.plot.volume()).toBeDefined();
+    });
+
+    it('Then techan.plot.wilderma should be defined', function () {
+      expect(techan.plot.wilderma).toBeDefined();
+    });
+
+    it('Then techan.plot.wilderma can be constructed', function () {
+      expect(techan.plot.wilderma()).toBeDefined();
     });
 
     it('Then techan.scale should be defined', function () {

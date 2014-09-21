@@ -56,6 +56,25 @@ module.exports = {
       { date: new Date(14), value: 22.516355744453616 },
       { date: new Date(15), value: 22.79520015455296 },
       { date: new Date(16), value: 22.966981944634238 }
+    ],
+    wilderma: [
+//      { date: new Date(0), value: 22.27 },
+//      { date: new Date(1), value: 22.23 },
+//      { date: new Date(2), value: 22.179999999999996 },
+//      { date: new Date(3), value: 22.1775 },
+//      { date: new Date(4), value: 22.177999999999997 },
+//      { date: new Date(5), value: 22.169999999999998 },
+//      { date: new Date(6), value: 22.178571428571423 },
+//      { date: new Date(7), value: 22.209999999999997 },
+//      { date: new Date(8), value: 22.21333333333333 },
+      { date: new Date(9), value: 22.220999999999997 },
+      { date: new Date(10), value: 22.213899999999995 },
+      { date: new Date(11), value: 22.231509999999997 },
+      { date: new Date(12), value: 22.246358999999998 },
+      { date: new Date(13), value: 22.2827231 },
+      { date: new Date(14), value: 22.39045079 },
+      { date: new Date(15), value: 22.556405711 },
+      { date: new Date(16), value: 22.6747651399 }
     ]
   }
 };

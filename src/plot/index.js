@@ -22,7 +22,8 @@ module.exports = function(d3) {
     moneyflow: line(accessor.value, plot, plotMixin, true),
     sma: line(accessor.value, plot, plotMixin),
     supstance: require('./supstance')(d3.behavior.drag, d3_event, d3.select, accessor.value, plot, plotMixin),
-    trendline: require('./trendline')(d3.behavior.drag, d3_event, d3.select, accessor.trendline, plot, plotMixin)
+    trendline: require('./trendline')(d3.behavior.drag, d3_event, d3.select, accessor.trendline, plot, plotMixin),
+    wilderma: line(accessor.value, plot, plotMixin)
   };
 };
 
