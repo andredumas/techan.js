@@ -55,7 +55,7 @@ techanModule('plot/candlestick', function(specBuilder) {
 
             it('Then candlesticks opacity should be rendered', function() {
               // g > g.data > g.path
-              expect(g[0][0].childNodes[0].childNodes[0].style.opacity).toEqual('0.27272727272727276');
+              expect(round(g[0][0].childNodes[0].childNodes[0].style.opacity, 10)).toEqual(round('0.27272727272727276', 10));
             });
           });
 
@@ -71,13 +71,18 @@ techanModule('plot/candlestick', function(specBuilder) {
 
             it('Then candlesticks opacity should be rendered', function() {
               // g > g.data > g.path
-              expect(g[0][0].childNodes[0].childNodes[0].style.opacity).toEqual('0.27272727272727276');
+              expect(round(g[0][0].childNodes[0].childNodes[0].style.opacity, 10)).toEqual(round('0.27272727272727276', 10));
             });
           });
 
           describe('And data contains invalid volume entry', function() {
             plotShouldRenderWithoutError(scope, invalidvolume, domFixtures);
           });
+
+          function round(value, places) {
+            var factor = 10^places;
+            return Math.round(+value*factor)/factor;
+          }
         });
       });
     });
