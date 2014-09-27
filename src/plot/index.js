@@ -11,7 +11,7 @@ module.exports = function(d3) {
   return {
     axisannotation: axisannotation,
     candlestick: require('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
-    crosshair: require('./crosshair')(d3.select, d3_event, d3.mouse, axisannotation),
+    crosshair: require('./crosshair')(d3.select, d3_event, d3.mouse, d3.dispatch, axisannotation),
     ema: line(accessor.value, plot, plotMixin),
     ohlc: require('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
     close: line(accessor.ohlc, plot, plotMixin),

@@ -14,7 +14,7 @@ techanModule('plot/crosshair', function(specBuilder) {
 
   var mockInit = function(crosshair) {
     spies.d3_mouse = jasmine.createSpy('d3_mouse');
-    return crosshair(d3.select, d3.event, spies.d3_mouse, techan.plot.axisannotation);
+    return crosshair(d3.select, d3.event, spies.d3_mouse, d3.dispatch, techan.plot.axisannotation);
   };
 
   function assertDomStructure(gScope) {
@@ -201,13 +201,17 @@ techanModule('plot/crosshair', function(specBuilder) {
             var mouseRectAttribute,
                 verticalPathLine,
                 horizontalPathLine,
-                mousemoveRefresh;
+                mousemoveRefresh,
+                mouseenter,
+                mouseout;
 
             beforeEach(function() {
               crosshair(spies.g);
               mouseRectAttribute = selectSpies.attr.calls.argsFor(7)[0];
               verticalPathLine = selectSpies.attr.calls.argsFor(8)[1];
               horizontalPathLine = selectSpies.attr.calls.argsFor(9)[1];
+              mouseenter = selectSpies.on.calls.argsFor(0)[1];
+              mouseout = selectSpies.on.calls.argsFor(1)[1];
               mousemoveRefresh = selectSpies.on.calls.argsFor(2)[1];
             });
 
@@ -263,7 +267,17 @@ techanModule('plot/crosshair', function(specBuilder) {
               expect(mousemoveRefresh).toBeDefined();
             });
 
+            it('Then mouseenter is defined', function() {
+              expect(mouseenter).toBeDefined();
+            });
+
+            it('Then mouseout is defined', function() {
+              expect(mouseout).toBeDefined();
+            });
+
             describe('And on mousemoveRefresh invoke', function() {
+              var listener;
+
               beforeEach(function() {
                 spies.d3_mouse.and.returnValue([1,2]);
                 selectSpies.datum = jasmine.createSpy('datum');
@@ -271,6 +285,9 @@ techanModule('plot/crosshair', function(specBuilder) {
                 // Redefine the annotation refresh
                 crosshair.xAnnotation()[0].refresh = jasmine.createSpy('refresh');
                 crosshair.yAnnotation()[0].refresh = jasmine.createSpy('refresh');
+                listener = jasmine.createSpy('listener');
+                crosshair.on('move', listener);
+
                 mousemoveRefresh();
               });
 
@@ -288,6 +305,18 @@ techanModule('plot/crosshair', function(specBuilder) {
                 expect(selectSpies.datum.calls.argsFor(1)[0]).toEqual(2);
               });
 
+              it('Then should update x event coordinate', function() {
+                var d = { value: 123 };
+                selectSpies.each.calls.argsFor(4)[0]([d], 0);
+                expect(d.value).toEqual(1);
+              });
+
+              it('Then should update y event coordindate', function() {
+                var d = { value: 321 };
+                selectSpies.each.calls.argsFor(5)[0]([d], 0);
+                expect(d.value).toEqual(2);
+              });
+
               it('Then should refresh x annotation', function() {
                 expect(selectSpies.selectAll.calls.argsFor(8)[0]).toEqual('g.axisannotation.x > g');
                 selectSpies.each.calls.argsFor(6)[0](undefined, 0);
@@ -300,6 +329,42 @@ techanModule('plot/crosshair', function(specBuilder) {
                 selectSpies.each.calls.argsFor(7)[0](undefined, 0);
                 expect(crosshair.xAnnotation()[0].refresh).not.toHaveBeenCalled();
                 expect(crosshair.yAnnotation()[0].refresh).toHaveBeenCalled();
+              });
+
+              it('Then the listener should have been invoked', function() {
+                expect(listener).toHaveBeenCalled();
+              });
+
+              it('Then the listener should have been passed the correct coordinates', function() {
+                expect(listener.calls.argsFor(0)[0]).toEqual([[undefined], [undefined]]); // Mocks won't correctly initialise this array
+              });
+            });
+
+            describe('And on mouseenter invoke', function() {
+              var listener;
+
+              beforeEach(function() {
+                listener = jasmine.createSpy('listener');
+                crosshair.on('enter', listener);
+                mouseenter();
+              });
+
+              it('Then the listener should have been invoked', function() {
+                expect(listener).toHaveBeenCalled();
+              });
+            });
+
+            describe('And on mouseout invoke', function() {
+              var listener;
+
+              beforeEach(function() {
+                listener = jasmine.createSpy('listener');
+                crosshair.on('out', listener);
+                mouseout();
+              });
+
+              it('Then the listener should have been invoked', function() {
+                expect(listener).toHaveBeenCalled();
               });
             });
           });

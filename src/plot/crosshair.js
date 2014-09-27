@@ -1,8 +1,9 @@
 'use strict';
 
-module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // Injected dependencies
+module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannotation) { // Injected dependencies
   return function() { // Closure function
-    var xAnnotation = [axisannotation()],
+    var dispatch = d3_dispatch('enter', 'out', 'move'),
+        xAnnotation = [axisannotation()],
         yAnnotation = [axisannotation()],
         verticalWireRange,
         horizontalWireRange,
@@ -42,9 +43,15 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
           height: Math.abs(yRange[yRange.length-1] - yRange[0]),
           width: Math.abs(xRange[xRange.length-1] - xRange[0])
         })
-        .on('mouseenter', display(g, 'inline'))
-        .on('mouseout', display(g, 'none'))
-        .on('mousemove', mousemoveRefresh(d3_select, d3_mouse, xAnnotation, yAnnotation,
+        .on('mouseenter', function() {
+          display(g, 'inline');
+          dispatch.enter();
+        })
+        .on('mouseout', function() {
+          display(g, 'none');
+          dispatch.out();
+        })
+        .on('mousemove', mousemoveRefresh(d3_select, d3_mouse, dispatch, xAnnotation, yAnnotation,
           pathVerticalSelection, pathHorizontalSelection, xAnnotationSelection, yAnnotationSelection,
           verticalWireRange, horizontalWireRange)
         );
@@ -80,18 +87,23 @@ module.exports = function(d3_select, d3_event, d3_mouse, axisannotation) { // In
       return crosshair;
     };
 
+    crosshair.on = function(type, listener) {
+      dispatch.on(type, listener);
+      return crosshair;
+    };
+
     return crosshair;
   };
 };
 
 function display(g, style) {
-  return function() {
-    g.selectAll('g.data').style('display', style);
-  };
+  g.selectAll('g.data').style('display', style);
 }
 
-function mousemoveRefresh(d3_select, d3_mouse, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
+function mousemoveRefresh(d3_select, d3_mouse, dispatch, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
                           xAnnotationSelection, yAnnotationSelection, verticalWireRange, horizontalWireRange) {
+  var event = [new Array(xAnnotation.length), new Array(yAnnotation.length)];
+
   return function() {
     var coords = d3_mouse(this),
         x = xAnnotation[0].axis().scale(),
@@ -100,10 +112,12 @@ function mousemoveRefresh(d3_select, d3_mouse, xAnnotation, yAnnotation, pathVer
     refresh(d3_select, xAnnotation, yAnnotation,
       pathVerticalSelection.datum(x.invert(coords[0])),
       pathHorizontalSelection.datum(y.invert(coords[1])),
-      xAnnotationSelection.each(updateAnnotationValue(xAnnotation, coords[0])),
-      yAnnotationSelection.each(updateAnnotationValue(yAnnotation, coords[1])),
+      xAnnotationSelection.each(updateAnnotationValue(xAnnotation, coords[0], event[0])),
+      yAnnotationSelection.each(updateAnnotationValue(yAnnotation, coords[1], event[1])),
       verticalWireRange, horizontalWireRange
     );
+
+    dispatch.move(event);
   };
 }
 
@@ -135,10 +149,11 @@ function verticalPathLine(x, range) {
   };
 }
 
-function updateAnnotationValue(annotations, value) {
+function updateAnnotationValue(annotations, value, event) {
   return function(d, i) {
+    event[i] = annotations[i].axis().scale().invert(value);
     // d[0] because only ever 1 value for crosshairs
-    d[0].value = annotations[i].axis().scale().invert(value);
+    d[0].value = event[i];
   };
 }
 
