@@ -30,7 +30,7 @@ techanModule('plot/crosshair', function(specBuilder) {
 
     it('Then the first child element should be g.data', function() {
       expect(parent.childNodes[0].nodeName.toLowerCase()).toEqual('g');
-      expect(parent.childNodes[0].className).toEqual('data');
+      expect(parent.childNodes[0].className).toEqual('data top');
     });
 
     it('Then the second child element should be a rect', function() {
@@ -127,6 +127,18 @@ techanModule('plot/crosshair', function(specBuilder) {
           });
 
           assertDomStructure(gScope);
+
+          describe('And second full invoke', function() {
+            beforeEach(function() {
+              crosshair(g);
+            });
+
+            it('Then it should still refresh without error', function() {
+              expect(parent.innerHTML).not.toContain('NaN');
+            });
+
+            assertDomStructure(gScope);
+          });
 
           describe('And refresh invoke', function() {
             beforeEach(function() {
@@ -267,24 +279,24 @@ techanModule('plot/crosshair', function(specBuilder) {
               });
 
               it('Then should set correct path.vertical datum', function() {
-                expect(selectSpies.select.calls.argsFor(4)[0]).toEqual('path.vertical');
+                expect(selectSpies.selectAll.calls.argsFor(6)[0]).toEqual('path.vertical');
                 expect(selectSpies.datum.calls.argsFor(0)[0]).toEqual(1);
               });
 
               it('Then should set correct path.horizontal datum', function() {
-                expect(selectSpies.select.calls.argsFor(5)[0]).toEqual('path.horizontal');
+                expect(selectSpies.selectAll.calls.argsFor(7)[0]).toEqual('path.horizontal');
                 expect(selectSpies.datum.calls.argsFor(1)[0]).toEqual(2);
               });
 
               it('Then should refresh x annotation', function() {
-                expect(selectSpies.selectAll.calls.argsFor(6)[0]).toEqual('g.axisannotation.x > g');
+                expect(selectSpies.selectAll.calls.argsFor(8)[0]).toEqual('g.axisannotation.x > g');
                 selectSpies.each.calls.argsFor(6)[0](undefined, 0);
                 expect(crosshair.xAnnotation()[0].refresh).toHaveBeenCalled();
                 expect(crosshair.yAnnotation()[0].refresh).not.toHaveBeenCalled();
               });
 
               it('Then should refresh y annotation', function() {
-                expect(selectSpies.selectAll.calls.argsFor(7)[0]).toEqual('g.axisannotation.y > g');
+                expect(selectSpies.selectAll.calls.argsFor(9)[0]).toEqual('g.axisannotation.y > g');
                 selectSpies.each.calls.argsFor(7)[0](undefined, 0);
                 expect(crosshair.xAnnotation()[0].refresh).not.toHaveBeenCalled();
                 expect(crosshair.yAnnotation()[0].refresh).toHaveBeenCalled();
