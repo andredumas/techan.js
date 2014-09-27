@@ -26,7 +26,7 @@ techanModule('plot/volume', function(specBuilder) {
           g = domFixtures.g(data);
         });
 
-        xit('Then on default invoke, should not render up/down classes', function() {
+        it('Then on default invoke, should not render up/down classes', function() {
           volume(g);
           expect(g[0][0].innerHTML).not.toContain('up');
           expect(g[0][0].innerHTML).not.toContain('down');
