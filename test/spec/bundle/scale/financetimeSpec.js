@@ -32,8 +32,12 @@ techanModule('scale/financetime', function(specBuilder) {
           expect(financetime.band()).toEqual(80);
         });
 
-        it('Then scale of first index should return min range', function() {
+        it('Then scale of first index should return min widened range', function() {
           expect(financetime(data[0])).toEqual(100);
+        });
+
+        it('Then scale of last index should return max widened range', function() {
+          expect(financetime(data[data.length-1])).toEqual(1000);
         });
 
         it('Then scale of a value less than minimum should return less than minimum range', function() {
@@ -88,6 +92,40 @@ techanModule('scale/financetime', function(specBuilder) {
 
         it('Then using invert as Array.prototyp.map(invert) of a value about half of range, should return mid domain', function() {
           expect([600].map(financetime.invert)).toEqual([data[5]]);
+        });
+
+        describe('And widening set to none', function() {
+          beforeEach(function() {
+            financetime.widening(0);
+          });
+
+          it('Then widened should be 0', function() {
+            expect(financetime.widening()).toEqual(0);
+          });
+
+          it('Then scale of first index should return min range', function() {
+            expect(financetime(data[0])).toEqual(48);
+          });
+
+          it('Then scale of last index should return max range', function() {
+            expect(financetime(data[data.length-1])).toEqual(1052);
+          });
+
+          describe('And copied', function() {
+            var cloned;
+
+            beforeEach(function() {
+              cloned = financetime.copy();
+            });
+
+            it('Then widened should be 0', function() {
+              expect(cloned.widening()).toEqual(0);
+            });
+
+            it('Then scale of first index should return min range', function() {
+              expect(cloned(data[0])).toEqual(48);
+            });
+          });
         });
 
         it('Then ticks should return a distributed range of ticks', function() {

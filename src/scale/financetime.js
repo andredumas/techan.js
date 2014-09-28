@@ -6,13 +6,14 @@
  and weekends respectively. When plot, is done so without weekend gaps.
  */
 module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, widen, zoomable) {  // Injected dependencies
-  function financetime(index, domain) {
+  function financetime(index, domain, widening) {
     var dateIndexMap,
         tickState = { tickFormat: dailyTickMethod[dailyTickMethod.length-1][2] },
         band = 3;
 
     index = index || d3_scale_linear();
     domain = domain || [new Date(0), new Date(1)];
+    widening = widening === undefined ? 0.65 : widening;
 
     /**
      * Scales the value to domain. If the value is not within the domain, will currently brutally round the data:
@@ -68,12 +69,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
       }
 
       domain = _;
-      domainMap();
-      index.domain([0, domain.length-1]);
-      zoomed();
-      // Widen the outer edges by pulling the domain in to ensure start and end bands are fully visible
-      index.domain(index.range().map(widen(0.65, band)).map(index.invert));
-      return zoomed();
+      return applyDomain();
     };
 
     function zoomed() {
@@ -85,8 +81,17 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
       dateIndexMap = lookupIndex(domain);
     }
 
+    function applyDomain() {
+      domainMap();
+      index.domain([0, domain.length-1]);
+      zoomed();
+      // Widen the outer edges by pulling the domain in to ensure start and end bands are fully visible
+      index.domain(index.range().map(widen(widening, band)).map(index.invert));
+      return zoomed();
+    }
+
     scale.copy = function() {
-      return financetime(index.copy(), domain);
+      return financetime(index.copy(), domain, widening);
     };
 
     /**
@@ -99,6 +104,12 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
      */
     scale.band = function() {
       return band;
+    };
+
+    scale.widening = function(_) {
+      if(!arguments.length) return widening;
+      widening = _;
+      return applyDomain();
     };
 
     scale.zoomable = function() {
