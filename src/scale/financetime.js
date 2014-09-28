@@ -5,15 +5,15 @@
  generally contains data points on days where a market is open but no points when closed, such as weekday
  and weekends respectively. When plot, is done so without weekend gaps.
  */
-module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, widen, zoomable) {  // Injected dependencies
-  function financetime(index, domain, widening) {
+module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, scale_widen, zoomable) {  // Injected dependencies
+  function financetime(index, domain, outerPadding) {
     var dateIndexMap,
         tickState = { tickFormat: dailyTickMethod[dailyTickMethod.length-1][2] },
         band = 3;
 
     index = index || d3_scale_linear();
     domain = domain || [new Date(0), new Date(1)];
-    widening = widening === undefined ? 0.65 : widening;
+    outerPadding = outerPadding === undefined ? 0.65 : outerPadding;
 
     /**
      * Scales the value to domain. If the value is not within the domain, will currently brutally round the data:
@@ -85,13 +85,13 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
       domainMap();
       index.domain([0, domain.length-1]);
       zoomed();
-      // Widen the outer edges by pulling the domain in to ensure start and end bands are fully visible
-      index.domain(index.range().map(widen(widening, band)).map(index.invert));
+      // Apply outerPadding and widen the outer edges by pulling the domain in to ensure start and end bands are fully visible
+      index.domain(index.range().map(scale_widen(outerPadding, band)).map(index.invert));
       return zoomed();
     }
 
     scale.copy = function() {
-      return financetime(index.copy(), domain, widening);
+      return financetime(index.copy(), domain, outerPadding);
     };
 
     /**
@@ -106,9 +106,9 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
       return band;
     };
 
-    scale.widening = function(_) {
-      if(!arguments.length) return widening;
-      widening = _;
+    scale.outerPadding = function(_) {
+      if(!arguments.length) return outerPadding;
+      outerPadding = _;
       return applyDomain();
     };
 

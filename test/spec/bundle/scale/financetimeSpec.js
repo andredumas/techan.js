@@ -94,13 +94,13 @@ techanModule('scale/financetime', function(specBuilder) {
           expect([600].map(financetime.invert)).toEqual([data[5]]);
         });
 
-        describe('And widening set to none', function() {
+        describe('And outerPadding set to none', function() {
           beforeEach(function() {
-            financetime.widening(0);
+            financetime.outerPadding(0);
           });
 
-          it('Then widened should be 0', function() {
-            expect(financetime.widening()).toEqual(0);
+          it('Then outerPadding should be 0', function() {
+            expect(financetime.outerPadding()).toEqual(0);
           });
 
           it('Then scale of first index should return min range', function() {
@@ -118,8 +118,8 @@ techanModule('scale/financetime', function(specBuilder) {
               cloned = financetime.copy();
             });
 
-            it('Then widened should be 0', function() {
-              expect(cloned.widening()).toEqual(0);
+            it('Then outerPadding should be 0', function() {
+              expect(cloned.outerPadding()).toEqual(0);
             });
 
             it('Then scale of first index should return min range', function() {
