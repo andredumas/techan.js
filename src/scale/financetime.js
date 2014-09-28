@@ -6,13 +6,14 @@
  and weekends respectively. When plot, is done so without weekend gaps.
  */
 module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, scale_widen, zoomable) {  // Injected dependencies
-  function financetime(index, domain, outerPadding) {
+  function financetime(index, domain, padding, outerPadding) {
     var dateIndexMap,
         tickState = { tickFormat: dailyTickMethod[dailyTickMethod.length-1][2] },
         band = 3;
 
     index = index || d3_scale_linear();
     domain = domain || [new Date(0), new Date(1)];
+    padding = padding === undefined ? 0.2 : padding;
     outerPadding = outerPadding === undefined ? 0.65 : outerPadding;
 
     /**
@@ -73,7 +74,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     };
 
     function zoomed() {
-      band = rangeBand(index, domain);
+      band = rangeBand(index, domain, padding);
       return scale;
     }
 
@@ -91,7 +92,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     }
 
     scale.copy = function() {
-      return financetime(index.copy(), domain, outerPadding);
+      return financetime(index.copy(), domain, padding, outerPadding);
     };
 
     /**
@@ -109,6 +110,12 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     scale.outerPadding = function(_) {
       if(!arguments.length) return outerPadding;
       outerPadding = _;
+      return applyDomain();
+    };
+
+    scale.padding = function(_) {
+      if(!arguments.length) return padding;
+      padding = _;
       return applyDomain();
     };
 
@@ -172,8 +179,8 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     return zoomed();
   }
 
-  function rangeBand(linear, domain) {
-    return (Math.abs(linear(domain.length-1) - linear(0))/Math.max(1, domain.length-1))*0.8;
+  function rangeBand(linear, domain, padding) {
+    return (Math.abs(linear(domain.length-1) - linear(0))/Math.max(1, domain.length-1))*(1-padding);
   }
 
   var dayFormat = d3_time.format('%b %e'),

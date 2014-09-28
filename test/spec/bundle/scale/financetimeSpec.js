@@ -28,7 +28,7 @@ techanModule('scale/financetime', function(specBuilder) {
           expect(financetime.range()).toEqual([48, 1052]);
         });
 
-        it('Then band should correct band', function() {
+        it('Then band should be default of 80%', function() {
           expect(financetime.band()).toEqual(80);
         });
 
@@ -124,6 +124,36 @@ techanModule('scale/financetime', function(specBuilder) {
 
             it('Then scale of first index should return min range', function() {
               expect(cloned(data[0])).toEqual(48);
+            });
+          });
+
+          describe('And padding set to none', function() {
+            beforeEach(function() {
+              financetime.padding(0);
+            });
+
+            it('Then padding should be 0', function() {
+              expect(financetime.padding()).toEqual(0);
+            });
+
+            it('Then band should be approximately 100%', function() {
+              expect(financetime.band()).toEqual(111.55555555555556); // (1052-48)/9
+            });
+
+            describe('And copied', function() {
+              var cloned;
+
+              beforeEach(function() {
+                cloned = financetime.copy();
+              });
+
+              it('Then padding should be 0', function() {
+                expect(cloned.padding()).toEqual(0);
+              });
+
+              it('Then band should be approximately of 100%', function() {
+                expect(financetime.band()).toEqual(111.55555555555556); // (1052-48)/9
+              });
             });
           });
         });
