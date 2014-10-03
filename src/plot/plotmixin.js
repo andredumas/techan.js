@@ -34,7 +34,18 @@ module.exports = function(d3_scale_linear, techan_scale_financetime) {
     }
 
     bind();
+
+    return plotMixin;
   }
+
+  plotMixin.on = function(source, dispatch) {
+    source.on = function(type, listener) {
+      dispatch.on(type, listener);
+      return source;
+    };
+
+    return plotMixin;
+  };
 
   return plotMixin;
 };

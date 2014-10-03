@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(d3) {
+module.exports = function(d3, d3_select) {
   function dataSelection(g, dataMapper, accessor_date) {
     var selection = g.selectAll('g.data').data(dataMapper, accessor_date);
     selection.exit().remove();
@@ -53,6 +53,36 @@ module.exports = function(d3) {
       return d3.svg.line().interpolate('monotone')
         .x(function(d) { return x(accessor_date(d)); } )
         .y(function(d) { return y(accessor_value(d)); } );
+    },
+
+    interaction: {
+      mousedispatch: function(dispatch) {
+        return function(selection) {
+          return selection.on('mouseenter', function(d) {
+            d3_select(this.parentNode).classed('mouseover', true);
+            dispatch.mouseenter(d);
+          })
+          .on('mouseout', function(d) {
+            var parentElement = d3_select(this.parentNode);
+            if(!parentElement.classed('dragging')) {
+              parentElement.classed('mouseover', false);
+              dispatch.mouseout(d);
+            }
+          })
+          .on('mousemove', function(d) { dispatch.mousemove(d); });
+        };
+      },
+
+      dragStartEndDispatch: function(drag, dispatch) {
+        return drag.on('dragstart', function(d) {
+          d3_select(this.parentNode.parentNode).classed('dragging', true);
+          dispatch.dragstart(d);
+        })
+        .on('dragend', function(d) {
+          d3_select(this.parentNode.parentNode).classed('dragging', false);
+          dispatch.dragend(d);
+        });
+      }
     }
   };
 };
