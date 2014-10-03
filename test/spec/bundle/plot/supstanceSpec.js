@@ -70,7 +70,7 @@ techanModule('plot/supstance', function(specBuilder) {
         var g,
             interactionSelection,
             mouseenter,
-            mouseout,
+            mouseleave,
             mousemove;
 
         beforeEach(function() {
@@ -80,7 +80,7 @@ techanModule('plot/supstance', function(specBuilder) {
 
           interactionSelection = g.select('g.interaction');
           mouseenter = interactionSelection.on('mouseenter');
-          mouseout = interactionSelection.on('mouseout');
+          mouseleave = interactionSelection.on('mouseleave');
           mousemove = interactionSelection.on('mousemove');
         });
 
@@ -88,8 +88,8 @@ techanModule('plot/supstance', function(specBuilder) {
           expect(mouseenter).toBeDefined();
         });
 
-        it('Then mouseout should be defined', function() {
-          expect(mouseout).toBeDefined();
+        it('Then mouseleave should be defined', function() {
+          expect(mouseleave).toBeDefined();
         });
 
         it('Then mousemove should be defined', function() {
@@ -126,9 +126,9 @@ techanModule('plot/supstance', function(specBuilder) {
               spies.d3_select.and.returnValue(g.select('g.data'));
             });
 
-            describe('And mouseout is invoked', function() {
+            describe('And mouseleave is invoked', function() {
               beforeEach(function() {
-                mouseout.call(interactionSelection.node(), 321);
+                mouseleave.call(interactionSelection.node(), 321);
               });
 
               it('Then the mouseover class should be cleared', function() {
@@ -145,9 +145,9 @@ techanModule('plot/supstance', function(specBuilder) {
                 g.select('g.data').classed('dragging', true);
               });
 
-              describe('And mouseout is invoked', function() {
+              describe('And mouseleave is invoked', function() {
                 beforeEach(function() {
-                  mouseout.call(interactionSelection.node(), 321);
+                  mouseleave.call(interactionSelection.node(), 321);
                 });
 
                 it('Then the mouseover class should still be set', function() {

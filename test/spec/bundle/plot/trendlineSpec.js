@@ -70,7 +70,7 @@ techanModule('plot/trendline', function(specBuilder) {
         var g,
           interactionSelection,
           mouseenter,
-          mouseout,
+          mouseleave,
           mousemove;
 
         beforeEach(function () {
@@ -80,7 +80,7 @@ techanModule('plot/trendline', function(specBuilder) {
 
           interactionSelection = g.select('g.interaction');
           mouseenter = interactionSelection.on('mouseenter');
-          mouseout = interactionSelection.on('mouseout');
+          mouseleave = interactionSelection.on('mouseleave');
           mousemove = interactionSelection.on('mousemove');
         });
 
@@ -89,8 +89,8 @@ techanModule('plot/trendline', function(specBuilder) {
           expect(mouseenter).toBeDefined();
         });
 
-        it('Then mouseout should be defined', function () {
-          expect(mouseout).toBeDefined();
+        it('Then mouseleave should be defined', function () {
+          expect(mouseleave).toBeDefined();
         });
 
         it('Then mousemove should be defined', function () {

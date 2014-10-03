@@ -62,7 +62,7 @@ module.exports = function(d3_svg_line, d3_select) {
             d3_select(this.parentNode).classed('mouseover', true);
             dispatch.mouseenter(d);
           })
-          .on('mouseout', function(d) {
+          .on('mouseleave', function(d) {
             var parentElement = d3_select(this.parentNode);
             if(!parentElement.classed('dragging')) {
               parentElement.classed('mouseover', false);
