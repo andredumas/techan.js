@@ -13,8 +13,9 @@ techanModule('plot/crosshair', function(specBuilder) {
   };
 
   var mockInit = function(crosshair) {
+    var plotmixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
     spies.d3_mouse = jasmine.createSpy('d3_mouse');
-    return crosshair(d3.select, d3.event, spies.d3_mouse, d3.dispatch, techan.plot.axisannotation);
+    return crosshair(d3.select, d3.event, spies.d3_mouse, d3.dispatch, techan.plot.axisannotation, plotmixin);
   };
 
   function assertDomStructure(gScope) {
@@ -110,6 +111,10 @@ techanModule('plot/crosshair', function(specBuilder) {
         beforeEach(function () {
           crosshair = scope.plot;
           g = domFixtures.g();
+        });
+
+        it('Then .on should be defined', function() {
+          expect(crosshair.on).toBeDefined();
         });
 
         describe('And on default invoke', function() {

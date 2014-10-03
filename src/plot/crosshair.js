@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannotation) { // Injected dependencies
+module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannotation, plotMixin) { // Injected dependencies
   return function() { // Closure function
     var dispatch = d3_dispatch('enter', 'out', 'move'),
         xAnnotation = [axisannotation()],
@@ -87,10 +87,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
       return crosshair;
     };
 
-    crosshair.on = function(type, listener) {
-      dispatch.on(type, listener);
-      return crosshair;
-    };
+    // Mixin event listening
+    plotMixin.on(crosshair, dispatch);
 
     return crosshair;
   };
