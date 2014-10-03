@@ -12,7 +12,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
     function crosshair(g) {
       var group = g.selectAll('g.data.top').data([change], function(d) { return d; }),
           groupEnter = group.enter(),
-          dataEnter = groupEnter.append('g').attr('class', 'data top').call(display, 'none');
+          dataEnter = groupEnter.append('g').attr('class', 'data top').style('display', 'none');
 
       group.exit().remove();
 
@@ -95,7 +95,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
 };
 
 function display(g, style) {
-  g.selectAll('g.data').style('display', style);
+  g.select('g.data.top').style('display', style);
 }
 
 function mousemoveRefresh(d3_select, d3_mouse, dispatch, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
