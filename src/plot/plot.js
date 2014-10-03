@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(d3, d3_select) {
+module.exports = function(d3_svg_line, d3_select) {
   function dataSelection(g, dataMapper, accessor_date) {
     var selection = g.selectAll('g.data').data(dataMapper, accessor_date);
     selection.exit().remove();
@@ -50,7 +50,7 @@ module.exports = function(d3, d3_select) {
     },
 
     pathLine: function(accessor_date, x, accessor_value, y) {
-      return d3.svg.line().interpolate('monotone')
+      return d3_svg_line().interpolate('monotone')
         .x(function(d) { return x(accessor_date(d)); } )
         .y(function(d) { return y(accessor_value(d)); } );
     },

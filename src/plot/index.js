@@ -3,7 +3,7 @@
 module.exports = function(d3) {
   var scale = require('../scale')(d3),
       accessor = require('../accessor')(),
-      plot = require('./plot')(d3, d3.select),
+      plot = require('./plot')(d3.svg.line, d3.select),
       plotMixin = require('./plotmixin')(d3.scale.linear, scale.financetime),
       line = require('./line'),
       axisannotation = require('./axisannotation')(d3.svg.axis, plot);

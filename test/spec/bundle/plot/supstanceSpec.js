@@ -14,7 +14,7 @@ techanModule('plot/supstance', function(specBuilder) {
     spies.d3_event = jasmine.createSpy('d3_event');
     spies.d3_select = jasmine.createSpy('d3_select');
 
-    var plot = require('../../../../src/plot/plot')(d3, spies.d3_select),
+    var plot = require('../../../../src/plot/plot')(d3.svg.line, spies.d3_select),
         plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
 
     return supstance(d3.behavior.drag, spies.d3_event, spies.d3_select, d3.dispatch, techan.accessor.value, plot, plotMixin);
