@@ -222,9 +222,9 @@ path.middle, path.zero {
     stroke-dasharray: 5, 5;
 }
 
-.analysis path {
+.analysis path, .analysis circle {
     stroke: yellow;
-    stroke-width: 1;
+    stroke-width: 0.7;
 }
 
 .interaction path, .interaction circle {
@@ -239,13 +239,31 @@ path.middle, path.zero {
     cursor: nwse-resize;
 }
 
-path.supstance {
+.trendline circle {
+    stroke-width: 0;
+    display: none;
+}
+.mouseover .trendline path {
+    stroke-width: 1;
+}
+
+.mouseover .trendline circle {
+    stroke-width: 1;
+    fill: yellow;
+    display: inline;
+}
+
+.supstance path {
     stroke-dasharray: 2, 2;
 }
 
 .supstances .interaction path {
     pointer-events: all;
     cursor: ns-resize;
+}
+
+.mouseover .supstance path {
+    stroke-width: 1.5;
 }
 
 .crosshair {
