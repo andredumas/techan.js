@@ -17,9 +17,29 @@ techanModule('indicator/ema', function(specBuilder) {
           ema = scope.ema;
         });
 
-        it('Then on default invoke, ema should calculate correct values', function() {
-          ema(data.input).forEach(function(d, i) {
-            expect(d).toEqual(data.expected.ema[i]);
+        describe('And on default invoke', function() {
+          var result;
+
+          beforeEach(function() {
+            result = ema(data.input);
+          });
+
+          it('Then ema should calculate correct values', function() {
+            result.forEach(function(d, i) {
+              expect(d).toEqual(data.expected.ema[i]);
+            });
+          });
+
+          describe('And on second default invoke', function() {
+            beforeEach(function() {
+              result = ema(data.input);
+            });
+
+            it('Then ema should calculate the same correct values', function() {
+              result.forEach(function(d, i) {
+                expect(d).toEqual(data.expected.ema[i]);
+              });
+            });
           });
         });
       });
