@@ -77,6 +77,10 @@ var techanSite = techanSite || {};
           .attr("class", "chart")
           .attr("transform", "translate(" + dim.margin.left + "," + dim.margin.top + ")");
 
+//        svg.append('text')
+//          .attr('y', dim.height)
+//          .text(techan.version);
+
         svg.append('text')
           .attr("class", "symbol")
           .attr("x", 5)
