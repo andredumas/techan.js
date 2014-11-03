@@ -97,7 +97,7 @@ techanModule('scale', function(specBuilder) {
         });
 
         it('Then the inverted domain reference value should be 0%', function() {
-          expect(scale.invert(y(125))).toEqual(0);
+          expect(Math.round(scale.invert(y(125))*1000)/1000).toBe(0);
         });
 
         it('Then the inverted min domain value should be -20%', function() {
@@ -105,7 +105,7 @@ techanModule('scale', function(specBuilder) {
         });
 
         it('Then the inverted max domain value should be 60%', function() {
-          expect(scale.invert(y(200))).toEqual(0.6000000000000001);
+          expect(scale.invert(y(200))).toEqual(0.6);
         });
       });
     });

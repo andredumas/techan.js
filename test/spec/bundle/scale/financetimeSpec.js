@@ -33,7 +33,7 @@ techanModule('scale/financetime', function(specBuilder) {
         });
 
         it('Then scale of first index should return min widened range', function() {
-          expect(financetime(data[0])).toEqual(100);
+          expect(Math.round(financetime(data[0])*1000)/1000).toEqual(100);
         });
 
         it('Then scale of last index should return max widened range', function() {
@@ -268,11 +268,11 @@ techanModule('scale/financetime', function(specBuilder) {
             });
 
             it('Then baseline scale of first index should return min zoomed range', function() {
-              expect(baselineScale(0)).toEqual(140.00000000000003);
+              expect(baselineScale(0)).toEqual(140);
             });
 
             it('Then scale of first index should return min range', function() {
-              expect(financetime(data[0])).toEqual(127.10303030303034);
+              expect(Math.round(financetime(data[0])*1000)/1000).toEqual(127.103);
             });
 
             it('Then baseline scale of last index should return max zoomed range', function() {
@@ -280,7 +280,7 @@ techanModule('scale/financetime', function(specBuilder) {
             });
 
             it('Then scale of last index should return max range', function() {
-              expect(financetime(data[data.length-1])).toEqual(1496.19393939394);
+              expect(Math.round(financetime(data[data.length-1])*1000)/1000).toEqual(1496.194);
             });
 
             it('Then domain should return visible domain', function() {
@@ -323,11 +323,11 @@ techanModule('scale/financetime', function(specBuilder) {
               });
 
               it('Then scale of first index should return min range', function() {
-                expect(cloned(data[0])).toEqual(127.10303030303034);
+                expect(Math.round(cloned(data[0])*1000)/1000).toEqual(127.103);
               });
 
               it('Then scale of last index should return max range', function() {
-                expect(cloned(data[data.length-1])).toEqual(1496.19393939394);
+                expect(Math.round(cloned(data[data.length-1])*1000)/1000).toEqual(1496.194);
               });
 
               it('Then domain should return visible domain', function() {
