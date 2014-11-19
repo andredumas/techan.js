@@ -21,8 +21,8 @@ techanModule('scale/zoomable', function(specBuilder) {
           zoomable = scope.zoomable(linear, zoomedCallback);
         });
 
-        it('Then throws an exception when reading the domain', function() {
-          expect(zoomable.domain).toThrow();
+        it('Then returns the domain when reading the domain', function() {
+          expect(zoomable.domain()).toEqual([0, 10]);
         });
 
         it('Then throws an exception when writing the range', function() {
@@ -41,6 +41,10 @@ techanModule('scale/zoomable', function(specBuilder) {
 
         it('Then the range should be default', function() {
           expect(linear.range()).toEqual([0, 1]);
+        });
+
+        it('Then setting domain outside of undlerying linear indexes should clamp', function() {
+          expect(zoomable.domain([-1, 11]).domain()).toEqual([0, 10]);
         });
 
         describe('And copied', function() {
@@ -93,6 +97,16 @@ techanModule('scale/zoomable', function(specBuilder) {
             it('Then scale of last index should return 2 max range', function() {
               expect(linear(10)).toEqual(1);
             });
+          });
+        });
+
+        describe('And domain clamp is disabled', function() {
+          beforeEach(function() {
+            zoomable.clamp(false);
+          });
+
+          it('Then setting domain outside of undlerying linear indexes wont clamp', function() {
+            expect(zoomable.domain([-1, 11]).domain()).toEqual([-1, 11]);
           });
         });
       });

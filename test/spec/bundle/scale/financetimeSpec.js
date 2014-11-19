@@ -225,22 +225,17 @@ techanModule('scale/financetime', function(specBuilder) {
           });
         });
 
-        describe('And a zoom applied', function() {
-          var zoom,
-              baselineScale;
+        describe('And a zoomable obtained', function() {
+          var zoomable;
 
           beforeEach(function() {
-            zoom = d3.behavior.zoom();
             financetime = scope.financetime;
-            zoom.x(financetime.zoomable());
-            baselineScale = d3.scale.linear()
-              .domain([-0.52, 9.52]) // Adjusted index domain taking to account the extra padding
-              .range(financetime.range());
+            zoomable = financetime.zoomable();
           });
 
-          describe('And heavily scaled', function() {
+          describe('And heavily scaled/zoomed in between values', function() {
             beforeEach(function() {
-              zoom.scale(100);
+              zoomable.domain([5.1, 5.8]);
             });
 
             it('Then domain should return empty', function() {
@@ -252,8 +247,118 @@ techanModule('scale/financetime', function(specBuilder) {
             });
           });
 
-          describe('And translated left', function() {
+          describe('And heavily scaled/zoomed in on value', function() {
             beforeEach(function() {
+              zoomable.domain([4.8, 5.1]);
+            });
+
+            it('Then domain should return a single value', function() {
+              expect(financetime.domain()).toEqual([new Date(2012,4,25)]);
+            });
+
+            it('Then ticks should return a single value', function() {
+              expect(financetime.ticks()).toEqual([new Date(2012,4,25)]);
+            });
+          });
+
+          describe('And heavily scaled/zoomed out', function() {
+            beforeEach(function() {
+              // Simulate a heavy zoom out
+              zoomable.domain([-100, 100]);
+            });
+
+            it('Then domain should return the full set of domain', function() {
+              expect(financetime.domain()).toEqual(data);
+            });
+
+            it('Then ticks should return full ticks as if not zoomed', function() {
+              expect(financetime.ticks()).toEqual([
+                new Date(2012, 4, 18),
+                new Date(2012, 4, 21),
+                new Date(2012, 4, 22),
+                new Date(2012, 4, 23),
+                new Date(2012, 4, 24),
+                new Date(2012, 4, 25),
+                new Date(2012, 4, 29),
+                new Date(2012, 4, 30),
+                new Date(2012, 4, 31),
+                new Date(2012, 5, 1)
+              ]);
+            });
+          });
+
+          describe('And heavily translated', function() {
+            beforeEach(function() {
+              zoomable.domain([8, 100]);
+            });
+
+            it('Then domain should return the stretched set of domain', function() {
+              expect(financetime.domain()).toEqual([
+                new Date(2012, 4, 31),
+                new Date(2012, 5, 1)
+              ]);
+            });
+
+            it('Then ticks should return stretched set of ticks', function() {
+              expect(financetime.ticks()).toEqual([
+                new Date(2012, 4, 31),
+                new Date(2012, 5, 1)
+              ]);
+            });
+          });
+
+          describe('And zoomable is not clamped', function() {
+            beforeEach(function() {
+              zoomable.clamp(false);
+            });
+
+            describe('And heavily scaled/zoomed out', function() {
+              beforeEach(function() {
+                // Simulate a heavy zoom out
+                zoomable.domain([-1000, 1000]);
+              });
+
+              it('Then domain should return the full set of domain', function() {
+                expect(financetime.domain()).toEqual(data);
+              });
+
+              // FIXME Not returning anything
+              xit('Then ticks should return a single rounded', function() {
+                expect(financetime.ticks()).toEqual([new Date(2012,5,1)]);
+              });
+            });
+
+            describe('And heavily translated', function() {
+              beforeEach(function() {
+                zoomable.domain([8, 100]);
+              });
+
+              it('Then domain should return a stretched set of domain', function() {
+                expect(financetime.domain()).toEqual([
+                  new Date(2012, 4, 31),
+                  new Date(2012, 5, 1)
+                ]);
+              });
+
+              xit('Then ticks should return a stretched set of ticks', function() {
+                expect(financetime.ticks()).toEqual([
+                  new Date(2012, 4, 31),
+                  new Date(2012, 5, 1)
+                ]);
+              });
+            });
+          });
+
+          describe('And translated left', function() {
+            var baselineScale;
+
+            beforeEach(function() {
+              var zoom = d3.behavior.zoom();
+              zoom.x(zoomable);
+              baselineScale = d3.scale.linear()
+                .domain([-0.52, 9.52]) // Adjusted index domain taking to account the extra padding
+                .range(financetime.range());
+
               d3.behavior.zoom().x(baselineScale)
                   .scale(1.5).translate([-10, 0]);
               zoom.scale(1.5).translate([-10, 0]);
@@ -285,6 +390,10 @@ techanModule('scale/financetime', function(specBuilder) {
 
             it('Then domain should return visible domain', function() {
               expect(financetime.domain()).toEqual(data.slice(0, 7));
+            });
+
+            it('Then ticks with 0 tick count returns an empty tick array', function() {
+              expect(financetime.ticks(0)).toEqual([]);
             });
 
             it('Then ticks should return offset tick values', function() {
@@ -396,6 +505,48 @@ techanModule('scale/financetime', function(specBuilder) {
             it('Then tickFormat should be intraday format', function() {
               expect(financetime.tickFormat()(new Date(1000))).toEqual(':01');
               expect(financetime.tickFormat()(new Date(2014, 1, 24, 9, 35))).toEqual('09:35');
+            });
+          });
+
+          describe('And zoomable obtained And clamp disabled', function() {
+            var zoomable;
+
+            beforeEach(function() {
+              zoomable = financetime.zoomable();
+              zoomable.clamp(false);
+            });
+
+            describe('And zoomed out', function() {
+              beforeEach(function() {
+                zoomable.domain([-100, 100]);
+              });
+
+              it('Then domain should return the full set of domain', function() {
+                expect(financetime.domain()).toEqual(timeData);
+              });
+
+              it('Then ticks should return a single rounded', function() {
+                expect(financetime.ticks()).toEqual([timeData[0]]);
+              });
+            });
+
+            describe('And heavily zoomed out', function() {
+              beforeEach(function() {
+                zoomable.domain([-1000, 1000]);
+              });
+
+              it('Then domain should return the full set of domain', function() {
+                expect(financetime.domain()).toEqual(timeData);
+              });
+
+              // Not if is a valid scenario to have small data set, zoom heavily and generate ticks
+              //xit('Then ticks should return a single rounded', function() {
+              //  expect(financetime.ticks()).toEqual([timeData[0]]);
+              //});
+              // Just make sure it executes without error rather than have a result for now
+              it('Then ticks should execute without error', function() {
+                expect(financetime.ticks).not.toThrow();
+              });
             });
           });
         });

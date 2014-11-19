@@ -12,13 +12,17 @@
 module.exports = function() {
   function zoomable(linear, zoomed) {
     var scale = {},
-        domainLimit = linear.domain();
+        domainLimit = linear.domain(),
+        clamp = true;
 
     scale.invert = linear.invert;
 
     scale.domain = function(_) {
-      if(!arguments.length) throw "zoomable is a write only domain. Use this scale for zooming only";
-      linear.domain([Math.max(domainLimit[0], _[0]), Math.min(domainLimit[1], _[1])]);
+      if(!arguments.length) return linear.domain();
+
+      if(clamp) linear.domain([Math.max(domainLimit[0], _[0]), Math.min(domainLimit[1], _[1])]);
+      else linear.domain(_);
+
       if(zoomed) zoomed(); // Callback to that we have been zoomed
       return scale;
     };
@@ -30,6 +34,12 @@ module.exports = function() {
 
     scale.copy = function() {
       return zoomable(linear.copy(), zoomed);
+    };
+
+    scale.clamp = function(_) {
+      if(!arguments.length) return clamp;
+      clamp = _;
+      return scale;
     };
 
     return scale;
