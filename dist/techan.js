@@ -1,9 +1,9 @@
 /*
- TechanJS v0.3.1
+ TechanJS v0.4.0-0
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-'use strict';module.exports='0.3.1';
+'use strict';module.exports='0.4.0-0';
 },{}],2:[function(_dereq_,module,exports){
 'use strict';
 
@@ -1734,9 +1734,12 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     scale.domain = function(_) {
       if (!arguments.length) {
         var visible = index.domain();
+
+        if(visible[0] < 0 && visible[visible.length-1] < 0) return []; // if it's all negative return empty, nothing is visible
+
         visible = [
-          Math.ceil(visible[0]), // If min is fraction, it is partially out of view, round up (ceil)
-          Math.floor(visible[visible.length-1]) // If max is fraction, is partially out of view, round down (floor)
+          Math.max(Math.ceil(visible[0]), 0), // If min is fraction, it is partially out of view, but still partially visible, round up (ceil)
+          Math.min(Math.floor(visible[visible.length-1]), domain.length-1) // If max is fraction, is partially out of view, but still partially visible, round down (floor)
         ];
         return domain.slice(visible[0], visible[visible.length-1]+1); // Grab visible domain, inclusive
       }
@@ -1812,14 +1815,15 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
      * @returns {*}
      */
     scale.ticks = function(interval, steps) {
-      var visibleDomain = scale.domain();
+      var visibleDomain = scale.domain(),
+          indexDomain = index.domain();
 
       if(!visibleDomain.length) return []; // Nothing is visible, no ticks to show
 
-      var method = interval === undefined ? tickMethod(visibleDomain, 10) :
-                    typeof interval === 'number' ? tickMethod(visibleDomain, interval) : null;
+      var method = interval === undefined ? tickMethod(visibleDomain, indexDomain, 10) :
+                    typeof interval === 'number' ? tickMethod(visibleDomain, indexDomain, interval) : null;
 
-      tickState.tickFormat = method ? method[2] : tickMethod(visibleDomain, 10)[2];
+      tickState.tickFormat = method ? method[2] : tickMethod(visibleDomain, indexDomain, 10)[2];
 
       if(method) {
         interval = method[0];
@@ -1845,7 +1849,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
       };
     };
 
-    techan_util_rebindCallback(scale, index, zoomed, 'range', 'interpolate', 'clamp', 'nice');
+    techan_util_rebindCallback(scale, index, zoomed, 'range');
 
     domainMap();
     return zoomed();
@@ -1922,17 +1926,29 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     [d3_time.day, 1, dayFormat]
   ];
 
-  function tickMethod(visibleDomain, count) {
+  /**
+   * Calculates the proportion of domain that is visible. Used to reduce the overall count by this factor
+   * @param visibleDomain
+   * @param indexDomain
+   * @returns {number}
+   */
+  function countK(visibleDomain, indexDomain) {
+    return visibleDomain.length/(indexDomain[indexDomain.length-1]-indexDomain[0]);
+  }
+
+  function tickMethod(visibleDomain, indexDomain, count) {
     if(visibleDomain.length == 1) return genericTickMethod; // If we only have 1 to display, show the generic tick method
 
-    // Determine whether we're showing daily or intraday data
-    var intraDay = (visibleDomain[visibleDomain.length-1] - visibleDomain[0])/dailyStep < 1,
+    var visibleDomainExtent = visibleDomain[visibleDomain.length-1] - visibleDomain[0],
+        intraDay = visibleDomainExtent/dailyStep < 1, // Determine whether we're showing daily or intraday data
         tickMethods = intraDay ? intraDayTickMethod : dailyTickMethod,
         tickSteps = intraDay ? intraDayTickSteps : dailyTickSteps,
-        target = (visibleDomain[visibleDomain.length-1] - visibleDomain[0])/count,
+        k = Math.min(Math.round(countK(visibleDomain, indexDomain)*count), count),
+        target = visibleDomainExtent/k, // Adjust the target based on proportion of domain that is visible
         i = d3_bisect(tickSteps, target);
 
-    return i ? tickMethods[target/tickSteps[i-1] < tickSteps[i]/target ? i-1 : i] : tickMethods[i];
+    return i == tickMethods.length ? tickMethods[i-1] : // Return the largest tick method
+      i ? tickMethods[target/tickSteps[i-1] < tickSteps[i]/target ? i-1 : i] : tickMethods[i]; // Else return close approximation or first tickMethod
   }
 
   function lookupIndex(array) {
@@ -2077,13 +2093,17 @@ function widen(widening, width) {
 module.exports = function() {
   function zoomable(linear, zoomed) {
     var scale = {},
-        domainLimit = linear.domain();
+        domainLimit = linear.domain(),
+        clamp = true;
 
     scale.invert = linear.invert;
 
     scale.domain = function(_) {
-      if(!arguments.length) throw "zoomable is a write only domain. Use this scale for zooming only";
-      linear.domain([Math.max(domainLimit[0], _[0]), Math.min(domainLimit[1], _[1])]);
+      if(!arguments.length) return linear.domain();
+
+      if(clamp) linear.domain([Math.max(domainLimit[0], _[0]), Math.min(domainLimit[1], _[1])]);
+      else linear.domain(_);
+
       if(zoomed) zoomed(); // Callback to that we have been zoomed
       return scale;
     };
@@ -2095,6 +2115,12 @@ module.exports = function() {
 
     scale.copy = function() {
       return zoomable(linear.copy(), zoomed);
+    };
+
+    scale.clamp = function(_) {
+      if(!arguments.length) return clamp;
+      clamp = _;
+      return scale;
     };
 
     return scale;
