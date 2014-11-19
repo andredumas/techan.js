@@ -4,6 +4,6 @@
     "d3": "~3.4.13",
     "bootstrap": "3.2.0",
     "jquery": "1.11.0",
-    "techanjs": "andredumas/techan.js#0.3.1"
+    "techanjs": "andredumas/techan.js#b70ed9fa5295faee082cdfed8d1305b3bde95d30"
   }
 }
