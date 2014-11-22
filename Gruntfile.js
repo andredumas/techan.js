@@ -94,12 +94,14 @@ module.exports = function(grunt) {
       options: {
         config: '.jscs.json'
       },
-      dev: ['src/**/*.js', 'Gruntfile.js', 'test/**/*.js', '<%= filegen.version.dest %>']
+      dev: {
+        src: ['src/**/*.js', 'Gruntfile.js', 'test/**/*.js', '<%= filegen.version.dest %>']
+      }
     },
 
     watch: {
       files: '<%= jshint.dev.src %>',
-      tasks: ['dev', 'dist']
+      tasks: ['dev']
     },
 
     jasmine: {
@@ -174,14 +176,14 @@ module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
   grunt.loadTasks('lib/grunt');
 
-  grunt.registerTask('lint', ['jshint', 'jscs']);
-  grunt.registerTask('dev', ['filegen:version', 'lint', 'browserify:dev', 'browserify:test', 'jasmine:test']);
+  grunt.registerTask('lint', ['newer:jshint', 'newer:jscs']);
+  grunt.registerTask('dev', ['lint', 'newer:browserify:dev', 'newer:browserify:test', 'jasmine:test']);
   grunt.registerTask('dist', ['browserify:dist', 'usebanner', 'jasmine:dist']);
   grunt.registerTask('minify', ['uglify', 'jasmine:minify']);
-  grunt.registerTask('serve', ['connect', 'watch']);
+  grunt.registerTask('serve', ['filegen:version', 'connect', 'watch']);
   grunt.registerTask('release:pre', ['bump-only:prerelease', 'default']);
   grunt.registerTask('release:minor', ['bump-only:minor', 'default', 'bump-commit']);
   grunt.registerTask('release:major', ['bump-only:major', 'default', 'bump-commit']);
 
-  grunt.registerTask('default', ['jsonlint', 'bower', 'clean', 'dev', 'dist', 'minify', 'compress']);
+  grunt.registerTask('default', ['jsonlint', 'bower', 'clean', 'filegen:version', 'dev', 'dist', 'minify', 'compress']);
 };

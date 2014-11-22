@@ -28,7 +28,8 @@
     "grunt-banner": "~0.2.3",
     "grunt-contrib-connect": "~0.8.0",
     "grunt-contrib-compress": "~0.10.0",
-    "grunt-bump": "0.0.15"
+    "grunt-bump": "0.0.15",
+    "grunt-newer": "~0.8.0"
   },
   "scripts": {
     "watch": "grunt serve",
