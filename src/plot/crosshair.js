@@ -2,9 +2,10 @@
 
 module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannotation, plotMixin) { // Injected dependencies
   return function() { // Closure function
-    var dispatch = d3_dispatch('enter', 'out', 'move'),
-        xAnnotation = [axisannotation()],
-        yAnnotation = [axisannotation()],
+    var p = {},  // Container for private, direct access mixed in variables
+        dispatch = d3_dispatch('enter', 'out', 'move'),
+        xAnnotation = [],
+        yAnnotation = [],
         verticalWireRange,
         horizontalWireRange,
         change = 0; // Track changes to this object, to know when to redraw
@@ -28,8 +29,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
     }
 
     crosshair.refresh = function(g) {
-      var xRange = xAnnotation[0].axis().scale().range(),
-          yRange = yAnnotation[0].axis().scale().range(),
+      var xRange = p.xScale.range(),
+          yRange = p.yScale.range(),
           group = g.selectAll('g.data'),
           mouseSelection = g.selectAll('rect'),
           pathVerticalSelection = group.selectAll('path.vertical'),
@@ -51,12 +52,12 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
           display(g, 'none');
           dispatch.out();
         })
-        .on('mousemove', mousemoveRefresh(d3_select, d3_mouse, dispatch, xAnnotation, yAnnotation,
+        .on('mousemove', mousemoveRefresh(d3_select, d3_mouse, p, dispatch, xAnnotation, yAnnotation,
           pathVerticalSelection, pathHorizontalSelection, xAnnotationSelection, yAnnotationSelection,
           verticalWireRange, horizontalWireRange)
         );
 
-      refresh(d3_select, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
+      refresh(d3_select, p, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
         xAnnotationSelection, yAnnotationSelection, verticalWireRange, horizontalWireRange
       );
     };
@@ -87,8 +88,11 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
       return crosshair;
     };
 
-    // Mixin event listening
-    plotMixin.on(crosshair, dispatch);
+    // Mixin scale management and event listening
+    plotMixin(crosshair, p)
+      .xScale()
+      .yScale()
+      .on(dispatch);
 
     return crosshair;
   };
@@ -98,16 +102,16 @@ function display(g, style) {
   g.select('g.data.top').style('display', style);
 }
 
-function mousemoveRefresh(d3_select, d3_mouse, dispatch, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
+function mousemoveRefresh(d3_select, d3_mouse, p, dispatch, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
                           xAnnotationSelection, yAnnotationSelection, verticalWireRange, horizontalWireRange) {
   var event = [new Array(xAnnotation.length), new Array(yAnnotation.length)];
 
   return function() {
     var coords = d3_mouse(this),
-        x = xAnnotation[0].axis().scale(),
-        y = yAnnotation[0].axis().scale();
+        x = p.xScale,
+        y = p.yScale;
 
-    refresh(d3_select, xAnnotation, yAnnotation,
+    refresh(d3_select, p, xAnnotation, yAnnotation,
       pathVerticalSelection.datum(x.invert(coords[0])),
       pathHorizontalSelection.datum(y.invert(coords[1])),
       xAnnotationSelection.each(updateAnnotationValue(xAnnotation, coords[0], event[0])),
@@ -119,11 +123,11 @@ function mousemoveRefresh(d3_select, d3_mouse, dispatch, xAnnotation, yAnnotatio
   };
 }
 
-function refresh(d3_select, xAnnotation, yAnnotation, xPath, yPath,
+function refresh(d3_select, p, xAnnotation, yAnnotation, xPath, yPath,
                  xAnnotationSelection, yAnnotationSelection,
                  verticalWireRange, horizontalWireRange) {
-  var x = xAnnotation[0].axis().scale(),
-      y = yAnnotation[0].axis().scale();
+  var x = p.xScale,
+      y = p.yScale;
 
   xPath.attr('d', verticalPathLine(x, verticalWireRange || y.range()));
   yPath.attr('d', horizontalPathLine(y, horizontalWireRange || x.range()));

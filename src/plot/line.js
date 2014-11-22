@@ -23,7 +23,7 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(line, p, accessor_value());
+    plotMixin(line, p).plot(accessor_value());
 
     return line;
   };

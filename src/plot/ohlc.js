@@ -16,7 +16,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(ohlc, p, accessor_ohlc());
+    plotMixin(ohlc, p).plot(accessor_ohlc());
 
     return ohlc;
   };

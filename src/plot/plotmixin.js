@@ -1,51 +1,70 @@
 'use strict';
 
+/**
+ * Module allows optionally mixing in helper methods to plots such as xScale, yScale, accessor setters
+ * and helpers for defining dispatching methods.
+ *
+ * @param d3_scale_linear
+ * @param techan_scale_financetime
+ * @returns {Function}
+ */
 module.exports = function(d3_scale_linear, techan_scale_financetime) {
-  function plotMixin(source, priv, accessor) {
-    var xScale = techan_scale_financetime(),
-        yScale = d3_scale_linear();
+  return function(source, priv) {
+    var plotMixin = {};
 
-    // Mixin the functions to the source
-    source.accessor = function(_) {
-      if (!arguments.length) return accessor;
-      accessor = _;
-      return bind();
+    plotMixin.xScale = function() {
+      priv.xScale = techan_scale_financetime();
+
+      source.xScale = function(_) {
+        if (!arguments.length) return priv.xScale;
+        priv.xScale = _;
+        return source;
+      };
+
+      return plotMixin;
     };
 
-    source.xScale = function(_) {
-      if (!arguments.length) return xScale;
-      xScale = _;
-      return bind();
+    plotMixin.yScale = function() {
+      priv.yScale = d3_scale_linear();
+
+      source.yScale = function(_) {
+        if (!arguments.length) return priv.yScale;
+        priv.yScale = _;
+        return source;
+      };
+
+      return plotMixin;
     };
 
-    source.yScale = function(_) {
-      if (!arguments.length) return yScale;
-      yScale = _;
-      return bind();
-    };
-
-    // Add in the private, direct access variables
-    function bind() {
-      priv.xScale = xScale;
-      priv.yScale = yScale;
+    plotMixin.accessor = function(accessor) {
       priv.accessor = accessor;
 
-      return source;
-    }
+      source.accessor = function(_) {
+        if (!arguments.length) return priv.accessor;
+        priv.accessor = _;
+        return source;
+      };
 
-    bind();
+      return plotMixin;
+    };
 
-    return plotMixin;
-  }
+    plotMixin.on = function(dispatch) {
+      source.on = function(type, listener) {
+        dispatch.on(type, listener);
+        return source;
+      };
 
-  plotMixin.on = function(source, dispatch) {
-    source.on = function(type, listener) {
-      dispatch.on(type, listener);
-      return source;
+      return plotMixin;
+    };
+
+    /**
+    * Generic mixin used for most plots
+    * @returns {plotMixin}
+    */
+    plotMixin.plot = function(accessor) {
+      return plotMixin.xScale().yScale().accessor(accessor);
     };
 
     return plotMixin;
   };
-
-  return plotMixin;
 };

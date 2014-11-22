@@ -29,8 +29,9 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(supstance, p, accessor_value())
-      .on(supstance, dispatch);
+    plotMixin(supstance, p)
+      .plot(accessor_value())
+      .on(dispatch);
 
     return supstance;
   }

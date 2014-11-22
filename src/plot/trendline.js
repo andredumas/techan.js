@@ -37,8 +37,9 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(trendline, p, accessor_trendline())
-      .on(trendline, dispatch);
+    plotMixin(trendline, p)
+      .plot(accessor_trendline())
+      .on(dispatch);
 
     return trendline;
   }

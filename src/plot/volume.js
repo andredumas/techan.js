@@ -21,7 +21,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(volume, p, accessor_volume());
+    plotMixin(volume, p).plot(accessor_volume());
 
     return volume;
   };

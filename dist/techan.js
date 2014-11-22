@@ -1,9 +1,9 @@
 /*
- TechanJS v0.4.0-0
+ TechanJS v0.4.0-1
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-'use strict';module.exports='0.4.0-0';
+'use strict';module.exports='0.4.0-1';
 },{}],2:[function(_dereq_,module,exports){
 'use strict';
 
@@ -824,7 +824,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(candlestick, p, accessor_ohlc());
+    plotMixin(candlestick, p).plot(accessor_ohlc());
 
     return candlestick;
   };
@@ -909,9 +909,10 @@ function opacity(g, d3_scale_linear, d3_extent, accessor_volume) {
 
 module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannotation, plotMixin) { // Injected dependencies
   return function() { // Closure function
-    var dispatch = d3_dispatch('enter', 'out', 'move'),
-        xAnnotation = [axisannotation()],
-        yAnnotation = [axisannotation()],
+    var p = {},  // Container for private, direct access mixed in variables
+        dispatch = d3_dispatch('enter', 'out', 'move'),
+        xAnnotation = [],
+        yAnnotation = [],
         verticalWireRange,
         horizontalWireRange,
         change = 0; // Track changes to this object, to know when to redraw
@@ -935,8 +936,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
     }
 
     crosshair.refresh = function(g) {
-      var xRange = xAnnotation[0].axis().scale().range(),
-          yRange = yAnnotation[0].axis().scale().range(),
+      var xRange = p.xScale.range(),
+          yRange = p.yScale.range(),
           group = g.selectAll('g.data'),
           mouseSelection = g.selectAll('rect'),
           pathVerticalSelection = group.selectAll('path.vertical'),
@@ -958,12 +959,12 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
           display(g, 'none');
           dispatch.out();
         })
-        .on('mousemove', mousemoveRefresh(d3_select, d3_mouse, dispatch, xAnnotation, yAnnotation,
+        .on('mousemove', mousemoveRefresh(d3_select, d3_mouse, p, dispatch, xAnnotation, yAnnotation,
           pathVerticalSelection, pathHorizontalSelection, xAnnotationSelection, yAnnotationSelection,
           verticalWireRange, horizontalWireRange)
         );
 
-      refresh(d3_select, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
+      refresh(d3_select, p, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
         xAnnotationSelection, yAnnotationSelection, verticalWireRange, horizontalWireRange
       );
     };
@@ -994,8 +995,11 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
       return crosshair;
     };
 
-    // Mixin event listening
-    plotMixin.on(crosshair, dispatch);
+    // Mixin scale management and event listening
+    plotMixin(crosshair, p)
+      .xScale()
+      .yScale()
+      .on(dispatch);
 
     return crosshair;
   };
@@ -1005,16 +1009,16 @@ function display(g, style) {
   g.select('g.data.top').style('display', style);
 }
 
-function mousemoveRefresh(d3_select, d3_mouse, dispatch, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
+function mousemoveRefresh(d3_select, d3_mouse, p, dispatch, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
                           xAnnotationSelection, yAnnotationSelection, verticalWireRange, horizontalWireRange) {
   var event = [new Array(xAnnotation.length), new Array(yAnnotation.length)];
 
   return function() {
     var coords = d3_mouse(this),
-        x = xAnnotation[0].axis().scale(),
-        y = yAnnotation[0].axis().scale();
+        x = p.xScale,
+        y = p.yScale;
 
-    refresh(d3_select, xAnnotation, yAnnotation,
+    refresh(d3_select, p, xAnnotation, yAnnotation,
       pathVerticalSelection.datum(x.invert(coords[0])),
       pathHorizontalSelection.datum(y.invert(coords[1])),
       xAnnotationSelection.each(updateAnnotationValue(xAnnotation, coords[0], event[0])),
@@ -1026,11 +1030,11 @@ function mousemoveRefresh(d3_select, d3_mouse, dispatch, xAnnotation, yAnnotatio
   };
 }
 
-function refresh(d3_select, xAnnotation, yAnnotation, xPath, yPath,
+function refresh(d3_select, p, xAnnotation, yAnnotation, xPath, yPath,
                  xAnnotationSelection, yAnnotationSelection,
                  verticalWireRange, horizontalWireRange) {
-  var x = xAnnotation[0].axis().scale(),
-      y = yAnnotation[0].axis().scale();
+  var x = p.xScale,
+      y = p.yScale;
 
   xPath.attr('d', verticalPathLine(x, verticalWireRange || y.range()));
   yPath.attr('d', horizontalPathLine(y, horizontalWireRange || x.range()));
@@ -1134,7 +1138,7 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(line, p, accessor_value());
+    plotMixin(line, p).plot(accessor_value());
 
     return line;
   };
@@ -1176,7 +1180,7 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(macd, p, accessor_macd());
+    plotMixin(macd, p).plot(accessor_macd());
 
     return macd;
   };
@@ -1223,7 +1227,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(ohlc, p, accessor_ohlc());
+    plotMixin(ohlc, p).plot(accessor_ohlc());
 
     return ohlc;
   };
@@ -1343,54 +1347,73 @@ module.exports = function(d3_svg_line, d3_select) {
 },{}],23:[function(_dereq_,module,exports){
 'use strict';
 
+/**
+ * Module allows optionally mixing in helper methods to plots such as xScale, yScale, accessor setters
+ * and helpers for defining dispatching methods.
+ *
+ * @param d3_scale_linear
+ * @param techan_scale_financetime
+ * @returns {Function}
+ */
 module.exports = function(d3_scale_linear, techan_scale_financetime) {
-  function plotMixin(source, priv, accessor) {
-    var xScale = techan_scale_financetime(),
-        yScale = d3_scale_linear();
+  return function(source, priv) {
+    var plotMixin = {};
 
-    // Mixin the functions to the source
-    source.accessor = function(_) {
-      if (!arguments.length) return accessor;
-      accessor = _;
-      return bind();
+    plotMixin.xScale = function() {
+      priv.xScale = techan_scale_financetime();
+
+      source.xScale = function(_) {
+        if (!arguments.length) return priv.xScale;
+        priv.xScale = _;
+        return source;
+      };
+
+      return plotMixin;
     };
 
-    source.xScale = function(_) {
-      if (!arguments.length) return xScale;
-      xScale = _;
-      return bind();
+    plotMixin.yScale = function() {
+      priv.yScale = d3_scale_linear();
+
+      source.yScale = function(_) {
+        if (!arguments.length) return priv.yScale;
+        priv.yScale = _;
+        return source;
+      };
+
+      return plotMixin;
     };
 
-    source.yScale = function(_) {
-      if (!arguments.length) return yScale;
-      yScale = _;
-      return bind();
-    };
-
-    // Add in the private, direct access variables
-    function bind() {
-      priv.xScale = xScale;
-      priv.yScale = yScale;
+    plotMixin.accessor = function(accessor) {
       priv.accessor = accessor;
 
-      return source;
-    }
+      source.accessor = function(_) {
+        if (!arguments.length) return priv.accessor;
+        priv.accessor = _;
+        return source;
+      };
 
-    bind();
+      return plotMixin;
+    };
 
-    return plotMixin;
-  }
+    plotMixin.on = function(dispatch) {
+      source.on = function(type, listener) {
+        dispatch.on(type, listener);
+        return source;
+      };
 
-  plotMixin.on = function(source, dispatch) {
-    source.on = function(type, listener) {
-      dispatch.on(type, listener);
-      return source;
+      return plotMixin;
+    };
+
+    /**
+    * Generic mixin used for most plots
+    * @returns {plotMixin}
+    */
+    plotMixin.plot = function(accessor) {
+      return plotMixin.xScale().yScale().accessor(accessor);
     };
 
     return plotMixin;
   };
-
-  return plotMixin;
 };
 },{}],24:[function(_dereq_,module,exports){
 'use strict';
@@ -1415,7 +1438,7 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(rsi, p, accessor_rsi());
+    plotMixin(rsi, p).plot(accessor_rsi());
 
     return rsi;
   };
@@ -1459,8 +1482,9 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(supstance, p, accessor_value())
-      .on(supstance, dispatch);
+    plotMixin(supstance, p)
+      .plot(accessor_value())
+      .on(dispatch);
 
     return supstance;
   }
@@ -1537,8 +1561,9 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(trendline, p, accessor_trendline())
-      .on(trendline, dispatch);
+    plotMixin(trendline, p)
+      .plot(accessor_trendline())
+      .on(dispatch);
 
     return trendline;
   }
@@ -1640,7 +1665,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(volume, p, accessor_volume());
+    plotMixin(volume, p).plot(accessor_volume());
 
     return volume;
   };

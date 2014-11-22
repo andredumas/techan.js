@@ -18,7 +18,7 @@ techanModule('plot/crosshair', function(specBuilder) {
     return crosshair(d3.select, d3.event, spies.d3_mouse, d3.dispatch, techan.plot.axisannotation, plotmixin);
   };
 
-  function assertDomStructure(gScope) {
+  function assertDomStructure(gScope, annotations) {
     var parent;
 
     beforeEach(function() {
@@ -84,28 +84,30 @@ techanModule('plot/crosshair', function(specBuilder) {
         expect(axisAnnotationXGroup.className).toEqual('axisannotation x');
       });
 
-      it('Then the g.axisannotation.x should have 1 child', function() {
-        expect(axisAnnotationXGroup.childNodes.length).toEqual(1);
-      });
+      if(annotations) {
+        it('Then the g.axisannotation.x should have 1 child', function () {
+          expect(axisAnnotationXGroup.childNodes.length).toEqual(1);
+        });
 
-      it('Then the g.axisannotation.x child should be g.0', function() {
-        expect(axisAnnotationXGroup.childNodes[0].nodeName.toLowerCase()).toEqual('g');
-        expect(axisAnnotationXGroup.childNodes[0].className).toEqual('0');
-      });
+        it('Then the g.axisannotation.x child should be g.0', function () {
+          expect(axisAnnotationXGroup.childNodes[0].nodeName.toLowerCase()).toEqual('g');
+          expect(axisAnnotationXGroup.childNodes[0].className).toEqual('0');
+        });
 
-      it('Then the fourth child element should be g.axisannotation.y', function() {
-        expect(axisAnnotationYGroup.nodeName.toLowerCase()).toEqual('g');
-        expect(axisAnnotationYGroup.className).toEqual('axisannotation y');
-      });
+        it('Then the fourth child element should be g.axisannotation.y', function () {
+          expect(axisAnnotationYGroup.nodeName.toLowerCase()).toEqual('g');
+          expect(axisAnnotationYGroup.className).toEqual('axisannotation y');
+        });
 
-      it('Then the g.axisannotation.y should have 1 child', function() {
-        expect(axisAnnotationYGroup.childNodes.length).toEqual(1);
-      });
+        it('Then the g.axisannotation.y should have 1 child', function () {
+          expect(axisAnnotationYGroup.childNodes.length).toEqual(1);
+        });
 
-      it('Then the g.axisannotation.y child should be g.0', function() {
-        expect(axisAnnotationYGroup.childNodes[0].nodeName.toLowerCase()).toEqual('g');
-        expect(axisAnnotationYGroup.childNodes[0].className).toEqual('0');
-      });
+        it('Then the g.axisannotation.y child should be g.0', function () {
+          expect(axisAnnotationYGroup.childNodes[0].nodeName.toLowerCase()).toEqual('g');
+          expect(axisAnnotationYGroup.childNodes[0].className).toEqual('0');
+        });
+      }
     });
   }
 
@@ -162,12 +164,72 @@ techanModule('plot/crosshair', function(specBuilder) {
           });
         });
       });
+
+      describe('And crosshair is initialised with annotations', function () {
+        beforeEach(function () {
+          crosshair = scope.plot;
+          crosshair.xAnnotation(techan.plot.axisannotation())
+            .yAnnotation(techan.plot.axisannotation());
+          g = domFixtures.g();
+        });
+
+        it('Then .on should be defined', function() {
+          expect(crosshair.on).toBeDefined();
+        });
+
+        describe('And on default invoke', function() {
+          var parent,
+            gScope = {g:undefined};
+
+          beforeEach(function() {
+            crosshair(g);
+            parent = g[0][0];
+            gScope.g = g;
+          });
+
+          it('Then it should render without error', function() {
+            expect(parent.innerHTML).not.toContain('NaN');
+          });
+
+          assertDomStructure(gScope, true);
+
+          describe('And second full invoke', function() {
+            beforeEach(function() {
+              crosshair(g);
+            });
+
+            it('Then it should still refresh without error', function() {
+              expect(parent.innerHTML).not.toContain('NaN');
+            });
+
+            assertDomStructure(gScope, true);
+          });
+
+          describe('And refresh invoke', function() {
+            beforeEach(function() {
+              crosshair.refresh(g);
+            });
+
+            it('Then it should still refresh without error', function() {
+              expect(parent.innerHTML).not.toContain('NaN');
+            });
+
+            assertDomStructure(gScope, true);
+          });
+        });
+      });
     });
 
     instanceBuilder.instance('mocked', mockInit, function(scope) {
       describe('And crosshair is initialised with defaults', function () {
         beforeEach(function () {
           crosshair = scope.crosshair;
+          // Accurately model an xAnnotation with time scale
+          var xAnnotation = techan.plot.axisannotation();
+          xAnnotation.axis().scale(techan.scale.financetime());
+          crosshair.xAnnotation(xAnnotation)
+            .yAnnotation(techan.plot.axisannotation());
+
           g = domFixtures.g();
         });
 
@@ -300,7 +362,7 @@ techanModule('plot/crosshair', function(specBuilder) {
 
               it('Then should set correct path.vertical datum', function() {
                 expect(selection.selectAll.calls.argsFor(6)[0]).toEqual('path.vertical');
-                expect(selection.datum.calls.argsFor(0)[0]).toEqual(1);
+                expect(selection.datum.calls.argsFor(0)[0]).toEqual(new Date(1));
               });
 
               it('Then should set correct path.horizontal datum', function() {
@@ -311,7 +373,7 @@ techanModule('plot/crosshair', function(specBuilder) {
               it('Then should update x event coordinate', function() {
                 var d = { value: 123 };
                 selection.each.calls.argsFor(4)[0]([d], 0);
-                expect(d.value).toEqual(1);
+                expect(d.value).toEqual(new Date(1));
               });
 
               it('Then should update y event coordindate', function() {

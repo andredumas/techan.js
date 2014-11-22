@@ -20,7 +20,7 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
     };
 
     // Mixin 'superclass' methods and variables
-    plotMixin(rsi, p, accessor_rsi());
+    plotMixin(rsi, p).plot(accessor_rsi());
 
     return rsi;
   };
