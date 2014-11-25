@@ -36,7 +36,7 @@ range of [static and interactive plots](http://bl.ocks.org/andredumas/edf630690c
 
 ## Getting Started
 
-To obtain just the project itself:
+Cloning and building the base project:
 
 ```shell
 git clone git@github.com:andredumas/techan.js.git
@@ -46,7 +46,7 @@ npm test
 grunt
 ```
 
-Project with all examples
+Cloning the project with all examples and usage:
 
 ```shell
 git clone --recursive git@github.com:andredumas/techan.js.git
@@ -55,5 +55,6 @@ grunt serve
 
 ```
 
-Once running browse to http://localhost:8000/examples/ to see examples using remote techanjs and d3. Alternatively
-browse to http://localhost:8000/build/examples/ to see examples using locally built techanjs and bower d3
+Once running browse to [http://localhost:8000/examples/](http://localhost:8000/examples/) to see examples using remote
+techanjs and d3. Alternatively browse to [http://localhost:8000/build/examples/](http://localhost:8000/build/examples/)
+to see examples using locally built techanjs and bower d3
