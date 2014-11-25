@@ -36,6 +36,18 @@ range of [static and interactive plots](http://bl.ocks.org/andredumas/edf630690c
 
 ## Getting Started
 
+### Manual Download
+
+Download the latest release [https://github.com/andredumas/techan.js/releases/latest](https://github.com/andredumas/techan.js/releases/latest)
+
+### Bower Dependency
+
+```
+"techanjs": "andredumas/techan.js
+```
+
+### Build From Source
+
 Cloning and building the base project:
 
 ```shell
@@ -46,15 +58,20 @@ npm test
 grunt
 ```
 
+### Build From Source With Examples
+
 Cloning the project with all examples and usage:
 
 ```shell
 git clone --recursive git@github.com:andredumas/techan.js.git
 npm install
 grunt serve
-
 ```
 
-Once running browse to [http://localhost:8000/examples/](http://localhost:8000/examples/) to see examples using remote
-techanjs and d3. Alternatively browse to [http://localhost:8000/build/examples/](http://localhost:8000/build/examples/)
-to see examples using locally built techanjs and bower d3
+Once running browse to [http://localhost:8000/examples/](http://localhost:8000/examples/) to see examples using the remote
+[(development stable) techanjs](http://techanjs.org/techan.min.js) and d3. Alternatively browse to
+[http://localhost:8000/build/examples/](http://localhost:8000/build/examples/) for the same examples using the locally
+built techanjs and bower obtained d3 but **be aware** that the examples are built to work with the latest, development
+stable version of techanjs located at [http://techanjs.org/techan.min.js](http://techanjs.org/techan.min.js). Expect that
+HEAD of master will contain unstable features under development. They may not always be compatible with all
+the examples. I will attempt to keep the release tags functional together with correctly referenced examples.
