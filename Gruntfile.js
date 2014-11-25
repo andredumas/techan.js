@@ -13,8 +13,8 @@ module.exports = function(grunt) {
     },
 
     clean: {
-      dist: ['dist'],
-      build: ['build']
+      dist: 'dist',
+      build: 'build'
     },
 
     filegen: {
@@ -22,7 +22,7 @@ module.exports = function(grunt) {
         options: {
           content: "'use strict';module.exports='<%= pkg.version %>';"
         },
-        dest: 'build/version.js'
+        dest: '<%= clean.build %>/version.js'
       }
     },
 
@@ -36,17 +36,17 @@ module.exports = function(grunt) {
           }
         },
         src: 'src/techan.js',
-        dest: 'build/techan-bundle.js'
+        dest: '<%= clean.build %>/techan-bundle.js'
       },
       test: {
         options: {
-          external: ['src/**/*.js'],
+          external: 'src/**/*.js',
           bundleOptions: {
             debug: true
           }
         },
-        src: ['test/spec/bundle/**/*.js'],
-        dest: 'build/specs-bundle.js'
+        src: 'test/spec/bundle/**/*.js',
+        dest: '<%= clean.build %>/specs-bundle.js'
       },
       dist: {
         options: {
@@ -55,7 +55,7 @@ module.exports = function(grunt) {
           }
         },
         src: 'src/techan.js',
-        dest: 'dist/techan.js'
+        dest: '<%= clean.dist %>/techan.js'
       }
     },
 
@@ -74,10 +74,10 @@ module.exports = function(grunt) {
 
     jsonlint: {
       bower: {
-        src: ['bower.json']
+        src: 'bower.json'
       },
       dist: {
-        src: ['package.json']
+        src: 'package.json'
       }
     },
 
@@ -100,8 +100,8 @@ module.exports = function(grunt) {
     },
 
     watch: {
-      files: '<%= jshint.dev.src %>',
-      tasks: ['dev']
+      files: ['<%= jshint.dev.src %>', 'examples/**'],
+      tasks: ['examples', 'dev']
     },
 
     jasmine: {
@@ -112,21 +112,21 @@ module.exports = function(grunt) {
       test: {
         options: {
           specs: '<%= browserify.test.dest %>',
-          outfile: 'build/bundleSpecRunner.html'
+          outfile: '<%= clean.build %>/bundleSpecRunner.html'
         },
         src: '<%= browserify.dev.dest %>'
       },
       dist: {
         options: {
           specs: 'test/spec/standalone/**/*.js',
-          outfile: 'build/standaloneSpecRunner.html'
+          outfile: '<%= clean.build %>/standaloneSpecRunner.html'
         },
         src: '<%= browserify.dist.dest %>'
       },
       minify: {
         options: {
           specs: 'test/spec/standalone/**/*.js',
-          outfile: 'build/standaloneMinSpecRunner.html'
+          outfile: '<%= clean.build %>/standaloneMinSpecRunner.html'
         },
         src: '<%= uglify.dist.dest %>'
       }
@@ -140,17 +140,17 @@ module.exports = function(grunt) {
       },
       dist: {
         src: '<%= browserify.dist.dest %>',
-        dest: 'dist/techan.min.js'
+        dest: '<%= clean.dist %>/techan.min.js'
       }
     },
 
     compress: {
       dist: {
         options: {
-          archive: 'dist/techan.zip'
+          archive: '<%= clean.dist %>/techan.zip'
         },
         expand: true,
-        cwd: 'dist',
+        cwd: '<%= clean.dist %>',
         src: ['*.js*'],
         dest: '<%= config.dist %>'
       }
@@ -170,7 +170,30 @@ module.exports = function(grunt) {
 
     connect: {
       server: {}
+    },
+
+    copy: {
+      examples: {
+        files: [
+          { expand: true, cwd: 'examples', src: ['**', '!**/*.html'], dest: '<%= clean.build %>/examples/' }
+        ]
+      }
+    },
+
+    replace: {
+      main: {
+        options: {
+          patterns: [
+            { match: /http:\/\/d3js\.org\/d3\.v3\.min\.js/g, replacement: '/bower_components/d3/d3.js' },
+            { match: /http:\/\/techanjs\.org\/techan\.min\.js/g, replacement: '/<%= browserify.dist.dest %>' }
+          ]
+        },
+        files: [
+          { expand: true, cwd: 'examples', src: '**/*.html', dest: '<%= clean.build %>/examples/' }
+        ]
+      }
     }
+
   });
 
   require('load-grunt-tasks')(grunt);
@@ -178,9 +201,10 @@ module.exports = function(grunt) {
 
   grunt.registerTask('lint', ['newer:jshint', 'newer:jscs']);
   grunt.registerTask('dev', ['lint', 'newer:browserify:dev', 'newer:browserify:test', 'jasmine:test']);
+  grunt.registerTask('examples', ['newer:replace', 'newer:copy']);
   grunt.registerTask('dist', ['browserify:dist', 'usebanner', 'jasmine:dist']);
   grunt.registerTask('minify', ['uglify', 'jasmine:minify']);
-  grunt.registerTask('serve', ['filegen:version', 'connect', 'watch']);
+  grunt.registerTask('serve', ['filegen:version', 'examples', 'dev', 'connect', 'watch']);
   grunt.registerTask('release:pre', ['bump-only:prerelease', 'default']);
   grunt.registerTask('release:minor', ['bump-only:minor', 'default', 'bump-commit']);
   grunt.registerTask('release:major', ['bump-only:major', 'default', 'bump-commit']);

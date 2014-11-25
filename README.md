@@ -33,3 +33,27 @@ range of [static and interactive plots](http://bl.ocks.org/andredumas/edf630690c
 * [Moving Averages (Simple & Exponential)](http://bl.ocks.org/andredumas/274b54b4d2c2ffa19fca)
 * [RSI](http://bl.ocks.org/andredumas/6da267f1c51a13dea35b)
 * [MACD](http://bl.ocks.org/andredumas/10d701ccb3b8b1e99878)
+
+## Getting Started
+
+To obtain just the project itself:
+
+```shell
+git clone git@github.com:andredumas/techan.js.git
+npm install
+npm test
+# OR
+grunt
+```
+
+Project with all examples
+
+```shell
+git clone --recursive git@github.com:andredumas/techan.js.git
+npm install
+grunt serve
+
+```
+
+Once running browse to http://localhost:8000/examples/ to see examples using remote techanjs and d3. Alternatively
+browse to http://localhost:8000/build/examples/ to see examples using locally built techanjs and bower d3
