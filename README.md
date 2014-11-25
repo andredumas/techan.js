@@ -43,7 +43,7 @@ Download the latest release [https://github.com/andredumas/techan.js/releases/la
 ### Bower Dependency
 
 ```
-"techanjs": "andredumas/techan.js
+"techanjs": "andredumas/techan.js"
 ```
 
 ### Build From Source
