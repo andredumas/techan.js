@@ -32,7 +32,8 @@ module.exports = function(grunt) {
           // Thanks https://github.com/amitayd/grunt-browserify-jasmine-node-example/blob/2488181e29b09226f2a87202a851f996820eafb6/Gruntfile.js#L51
           require: grunt.file.expand({filter: 'isFile'}, './src/**/*.js', './<%= filegen.version.dest %>'),
           bundleOptions: {
-            debug: true
+            debug: true,
+            standalone: 'techan'
           }
         },
         src: 'src/techan.js',
@@ -185,7 +186,7 @@ module.exports = function(grunt) {
         options: {
           patterns: [
             { match: /http:\/\/d3js\.org\/d3\.v3\.min\.js/g, replacement: '/bower_components/d3/d3.js' },
-            { match: /http:\/\/techanjs\.org\/techan\.min\.js/g, replacement: '/<%= browserify.dist.dest %>' }
+            { match: /http:\/\/techanjs\.org\/techan\.min\.js/g, replacement: '/<%= browserify.dev.dest %>' }
           ]
         },
         files: [
