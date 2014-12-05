@@ -49,16 +49,58 @@ techanModule('plot/supstance', function(specBuilder) {
           expect(g[0][0].innerHTML).not.toContain('NaN');
         });
       });
+
+      describe('And supstance is initialised with annotation', function () {
+        plotMixinShouldBeSetup(scope);
+
+        var plot,
+          g;
+
+        beforeEach(function () {
+          plot = scope.plot;
+          plot.xScale().domain([data[0].start, data[0].end]);
+          plot.annotation(techan.plot.axisannotation());
+          g = domFixtures.g(data);
+        });
+
+        it('Then .on should be defined', function() {
+          expect(plot.on).toBeDefined();
+        });
+
+        it('Then on default invoke, it should render without error', function() {
+          plot(g);
+          expect(g[0][0].innerHTML).not.toContain('NaN');
+        });
+
+        it('Then on refresh invoke, it should be refreshed only', function() {
+          plot(g);
+          plot.refresh(g);
+          expect(g[0][0].innerHTML).not.toContain('NaN');
+        });
+      });
     });
 
     instanceBuilder.instance('mocked select and event', mockEventInit, function(scope) {
       var supstance,
-          selection;
+          selection,
+          annotation;
 
       beforeEach(function() {
         supstance = scope.supstance;
+        // This is painful and not asserting anything other than successful execution. Needs improvement
+        annotation = function() {}; // Base annotation mock
+        var annotationObject = jasmine.createSpyObj('annotation', ['accessor', 'axis', 'scale', 'invert', 'refresh']);
+        annotation.axis = annotationObject.axis;
+        annotation.scale = annotationObject.scale;
+        annotation.accessor = annotationObject.accessor;
+        annotation.invert = annotationObject.invert;
+        annotation.refresh = annotationObject.refresh;
+        annotationObject.axis.and.returnValue(annotation);
+        annotationObject.scale.and.returnValue(annotation);
+        annotationObject.accessor.and.returnValue(function() {});
+        supstance.annotation(annotation);
 
-        selection = jasmine.createSpyObj('selection', ['selectAll', 'call', 'parentNode', 'attr', 'classed']);
+        selection = jasmine.createSpyObj('selection', ['selectAll', 'call', 'parentNode', 'attr', 'classed', 'each']);
         selection.selectAll.and.returnValue(selection);
         selection.parentNode.and.returnValue(selection);
         selection.attr.and.returnValue(selection);

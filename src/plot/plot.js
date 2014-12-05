@@ -83,6 +83,47 @@ module.exports = function(d3_svg_line, d3_select) {
           dispatch.dragend(d);
         });
       }
+    },
+
+    annotation: {
+      append: function(selection, accessor, scale, annotations, clazz) {
+        var annotationSelection = selection.append('g').attr('class', 'axisannotation ' + clazz)
+          .selectAll('g').data(function(supstance) {
+            // Transform the data to values for each annotation
+            var y = scale(accessor(supstance));
+
+            return annotations.map(function(annotation) {
+              var d = {};
+              annotation.accessor()(d, annotation.axis().scale().invert(y));
+              // Only ever 1 data point per annotation
+              return [d];
+            });
+          }
+        );
+
+        annotationSelection.enter().append('g').attr('class', function(d, i) { return i; })
+          .each(function(d, i) {
+            // Store some meta for lookup later, could use class instance, but this 'should' be more reliable
+            this.__annotation__ = i;
+            annotations[i](d3_select(this));
+          });
+      },
+
+      update: function(scale, annotations, value) {
+        var y = scale(value);
+
+        return function(d) {
+          var annotation = annotations[this.__annotation__];
+          // As in append, should only ever be 1 in the array
+          annotation.accessor()(d[0], annotation.axis().scale().invert(y));
+        };
+      },
+
+      refresh: function(annotations) {
+        return function() {
+          annotations[this.__annotation__].refresh(d3_select(this));
+        };
+      }
     }
   };
 };

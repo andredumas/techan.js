@@ -41,7 +41,7 @@ module.exports = function(grunt) {
       },
       test: {
         options: {
-          external: 'src/**/*.js',
+          //external: ['src/**/*.js'], // Put this back in to NOT include source in test bundle.
           bundleOptions: {
             debug: true
           }
@@ -112,10 +112,9 @@ module.exports = function(grunt) {
       },
       test: {
         options: {
-          specs: '<%= browserify.test.dest %>',
           outfile: '<%= clean.build %>/bundleSpecRunner.html'
         },
-        src: '<%= browserify.dev.dest %>'
+        src: '<%= browserify.test.dest %>' // Single browserify bundle that includes src under test
       },
       dist: {
         options: {
@@ -201,7 +200,7 @@ module.exports = function(grunt) {
   grunt.loadTasks('lib/grunt');
 
   grunt.registerTask('lint', ['newer:jshint', 'newer:jscs']);
-  grunt.registerTask('dev', ['lint', 'newer:browserify:dev', 'newer:browserify:test', 'jasmine:test']);
+  grunt.registerTask('dev', ['lint', 'browserify:dev', 'browserify:test', 'jasmine:test']);
   grunt.registerTask('examples', ['newer:replace', 'newer:copy']);
   grunt.registerTask('dist', ['browserify:dist', 'usebanner', 'jasmine:dist']);
   grunt.registerTask('minify', ['uglify', 'jasmine:minify']);

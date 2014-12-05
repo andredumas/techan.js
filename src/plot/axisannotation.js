@@ -3,9 +3,10 @@
 /**
  * TODO Refactor this to techan.plot.annotation.axis()?
  */
-module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
+module.exports = function(d3_svg_axis, accessor_value, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
-    var axis = d3_svg_axis(),
+    var p = {},
+        axis = d3_svg_axis(),
         format,
         point = 4,
         height = 14,
@@ -21,7 +22,7 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
 
     annotation.refresh = function(g) {
       var fmt = format ? format : (axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat());
-      refresh(g, plot, axis, fmt, height, width, point, translate);
+      refresh(g, plot, p.accessor, axis, fmt, height, width, point, translate);
     };
 
     annotation.axis = function(_) {
@@ -54,23 +55,25 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
       return annotation;
     };
 
+    plotMixin(annotation, p).accessor(accessor_value());
+
     return annotation;
   };
 };
 
-function refresh(g, plot, axis, format, height, width, point, translate) {
+function refresh(g, plot, accessor, axis, format, height, width, point, translate) {
   var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1,
       translateSelection = g.select('g.translate'),
-      dataGroup = plot.groupSelect(translateSelection, filterInvalidValues(axis.scale()));
+      dataGroup = plot.groupSelect(translateSelection, filterInvalidValues(accessor, axis.scale()));
   dataGroup.entry.append('path');
   dataGroup.entry.append('text');
 
   translateSelection.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
-  dataGroup.selection.selectAll('path').attr('d', backgroundPath(axis, height, width, point, neg));
-  dataGroup.selection.selectAll('text').text(textValue(format)).call(textAttributes, axis, neg);
+  dataGroup.selection.selectAll('path').attr('d', backgroundPath(accessor, axis, height, width, point, neg));
+  dataGroup.selection.selectAll('text').text(textValue(accessor, format)).call(textAttributes, accessor, axis, neg);
 }
 
-function filterInvalidValues(scale) {
+function filterInvalidValues(accessor, scale) {
   return function(data) {
     var range = scale.range(),
         start = range[0],
@@ -79,14 +82,14 @@ function filterInvalidValues(scale) {
     range = start < end ? [start, end] : [end, start];
 
     return data.filter(function (d) {
-      if (!d.value) return false;
-      var value = scale(d.value);
+      if (!accessor(d)) return false;
+      var value = scale(accessor(d));
       return value && !isNaN(value) && range[0] <= value && value <= range[1];
     });
   };
 }
 
-function textAttributes(text, axis, neg) {
+function textAttributes(text, accessor, axis, neg) {
   var scale = axis.scale();
 
   switch(axis.orient()) {
@@ -94,14 +97,14 @@ function textAttributes(text, axis, neg) {
     case 'right':
       text.attr({
         x: neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()),
-        y: textPosition(scale),
+        y: textPosition(accessor, scale),
         dy: '.32em'
       }).style('text-anchor', neg < 0 ? 'end' : 'start');
       break;
     case 'top':
     case 'bottom':
       text.attr({
-        x: textPosition(scale),
+        x: textPosition(accessor, scale),
         y: neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()),
         dy: neg < 0 ? '0em' : '.72em'
       }).style('text-anchor', 'middle');
@@ -109,22 +112,22 @@ function textAttributes(text, axis, neg) {
   }
 }
 
-function textPosition(scale) {
+function textPosition(accessor, scale) {
   return function(d) {
-    return scale(d.value);
+    return scale(accessor(d));
   };
 }
 
-function textValue(format) {
+function textValue(accessor, format) {
   return function(d) {
-    return format(d.value);
+    return format(accessor(d));
   };
 }
 
-function backgroundPath(axis, height, width, point, neg) {
+function backgroundPath(accessor, axis, height, width, point, neg) {
   return function(d) {
     var scale = axis.scale(),
-        value = scale(d.value),
+        value = scale(accessor(d)),
         pt = point;
 
     switch(axis.orient()) {

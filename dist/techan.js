@@ -1,9 +1,9 @@
 /*
- TechanJS v0.4.0-1
+ TechanJS v0.4.0-2
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-'use strict';module.exports='0.4.0-1';
+'use strict';module.exports='0.4.0-2';
 },{}],2:[function(_dereq_,module,exports){
 'use strict';
 
@@ -263,11 +263,18 @@ module.exports = function() {
       value = function(d, _) {
         if(arguments.length < 2) return d.value;
         d.value = _;
+        return accessor;
       },
       zero = function(d) { return d.zero; };
 
-  function accessor(d) {
-    return accessor.v(d);
+  /**
+   * Supports getter and setter
+   * @param d Underlying data object to get or set the value
+   * @param _ If passed turns into a setter. This is the value to set
+   * @returns {*}
+   */
+  function accessor(d, _) {
+    return accessor.v.apply(undefined, arguments);
   }
 
   // TODO use d3.rebind to obtain this from 'super class'
@@ -633,9 +640,10 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
 /**
  * TODO Refactor this to techan.plot.annotation.axis()?
  */
-module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
+module.exports = function(d3_svg_axis, accessor_value, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
-    var axis = d3_svg_axis(),
+    var p = {},
+        axis = d3_svg_axis(),
         format,
         point = 4,
         height = 14,
@@ -651,7 +659,7 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
 
     annotation.refresh = function(g) {
       var fmt = format ? format : (axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat());
-      refresh(g, plot, axis, fmt, height, width, point, translate);
+      refresh(g, plot, p.accessor, axis, fmt, height, width, point, translate);
     };
 
     annotation.axis = function(_) {
@@ -684,23 +692,25 @@ module.exports = function(d3_svg_axis, plot) {  // Injected dependencies
       return annotation;
     };
 
+    plotMixin(annotation, p).accessor(accessor_value());
+
     return annotation;
   };
 };
 
-function refresh(g, plot, axis, format, height, width, point, translate) {
+function refresh(g, plot, accessor, axis, format, height, width, point, translate) {
   var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1,
       translateSelection = g.select('g.translate'),
-      dataGroup = plot.groupSelect(translateSelection, filterInvalidValues(axis.scale()));
+      dataGroup = plot.groupSelect(translateSelection, filterInvalidValues(accessor, axis.scale()));
   dataGroup.entry.append('path');
   dataGroup.entry.append('text');
 
   translateSelection.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
-  dataGroup.selection.selectAll('path').attr('d', backgroundPath(axis, height, width, point, neg));
-  dataGroup.selection.selectAll('text').text(textValue(format)).call(textAttributes, axis, neg);
+  dataGroup.selection.selectAll('path').attr('d', backgroundPath(accessor, axis, height, width, point, neg));
+  dataGroup.selection.selectAll('text').text(textValue(accessor, format)).call(textAttributes, accessor, axis, neg);
 }
 
-function filterInvalidValues(scale) {
+function filterInvalidValues(accessor, scale) {
   return function(data) {
     var range = scale.range(),
         start = range[0],
@@ -709,14 +719,14 @@ function filterInvalidValues(scale) {
     range = start < end ? [start, end] : [end, start];
 
     return data.filter(function (d) {
-      if (!d.value) return false;
-      var value = scale(d.value);
+      if (!accessor(d)) return false;
+      var value = scale(accessor(d));
       return value && !isNaN(value) && range[0] <= value && value <= range[1];
     });
   };
 }
 
-function textAttributes(text, axis, neg) {
+function textAttributes(text, accessor, axis, neg) {
   var scale = axis.scale();
 
   switch(axis.orient()) {
@@ -724,14 +734,14 @@ function textAttributes(text, axis, neg) {
     case 'right':
       text.attr({
         x: neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()),
-        y: textPosition(scale),
+        y: textPosition(accessor, scale),
         dy: '.32em'
       }).style('text-anchor', neg < 0 ? 'end' : 'start');
       break;
     case 'top':
     case 'bottom':
       text.attr({
-        x: textPosition(scale),
+        x: textPosition(accessor, scale),
         y: neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()),
         dy: neg < 0 ? '0em' : '.72em'
       }).style('text-anchor', 'middle');
@@ -739,22 +749,22 @@ function textAttributes(text, axis, neg) {
   }
 }
 
-function textPosition(scale) {
+function textPosition(accessor, scale) {
   return function(d) {
-    return scale(d.value);
+    return scale(accessor(d));
   };
 }
 
-function textValue(format) {
+function textValue(accessor, format) {
   return function(d) {
-    return format(d.value);
+    return format(accessor(d));
   };
 }
 
-function backgroundPath(axis, height, width, point, neg) {
+function backgroundPath(accessor, axis, height, width, point, neg) {
   return function(d) {
     var scale = axis.scale(),
-        value = scale(d.value),
+        value = scale(accessor(d)),
         pt = point;
 
     switch(axis.orient()) {
@@ -927,8 +937,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
       dataEnter.append('path').attr('class', 'horizontal wire');
       dataEnter.append('path').attr('class', 'vertical wire');
 
-      appendAnnotation(dataEnter, d3_select, 'x', xAnnotation);
-      appendAnnotation(dataEnter, d3_select, 'y', yAnnotation);
+      appendAnnotation(dataEnter, 'x', xAnnotation);
+      appendAnnotation(dataEnter, 'y', yAnnotation);
 
       g.selectAll('rect').data([0]).enter().append('rect').style({ fill: 'none', 'pointer-events': 'all' });
 
@@ -959,15 +969,39 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
           display(g, 'none');
           dispatch.out();
         })
-        .on('mousemove', mousemoveRefresh(d3_select, d3_mouse, p, dispatch, xAnnotation, yAnnotation,
-          pathVerticalSelection, pathHorizontalSelection, xAnnotationSelection, yAnnotationSelection,
-          verticalWireRange, horizontalWireRange)
+        .on('mousemove', mousemoveRefresh(pathVerticalSelection, pathHorizontalSelection,
+          xAnnotationSelection, yAnnotationSelection)
         );
 
-      refresh(d3_select, p, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
-        xAnnotationSelection, yAnnotationSelection, verticalWireRange, horizontalWireRange
-      );
+      refresh(pathVerticalSelection, pathHorizontalSelection, xAnnotationSelection, yAnnotationSelection);
     };
+
+    function mousemoveRefresh(pathVerticalSelection, pathHorizontalSelection,
+                              xAnnotationSelection, yAnnotationSelection) {
+      var event = [new Array(xAnnotation.length), new Array(yAnnotation.length)];
+
+      return function() {
+        var coords = d3_mouse(this);
+
+        refresh(pathVerticalSelection.datum(p.xScale.invert(coords[0])),
+          pathHorizontalSelection.datum(p.yScale.invert(coords[1])),
+          xAnnotationSelection.each(updateAnnotationValue(xAnnotation, coords[0], event[0])),
+          yAnnotationSelection.each(updateAnnotationValue(yAnnotation, coords[1], event[1]))
+        );
+
+        dispatch.move(event);
+      };
+    }
+
+    function refresh(xPath, yPath, xAnnotationSelection, yAnnotationSelection) {
+      var x = p.xScale,
+          y = p.yScale;
+
+      xPath.attr('d', verticalPathLine(x, verticalWireRange || y.range()));
+      yPath.attr('d', horizontalPathLine(y, horizontalWireRange || x.range()));
+      xAnnotationSelection.each(refreshAnnotation(xAnnotation));
+      yAnnotationSelection.each(refreshAnnotation(yAnnotation));
+    }
 
     crosshair.xAnnotation = function(_) {
       if(!arguments.length) return xAnnotation;
@@ -1003,43 +1037,24 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
 
     return crosshair;
   };
+
+  function appendAnnotation(selection, clazz, annotation) {
+    var annotationSelection = selection.append('g').attr('class', 'axisannotation ' + clazz)
+      .selectAll('g').data(annotation.map(function() { return [{ value: null }]; }));
+
+    annotationSelection.enter().append('g').attr('class', function(d, i) { return i; })
+      .each(function(d, i) { annotation[i](d3_select(this)); });
+  }
+
+  function refreshAnnotation(annotation) {
+    return function(d, i) {
+      annotation[i].refresh(d3_select(this));
+    };
+  }
 };
 
 function display(g, style) {
   g.select('g.data.top').style('display', style);
-}
-
-function mousemoveRefresh(d3_select, d3_mouse, p, dispatch, xAnnotation, yAnnotation, pathVerticalSelection, pathHorizontalSelection,
-                          xAnnotationSelection, yAnnotationSelection, verticalWireRange, horizontalWireRange) {
-  var event = [new Array(xAnnotation.length), new Array(yAnnotation.length)];
-
-  return function() {
-    var coords = d3_mouse(this),
-        x = p.xScale,
-        y = p.yScale;
-
-    refresh(d3_select, p, xAnnotation, yAnnotation,
-      pathVerticalSelection.datum(x.invert(coords[0])),
-      pathHorizontalSelection.datum(y.invert(coords[1])),
-      xAnnotationSelection.each(updateAnnotationValue(xAnnotation, coords[0], event[0])),
-      yAnnotationSelection.each(updateAnnotationValue(yAnnotation, coords[1], event[1])),
-      verticalWireRange, horizontalWireRange
-    );
-
-    dispatch.move(event);
-  };
-}
-
-function refresh(d3_select, p, xAnnotation, yAnnotation, xPath, yPath,
-                 xAnnotationSelection, yAnnotationSelection,
-                 verticalWireRange, horizontalWireRange) {
-  var x = p.xScale,
-      y = p.yScale;
-
-  xPath.attr('d', verticalPathLine(x, verticalWireRange || y.range()));
-  yPath.attr('d', horizontalPathLine(y, horizontalWireRange || x.range()));
-  xAnnotationSelection.each(refreshAnnotation(d3_select, xAnnotation));
-  yAnnotationSelection.each(refreshAnnotation(d3_select, yAnnotation));
 }
 
 function horizontalPathLine(y, range) {
@@ -1062,21 +1077,7 @@ function updateAnnotationValue(annotations, value, event) {
   return function(d, i) {
     event[i] = annotations[i].axis().scale().invert(value);
     // d[0] because only ever 1 value for crosshairs
-    d[0].value = event[i];
-  };
-}
-
-function appendAnnotation(selection, d3_select, clazz, annotation) {
-  var annotationSelection = selection.append('g').attr('class', 'axisannotation ' + clazz)
-    .selectAll('g').data(annotation.map(function() { return [{ value: null }]; }));
-
-  annotationSelection.enter().append('g').attr('class', function(d, i) { return i; })
-    .each(function(d, i) { annotation[i](d3_select(this)); });
-}
-
-function refreshAnnotation(d3_select, annotation) {
-  return function(d, i) {
-    annotation[i].refresh(d3_select(this));
+    annotations[i].accessor()(d[0], event[i]);
   };
 }
 },{}],18:[function(_dereq_,module,exports){
@@ -1088,7 +1089,7 @@ module.exports = function(d3) {
       plot = _dereq_('./plot')(d3.svg.line, d3.select),
       plotMixin = _dereq_('./plotmixin')(d3.scale.linear, scale.financetime),
       line = _dereq_('./line'),
-      axisannotation = _dereq_('./axisannotation')(d3.svg.axis, plot);
+      axisannotation = _dereq_('./axisannotation')(d3.svg.axis, accessor.value, plot, plotMixin);
 
   return {
     axisannotation: axisannotation,
@@ -1341,6 +1342,47 @@ module.exports = function(d3_svg_line, d3_select) {
           dispatch.dragend(d);
         });
       }
+    },
+
+    annotation: {
+      append: function(selection, accessor, scale, annotations, clazz) {
+        var annotationSelection = selection.append('g').attr('class', 'axisannotation ' + clazz)
+          .selectAll('g').data(function(supstance) {
+            // Transform the data to values for each annotation
+            var y = scale(accessor(supstance));
+
+            return annotations.map(function(annotation) {
+              var d = {};
+              annotation.accessor()(d, annotation.axis().scale().invert(y));
+              // Only ever 1 data point per annotation
+              return [d];
+            });
+          }
+        );
+
+        annotationSelection.enter().append('g').attr('class', function(d, i) { return i; })
+          .each(function(d, i) {
+            // Store some meta for lookup later, could use class instance, but this 'should' be more reliable
+            this.__annotation__ = i;
+            annotations[i](d3_select(this));
+          });
+      },
+
+      update: function(scale, annotations, value) {
+        var y = scale(value);
+
+        return function(d) {
+          var annotation = annotations[this.__annotation__];
+          // As in append, should only ever be 1 in the array
+          annotation.accessor()(d[0], annotation.axis().scale().invert(y));
+        };
+      },
+
+      refresh: function(annotations) {
+        return function() {
+          annotations[this.__annotation__].refresh(d3_select(this));
+        };
+      }
     }
   };
 };
@@ -1456,13 +1498,16 @@ function refresh(g, accessor, x, y, plot) {
 module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, accessor_value, plot, plotMixin) {  // Injected dependencies
   function Supstance() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
-        dispatch = d3_dispatch('mouseenter', 'mouseout', 'mousemove', 'drag', 'dragstart', 'dragend');
+        dispatch = d3_dispatch('mouseenter', 'mouseout', 'mousemove', 'drag', 'dragstart', 'dragend'),
+        annotation = [];
 
     function supstance(g) {
       var group = plot.groupSelect(g, plot.dataMapper.unity);
 
       group.entry.append('g').attr('class', 'supstance')
         .append('path');
+
+      plot.annotation.append(group.entry, p.accessor, p.yScale, annotation, 'y');
 
       var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
         .call(plot.interaction.mousedispatch(dispatch));
@@ -1473,12 +1518,18 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     }
 
     supstance.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale);
+      refresh(g, plot, p.accessor, p.xScale, p.yScale, g.selectAll('.axisannotation.y > g'), annotation);
     };
 
     supstance.drag = function(g) {
       g.selectAll('.interaction path')
-        .call(dragBody(dispatch, p.accessor, p.xScale, p.yScale));
+        .call(dragBody(dispatch, p.accessor, p.xScale, p.yScale, annotation));
+    };
+
+    supstance.annotation = function(_) {
+      if(!arguments.length) return annotation;
+      annotation = _ instanceof Array ? _ : [_];
+      return supstance;
     };
 
     // Mixin 'superclass' methods and variables
@@ -1489,13 +1540,18 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     return supstance;
   }
 
-  function dragBody(dispatch, accessor, x, y) {
+  function dragBody(dispatch, accessor, x, y, annotation) {
     var drag = d3_behavior_drag().origin(function(d) {
-      return { x: 0, y: y(accessor.v(d)) };
+      return { x: 0, y: y(accessor(d)) };
     })
     .on('drag', function(d) {
-      accessor.v(d, y.invert(d3_event().y));
-      refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
+      var value = y.invert(d3_event().y),
+          g = d3_select(this.parentNode.parentNode), // Go up to the selected items parent only (not the list of items)
+          annotationSelection = g.selectAll('.axisannotation.y > g');
+
+      accessor(d, value);
+      annotationSelection.each(plot.annotation.update(y, annotation, value));
+      refresh(g, plot, accessor, x, y, annotationSelection, annotation);
       dispatch.drag(d);
     });
 
@@ -1505,9 +1561,10 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
   return Supstance;
 };
 
-function refresh(g, accessor, x, y) {
+function refresh(g, plot, accessor, x, y, annotationSelection, annotation) {
   g.selectAll('.supstance path').attr('d', supstancePath(accessor, x, y));
   g.selectAll('.interaction path').attr('d', supstancePath(accessor, x, y));
+  annotationSelection.each(plot.annotation.refresh(annotation));
 }
 
 function supstancePath(accessor, x, y) {
@@ -1515,8 +1572,8 @@ function supstancePath(accessor, x, y) {
     var path = [],
         range = x.range();
 
-    path.push('M', range[0], y(accessor.v(d)));
-    path.push('L', range[range.length-1], y(accessor.v(d)));
+    path.push('M', range[0], y(accessor(d)));
+    path.push('L', range[range.length-1], y(accessor(d)));
 
     return path.join(' ');
   };

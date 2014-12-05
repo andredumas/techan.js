@@ -160,6 +160,6 @@ function updateAnnotationValue(annotations, value, event) {
   return function(d, i) {
     event[i] = annotations[i].axis().scale().invert(value);
     // d[0] because only ever 1 value for crosshairs
-    d[0].value = event[i];
+    annotations[i].accessor()(d[0], event[i]);
   };
 }

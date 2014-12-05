@@ -12,7 +12,8 @@ techanModule('plot/axisannotation', function(specBuilder) {
   };
 
   var mockInit = function(axisannotation) {
-    return axisannotation(d3.svg.axis, spies.plot);
+    var plotmixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
+    return axisannotation(d3.svg.axis, techan.accessor.value, spies.plot, plotmixin);
   };
 
   specBuilder.require(require('../../../../src/plot/axisannotation'), function(instanceBuilder) {
@@ -21,6 +22,10 @@ techanModule('plot/axisannotation', function(specBuilder) {
         beforeEach(function () {
           axisannotation = scope.plot;
           g = domFixtures.g([{ value: 50 }]);
+        });
+
+        it('Then the plot mixin accessor should be defined', function () {
+          expect(axisannotation.accessor).toBeDefined();
         });
 
         it('Then on default invoke, it should render without error', function() {
@@ -124,7 +129,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
 
               beforeEach(function() {
                 axisannotation.axis().orient('left');
-                textAttributes(selectSpies, axisannotation.axis(), -1);
+                textAttributes(selectSpies, axisannotation.accessor(), axisannotation.axis(), -1);
                 attr = selectSpies.attr.calls.argsFor(2)[0]; // It is the second call because it is initially invoked in earlier setup
                 styleArgs = selectSpies.style.calls.argsFor(0);
               });
@@ -179,7 +184,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
 
               beforeEach(function() {
                 axisannotation.axis().orient('right');
-                textAttributes(selectSpies, axisannotation.axis(), 1);
+                textAttributes(selectSpies, axisannotation.accessor(),axisannotation.axis(), 1);
                 attr = selectSpies.attr.calls.argsFor(2)[0]; // It is the second call because it is initially invoked in earlier setup
                 styleArgs = selectSpies.style.calls.argsFor(0);
               });
@@ -216,7 +221,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
 
               beforeEach(function() {
                 axisannotation.axis().orient('top');
-                textAttributes(selectSpies, axisannotation.axis(), -1);
+                textAttributes(selectSpies, axisannotation.accessor(),axisannotation.axis(), -1);
                 attr = selectSpies.attr.calls.argsFor(2)[0]; // It is the second call because it is initially invoked in earlier setup
                 styleArgs = selectSpies.style.calls.argsFor(0);
               });
@@ -253,7 +258,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
 
               beforeEach(function() {
                 axisannotation.axis().orient('bottom');
-                textAttributes(selectSpies, axisannotation.axis(), 1);
+                textAttributes(selectSpies, axisannotation.accessor(), axisannotation.axis(), 1);
                 attr = selectSpies.attr.calls.argsFor(2)[0]; // It is the second call because it is initially invoked in earlier setup
                 styleArgs = selectSpies.style.calls.argsFor(0);
               });
