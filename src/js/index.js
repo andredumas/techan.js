@@ -32,7 +32,7 @@ var techanSite = techanSite || {};
         timeAnnotationTop = techan.plot.axisannotation().axis(xAxisTop).format(d3.time.format('%Y-%m-%d')).width(65),
         yAxis = d3.svg.axis().scale(y).orient("right"),
         ohlcAnnotation = techan.plot.axisannotation().axis(yAxis).format(d3.format(',.2fs')),
-        closeAnnotation = techan.plot.axisannotation().axis(yAxis).format(d3.format(',.2fs')),
+        closeAnnotation = techan.plot.axisannotation().accessor(candlestick.accessor()).axis(yAxis).format(d3.format(',.2fs')),
         percentAxis = d3.svg.axis().scale(yPercent).orient("left").tickFormat(d3.format('+.1%')),
         percentAnnotation = techan.plot.axisannotation().axis(percentAxis),
         volumeAxis = d3.svg.axis().scale(yVolume).orient("right").ticks(3).tickFormat(d3.format(",.3s")),
@@ -49,9 +49,9 @@ var techanSite = techanSite || {};
         rsiAnnotation = techan.plot.axisannotation().axis(rsiAxis).format(d3.format(',.2fs')),
         rsiAxisLeft = d3.svg.axis().scale(rsiScale).ticks(3).orient("left"),
         rsiAnnotationLeft = techan.plot.axisannotation().axis(rsiAxisLeft).format(d3.format(',.2fs')),
-        ohlcCrosshair = techan.plot.crosshair().xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([ohlcAnnotation, percentAnnotation, volumeAnnotation]),
-        macdCrosshair = techan.plot.crosshair().xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([macdAnnotation, macdAnnotationLeft]),
-        rsiCrosshair = techan.plot.crosshair().xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([rsiAnnotation, rsiAnnotationLeft]);
+        ohlcCrosshair = techan.plot.crosshair().xScale(x).yScale(y).xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([ohlcAnnotation, percentAnnotation, volumeAnnotation]),
+        macdCrosshair = techan.plot.crosshair().xScale(x).yScale(macdScale).xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([macdAnnotation, macdAnnotationLeft]),
+        rsiCrosshair = techan.plot.crosshair().xScale(x).yScale(rsiScale).xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([rsiAnnotation, rsiAnnotationLeft]);
 
     function bigchart(selection) {
       selection.each(function() {
@@ -178,7 +178,7 @@ var techanSite = techanSite || {};
         bigchart.resize(selection);
 
         svg.select("g.candlestick").datum(data).call(candlestick);
-        svg.select("g.closeValue.annotation").datum([{value:data[data.length-1].close}]).call(closeAnnotation);
+        svg.select("g.closeValue.annotation").datum([data[data.length-1]]).call(closeAnnotation);
         svg.select("g.volume").datum(data).call(volume);
         svg.select("g.sma.ma-0").datum(techan.indicator.sma().period(10)(data)).call(sma0);
         svg.select("g.sma.ma-1").datum(techan.indicator.sma().period(20)(data)).call(sma1);
@@ -186,9 +186,9 @@ var techanSite = techanSite || {};
         svg.select("g.macd .indicator-plot").datum(macdData).call(macd);
         svg.select("g.rsi .indicator-plot").datum(rsiData).call(rsi);
 
-        svg.select("g.crosshair.ohlc").call(ohlcCrosshair);
-        svg.select("g.crosshair.macd").call(macdCrosshair);
-        svg.select("g.crosshair.rsi").call(rsiCrosshair);
+        //svg.select("g.crosshair.ohlc").call(ohlcCrosshair);
+        //svg.select("g.crosshair.macd").call(macdCrosshair);
+        //svg.select("g.crosshair.rsi").call(rsiCrosshair);
         svg.select("g.trendlines").datum(stock.trendlines).call(trendline).call(trendline.drag);
         svg.select("g.supstances").datum(stock.supstances).call(supstance).call(supstance.drag);
       });
@@ -295,6 +295,7 @@ var techanSite = techanSite || {};
       svg.select("g.crosshair.rsi").call(rsiCrosshair.refresh);
       svg.select("g.trendlines").call(trendline.refresh);
       svg.select("g.supstances").call(supstance.refresh);
+      console.log('redraw');
     }
 
     return bigchart;
@@ -307,6 +308,7 @@ var techanSite = techanSite || {};
 
   window.onresize = function() {
     d3.select('div#bigChart').call(bigchart.resize);
+    console.log('resize');
   };
 
 }(d3, techan));
