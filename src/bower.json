@@ -1,8 +1,7 @@
 {
   "name": "techanjs-site",
   "dependencies": {
-    "d3": "~3.4.13",
-    "bootstrap": "3.2.0",
+    "bootstrap": "3.3.1",
     "jquery": "1.11.0",
     "techanjs": "andredumas/techan.js#906da6d04b16d36376d5e7fb90a8d5ece4e45666"
   }

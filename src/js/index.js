@@ -186,9 +186,9 @@ var techanSite = techanSite || {};
         svg.select("g.macd .indicator-plot").datum(macdData).call(macd);
         svg.select("g.rsi .indicator-plot").datum(rsiData).call(rsi);
 
-        //svg.select("g.crosshair.ohlc").call(ohlcCrosshair);
-        //svg.select("g.crosshair.macd").call(macdCrosshair);
-        //svg.select("g.crosshair.rsi").call(rsiCrosshair);
+        svg.select("g.crosshair.ohlc").call(ohlcCrosshair);
+        svg.select("g.crosshair.macd").call(macdCrosshair);
+        svg.select("g.crosshair.rsi").call(rsiCrosshair);
         svg.select("g.trendlines").datum(stock.trendlines).call(trendline).call(trendline.drag);
         svg.select("g.supstances").datum(stock.supstances).call(supstance).call(supstance.drag);
       });
@@ -295,7 +295,6 @@ var techanSite = techanSite || {};
       svg.select("g.crosshair.rsi").call(rsiCrosshair.refresh);
       svg.select("g.trendlines").call(trendline.refresh);
       svg.select("g.supstances").call(supstance.refresh);
-      console.log('redraw');
     }
 
     return bigchart;
@@ -308,7 +307,6 @@ var techanSite = techanSite || {};
 
   window.onresize = function() {
     d3.select('div#bigChart').call(bigchart.resize);
-    console.log('resize');
   };
 
 }(d3, techan));
