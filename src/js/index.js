@@ -24,8 +24,6 @@ var techanSite = techanSite || {};
         sma1 = techan.plot.sma().xScale(x).yScale(y),
         ema2 = techan.plot.ema().xScale(x).yScale(y),
         volume = techan.plot.volume().accessor(candlestick.accessor()).xScale(x).yScale(yVolume),
-        trendline = techan.plot.trendline().xScale(x).yScale(y),
-        supstance = techan.plot.supstance().xScale(x).yScale(y),
         xAxis = d3.svg.axis().scale(x).orient("bottom"),
         xAxisTop = d3.svg.axis().scale(x).orient("top"),
         timeAnnotation = techan.plot.axisannotation().axis(xAxis).format(d3.time.format('%Y-%m-%d')).width(65),
@@ -51,7 +49,9 @@ var techanSite = techanSite || {};
         rsiAnnotationLeft = techan.plot.axisannotation().axis(rsiAxisLeft).format(d3.format(',.2fs')),
         ohlcCrosshair = techan.plot.crosshair().xScale(x).yScale(y).xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([ohlcAnnotation, percentAnnotation, volumeAnnotation]),
         macdCrosshair = techan.plot.crosshair().xScale(x).yScale(macdScale).xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([macdAnnotation, macdAnnotationLeft]),
-        rsiCrosshair = techan.plot.crosshair().xScale(x).yScale(rsiScale).xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([rsiAnnotation, rsiAnnotationLeft]);
+        rsiCrosshair = techan.plot.crosshair().xScale(x).yScale(rsiScale).xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([rsiAnnotation, rsiAnnotationLeft]),
+        trendline = techan.plot.trendline().xScale(x).yScale(y),
+        supstance = techan.plot.supstance().xScale(x).yScale(y).annotation([ohlcAnnotation, percentAnnotation]);
 
     function bigchart(selection) {
       selection.each(function() {
@@ -63,6 +63,12 @@ var techanSite = techanSite || {};
             .attr("id", "ohlcClip")
           .append("rect")
             .attr("x", 0)
+            .attr("y", 0);
+
+        defs.append("clipPath")
+            .attr("id", "supstanceClip")
+          .append("rect")
+            .attr("x", -dim.margin.left)
             .attr("y", 0);
 
         defs.selectAll(".indicatorClip").data([0, 1])
@@ -158,7 +164,7 @@ var techanSite = techanSite || {};
           .attr("clip-path", "url(#ohlcClip)");
         svg.append("g")
           .attr("class", "supstances analysis")
-          .attr("clip-path", "url(#ohlcClip)");
+          .attr("clip-path", "url(#supstanceClip)");
 
         var accessor = candlestick.accessor(),
             indicatorPreRoll = stock.preroll,
@@ -239,6 +245,10 @@ var techanSite = techanSite || {};
 
         selection.selectAll("defs #ohlcClip > rect")
           .attr("width", dim.plot.width)
+          .attr("height", dim.ohlc.height);
+
+        selection.selectAll("defs #supstanceClip > rect")
+          .attr("width", dim.width)
           .attr("height", dim.ohlc.height);
 
         selection.selectAll("defs .indicatorClip > rect")

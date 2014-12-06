@@ -263,6 +263,19 @@ path.middle, path.zero {
     cursor: ns-resize;
 }
 
+.supstances .axisannotation {
+    display: none;
+}
+
+.supstances .mouseover .axisannotation {
+    display: inline;
+}
+
+.supstances .axisannotation path {
+    fill: #806517;
+    stroke: none;
+}
+
 .mouseover .supstance path {
     stroke-width: 1.5;
 }
