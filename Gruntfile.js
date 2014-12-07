@@ -26,17 +26,17 @@ module.exports = function(grunt) {
       }
     },
 
-    browserify: {
+    watchify: {
       dev: {
         options: {
           // Thanks https://github.com/amitayd/grunt-browserify-jasmine-node-example/blob/2488181e29b09226f2a87202a851f996820eafb6/Gruntfile.js#L51
-          require: grunt.file.expand({filter: 'isFile'}, './src/**/*.js', './<%= filegen.version.dest %>'),
+          //require: grunt.file.expand({filter: 'isFile'}, './src/**/*.js', './<%= filegen.version.dest %>'),
           bundleOptions: {
             debug: true,
             standalone: 'techan'
           }
         },
-        src: 'src/techan.js',
+        src: './src/techan.js',
         dest: '<%= clean.build %>/techan-bundle.js'
       },
       test: {
@@ -46,16 +46,19 @@ module.exports = function(grunt) {
             debug: true
           }
         },
-        src: 'test/spec/bundle/**/*.js',
+        src: './test/spec/bundle/**/*.js',
         dest: '<%= clean.build %>/specs-bundle.js'
-      },
+      }
+    },
+
+    browserify: {
       dist: {
         options: {
           bundleOptions: {
             standalone: 'techan'
           }
         },
-        src: 'src/techan.js',
+        src: './src/techan.js',
         dest: '<%= clean.dist %>/techan.js'
       }
     },
@@ -114,7 +117,7 @@ module.exports = function(grunt) {
         options: {
           outfile: '<%= clean.build %>/bundleSpecRunner.html'
         },
-        src: '<%= browserify.test.dest %>' // Single browserify bundle that includes src under test
+        src: '<%= watchify.test.dest %>' // Single watchify bundle that includes src under test
       },
       dist: {
         options: {
@@ -185,7 +188,7 @@ module.exports = function(grunt) {
         options: {
           patterns: [
             { match: /http:\/\/d3js\.org\/d3\.v3\.min\.js/g, replacement: '/bower_components/d3/d3.js' },
-            { match: /http:\/\/techanjs\.org\/techan\.min\.js/g, replacement: '/<%= browserify.dev.dest %>' }
+            { match: /http:\/\/techanjs\.org\/techan\.min\.js/g, replacement: '/<%= watchify.dev.dest %>' }
           ]
         },
         files: [
@@ -200,7 +203,7 @@ module.exports = function(grunt) {
   grunt.loadTasks('lib/grunt');
 
   grunt.registerTask('lint', ['newer:jshint', 'newer:jscs']);
-  grunt.registerTask('dev', ['lint', 'browserify:dev', 'browserify:test', 'jasmine:test']);
+  grunt.registerTask('dev', ['lint', 'watchify:dev', 'watchify:test', 'jasmine:test']);
   grunt.registerTask('examples', ['newer:replace', 'newer:copy']);
   grunt.registerTask('dist', ['browserify:dist', 'usebanner', 'jasmine:dist']);
   grunt.registerTask('minify', ['uglify', 'jasmine:minify']);
