@@ -108,30 +108,33 @@ module.exports = function(grunt) {
       tasks: ['examples', 'dev']
     },
 
-    jasmine: {
+    karma: {
       options: {
-        vendor: ['bower_components/d3/d3.js', 'test/spec/common/**/*.js'],
-        keepRunner: true
+        configFile: 'karma.conf.js',
+        files: ['bower_components/d3/d3.js', 'test/spec/common/**/*.js']
+      },
+      watch: {
+        background: true,
+        singleRun: false,
+        options: {
+          files: ['<%= karma.options.files %>', '<%= watchify.test.dest %>'] // Single browserify bundle that includes src under test
+        }
       },
       test: {
+        //background: true,
         options: {
-          outfile: '<%= clean.build %>/bundleSpecRunner.html'
-        },
-        src: '<%= watchify.test.dest %>' // Single watchify bundle that includes src under test
+          files: ['<%= karma.options.files %>', '<%= watchify.test.dest %>'] // Single browserify bundle that includes src under test
+        }
       },
       dist: {
         options: {
-          specs: 'test/spec/standalone/**/*.js',
-          outfile: '<%= clean.build %>/standaloneSpecRunner.html'
-        },
-        src: '<%= browserify.dist.dest %>'
+          files: ['<%= karma.options.files %>', '<%= browserify.dist.dest %>', 'test/spec/standalone/**/*.js']
+        }
       },
       minify: {
         options: {
-          specs: 'test/spec/standalone/**/*.js',
-          outfile: '<%= clean.build %>/standaloneMinSpecRunner.html'
-        },
-        src: '<%= uglify.dist.dest %>'
+          files: ['<%= karma.options.files %>', '<%= uglify.dist.dest %>', 'test/spec/standalone/**/*.js']
+        }
       }
     },
 
@@ -203,14 +206,15 @@ module.exports = function(grunt) {
   grunt.loadTasks('lib/grunt');
 
   grunt.registerTask('lint', ['newer:jshint', 'newer:jscs']);
-  grunt.registerTask('dev', ['lint', 'watchify:dev', 'watchify:test', 'jasmine:test']);
+  grunt.registerTask('dev', ['lint', 'watchify:dev', 'watchify:test', 'karma:watch:run']);
+  grunt.registerTask('test', ['lint', 'watchify:dev', 'watchify:test', 'karma:test']);
   grunt.registerTask('examples', ['newer:replace', 'newer:copy']);
-  grunt.registerTask('dist', ['browserify:dist', 'usebanner', 'jasmine:dist']);
-  grunt.registerTask('minify', ['uglify', 'jasmine:minify']);
-  grunt.registerTask('serve', ['filegen:version', 'examples', 'dev', 'connect', 'watch']);
+  grunt.registerTask('dist', ['browserify:dist', 'usebanner', 'karma:dist']);
+  grunt.registerTask('minify', ['uglify', 'karma:minify']);
+  grunt.registerTask('serve', ['clean', 'filegen:version', 'examples', 'test', 'connect', 'karma:watch:start', 'watch']);
   grunt.registerTask('release:pre', ['bump-only:prerelease', 'default']);
   grunt.registerTask('release:minor', ['bump-only:minor', 'default', 'bump-commit']);
   grunt.registerTask('release:major', ['bump-only:major', 'default', 'bump-commit']);
 
-  grunt.registerTask('default', ['jsonlint', 'bower', 'clean', 'filegen:version', 'dev', 'dist', 'minify', 'compress']);
+  grunt.registerTask('default', ['jsonlint', 'bower', 'clean', 'filegen:version', 'test', 'dist', 'minify', 'compress']);
 };

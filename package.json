@@ -19,7 +19,6 @@
     "grunt-contrib-uglify": "~0.6.0",
     "grunt-contrib-watch": "~0.6.1",
     "grunt-contrib-clean": "~0.6.0",
-    "grunt-contrib-jasmine": "0.8.1",
     "grunt-jsonlint": "~1.0.4",
     "grunt-jscs": "~0.8.1",
     "load-grunt-tasks": "~1.0.0",
@@ -32,6 +31,10 @@
     "grunt-newer": "~0.8.0",
     "grunt-replace": "~0.8.0",
     "grunt-contrib-copy": "~0.7.0",
+    "jasmine-core": "~2.1.3",
+    "karma-jasmine": "~0.3.2",
+    "karma-phantomjs-launcher": "~0.1.4",
+    "grunt-karma": "~0.9.0",
     "grunt-watchify": "~0.1.0"
   },
   "scripts": {
