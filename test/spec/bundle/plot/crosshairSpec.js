@@ -401,7 +401,7 @@ techanModule('plot/crosshair', function(specBuilder) {
               });
 
               it('Then the listener should have been passed the correct coordinates', function() {
-                expect(listener.calls.argsFor(0)[0]).toEqual([[undefined], [undefined]]); // Mocks won't correctly initialise this array
+                expect(listener.calls.argsFor(0)[0]).toEqual([new Date(1), 2]); // Mocks won't correctly initialise this array
               });
             });
 

@@ -1,9 +1,9 @@
 /*
- TechanJS v0.4.0-2
+ TechanJS v0.4.0-3
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-'use strict';module.exports='0.4.0-2';
+'use strict';module.exports='0.4.0-3';
 },{}],2:[function(_dereq_,module,exports){
 'use strict';
 
@@ -978,18 +978,18 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
 
     function mousemoveRefresh(pathVerticalSelection, pathHorizontalSelection,
                               xAnnotationSelection, yAnnotationSelection) {
-      var event = [new Array(xAnnotation.length), new Array(yAnnotation.length)];
-
       return function() {
-        var coords = d3_mouse(this);
+        var coords = d3_mouse(this),
+            x = p.xScale.invert(coords[0]),
+            y = p.yScale.invert(coords[1]);
 
-        refresh(pathVerticalSelection.datum(p.xScale.invert(coords[0])),
-          pathHorizontalSelection.datum(p.yScale.invert(coords[1])),
-          xAnnotationSelection.each(updateAnnotationValue(xAnnotation, coords[0], event[0])),
-          yAnnotationSelection.each(updateAnnotationValue(yAnnotation, coords[1], event[1]))
+        refresh(pathVerticalSelection.datum(x),
+          pathHorizontalSelection.datum(y),
+          xAnnotationSelection.each(updateAnnotationValue(xAnnotation, coords[0])),
+          yAnnotationSelection.each(updateAnnotationValue(yAnnotation, coords[1]))
         );
 
-        dispatch.move(event);
+        dispatch.move([x, y]);
       };
     }
 
@@ -1073,11 +1073,10 @@ function verticalPathLine(x, range) {
   };
 }
 
-function updateAnnotationValue(annotations, value, event) {
+function updateAnnotationValue(annotations, value) {
   return function(d, i) {
-    event[i] = annotations[i].axis().scale().invert(value);
     // d[0] because only ever 1 value for crosshairs
-    annotations[i].accessor()(d[0], event[i]);
+    annotations[i].accessor()(d[0], annotations[i].axis().scale().invert(value));
   };
 }
 },{}],18:[function(_dereq_,module,exports){

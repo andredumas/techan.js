@@ -29,22 +29,15 @@ module.exports = function(grunt) {
     watchify: {
       dev: {
         options: {
-          // Thanks https://github.com/amitayd/grunt-browserify-jasmine-node-example/blob/2488181e29b09226f2a87202a851f996820eafb6/Gruntfile.js#L51
-          //require: grunt.file.expand({filter: 'isFile'}, './src/**/*.js', './<%= filegen.version.dest %>'),
-          bundleOptions: {
-            debug: true,
-            standalone: 'techan'
-          }
+          debug: true,
+          standalone: 'techan'
         },
         src: './src/techan.js',
         dest: '<%= clean.build %>/techan-bundle.js'
       },
       test: {
         options: {
-          //external: ['src/**/*.js'], // Put this back in to NOT include source in test bundle.
-          bundleOptions: {
-            debug: true
-          }
+          debug: true
         },
         src: './test/spec/bundle/**/*.js',
         dest: '<%= clean.build %>/specs-bundle.js'
@@ -89,8 +82,11 @@ module.exports = function(grunt) {
       options: {
         jshintrc: ".jshintrc"
       },
+      config: {
+        src: ['Gruntfile.js']
+      },
       dev: {
-        src: ['src/**/*.js', 'lib/**/*.js', 'Gruntfile.js', 'test/**/*.js', '<%= filegen.version.dest %>']
+        src: ['src/**/*.js', 'lib/**/*.js', 'test/**/*.js', '<%= filegen.version.dest %>']
       }
     },
 
@@ -104,8 +100,20 @@ module.exports = function(grunt) {
     },
 
     watch: {
-      files: ['<%= jshint.dev.src %>', 'examples/**'],
-      tasks: ['examples', 'dev']
+      config: {
+        files: [ 'Gruntfile.js'],
+        tasks: ['lint'],
+        options: {
+          reload: true
+        }
+      },
+      dev: {
+        files: ['<%= jshint.dev.src %>', 'examples/**/*'],
+        tasks: ['examples', 'dev'],
+        options: {
+          reload: false
+        }
+      }
     },
 
     karma: {

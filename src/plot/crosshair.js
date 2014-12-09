@@ -61,18 +61,18 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
 
     function mousemoveRefresh(pathVerticalSelection, pathHorizontalSelection,
                               xAnnotationSelection, yAnnotationSelection) {
-      var event = [new Array(xAnnotation.length), new Array(yAnnotation.length)];
-
       return function() {
-        var coords = d3_mouse(this);
+        var coords = d3_mouse(this),
+            x = p.xScale.invert(coords[0]),
+            y = p.yScale.invert(coords[1]);
 
-        refresh(pathVerticalSelection.datum(p.xScale.invert(coords[0])),
-          pathHorizontalSelection.datum(p.yScale.invert(coords[1])),
-          xAnnotationSelection.each(updateAnnotationValue(xAnnotation, coords[0], event[0])),
-          yAnnotationSelection.each(updateAnnotationValue(yAnnotation, coords[1], event[1]))
+        refresh(pathVerticalSelection.datum(x),
+          pathHorizontalSelection.datum(y),
+          xAnnotationSelection.each(updateAnnotationValue(xAnnotation, coords[0])),
+          yAnnotationSelection.each(updateAnnotationValue(yAnnotation, coords[1]))
         );
 
-        dispatch.move(event);
+        dispatch.move([x, y]);
       };
     }
 
@@ -156,10 +156,9 @@ function verticalPathLine(x, range) {
   };
 }
 
-function updateAnnotationValue(annotations, value, event) {
+function updateAnnotationValue(annotations, value) {
   return function(d, i) {
-    event[i] = annotations[i].axis().scale().invert(value);
     // d[0] because only ever 1 value for crosshairs
-    annotations[i].accessor()(d[0], event[i]);
+    annotations[i].accessor()(d[0], annotations[i].axis().scale().invert(value));
   };
 }
