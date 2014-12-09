@@ -172,6 +172,7 @@ module.exports = function(grunt) {
 
     bump: {
       options: {
+        updateConfigs: ['pkg'],
         commit: true,
         commitMessage: 'Release %VERSION%',
         commitFiles: ['-a'],
