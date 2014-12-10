@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannotation, plotMixin) { // Injected dependencies
+module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plotMixin) { // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
         dispatch = d3_dispatch('enter', 'out', 'move'),
@@ -20,8 +20,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
       dataEnter.append('path').attr('class', 'horizontal wire');
       dataEnter.append('path').attr('class', 'vertical wire');
 
-      appendAnnotation(dataEnter, 'x', xAnnotation);
-      appendAnnotation(dataEnter, 'y', yAnnotation);
+      plot.annotation.append(dataEnter, xAnnotation, 'x');
+      plot.annotation.append(dataEnter, yAnnotation, 'y');
 
       g.selectAll('rect').data([0]).enter().append('rect').style({ fill: 'none', 'pointer-events': 'all' });
 
@@ -68,8 +68,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
 
         refresh(pathVerticalSelection.datum(x),
           pathHorizontalSelection.datum(y),
-          xAnnotationSelection.each(updateAnnotationValue(xAnnotation, coords[0])),
-          yAnnotationSelection.each(updateAnnotationValue(yAnnotation, coords[1]))
+          xAnnotationSelection.each(plot.annotation.update(xAnnotation, coords[0])),
+          yAnnotationSelection.each(plot.annotation.update(yAnnotation, coords[1]))
         );
 
         dispatch.move([x, y]);
@@ -82,8 +82,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
 
       xPath.attr('d', verticalPathLine(x, verticalWireRange || y.range()));
       yPath.attr('d', horizontalPathLine(y, horizontalWireRange || x.range()));
-      xAnnotationSelection.each(refreshAnnotation(xAnnotation));
-      yAnnotationSelection.each(refreshAnnotation(yAnnotation));
+      xAnnotationSelection.each(plot.annotation.refresh(xAnnotation));
+      yAnnotationSelection.each(plot.annotation.refresh(yAnnotation));
     }
 
     crosshair.xAnnotation = function(_) {
@@ -120,20 +120,6 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
 
     return crosshair;
   };
-
-  function appendAnnotation(selection, clazz, annotation) {
-    var annotationSelection = selection.append('g').attr('class', 'axisannotation ' + clazz)
-      .selectAll('g').data(annotation.map(function() { return [{ value: null }]; }));
-
-    annotationSelection.enter().append('g').attr('class', function(d, i) { return i; })
-      .each(function(d, i) { annotation[i](d3_select(this)); });
-  }
-
-  function refreshAnnotation(annotation) {
-    return function(d, i) {
-      annotation[i].refresh(d3_select(this));
-    };
-  }
 };
 
 function display(g, style) {
@@ -153,12 +139,5 @@ function verticalPathLine(x, range) {
     if(!d) return "M 0 0";
     var value = x(d);
     return ['M', value, range[0], 'L', value, range[range.length-1]].join(' ');
-  };
-}
-
-function updateAnnotationValue(annotations, value) {
-  return function(d, i) {
-    // d[0] because only ever 1 value for crosshairs
-    annotations[i].accessor()(d[0], annotations[i].axis().scale().invert(value));
   };
 }

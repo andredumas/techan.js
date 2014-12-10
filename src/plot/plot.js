@@ -86,17 +86,22 @@ module.exports = function(d3_svg_line, d3_select) {
     },
 
     annotation: {
-      append: function(selection, accessor, scale, annotations, clazz) {
+      append: function(selection, annotations, clazz, accessor, scale) {
+        // Use this to either scale the data or initialise to null if accessor and scales are not provided
+        var argumentLength = arguments.length;
+
         var annotationSelection = selection.append('g').attr('class', 'axisannotation ' + clazz)
-          .selectAll('g').data(function(supstance) {
-            // Transform the data to values for each annotation
-            var y = scale(accessor(supstance));
+          .selectAll('g').data(function(d) {
+            // Transform the data to values for each annotation, only if we have accessor and scale
+            var y = argumentLength > 3 ? scale(accessor(d)) : null;
 
             return annotations.map(function(annotation) {
-              var d = {};
-              annotation.accessor()(d, annotation.axis().scale().invert(y));
+              var annotationData = {},
+                  value = argumentLength > 3 ? annotation.axis().scale().invert(y) : null;
+
+              annotation.accessor()(annotationData, value);
               // Only ever 1 data point per annotation
-              return [d];
+              return [annotationData];
             });
           }
         );
@@ -109,8 +114,9 @@ module.exports = function(d3_svg_line, d3_select) {
           });
       },
 
-      update: function(scale, annotations, value) {
-        var y = scale(value);
+      update: function(annotations, value, scale) {
+        // If we have a scale, scale it, otherwise it's an already scaled value
+        var y = arguments.length > 2 ? scale(value) : value;
 
         return function(d) {
           var annotation = annotations[this.__annotation__];

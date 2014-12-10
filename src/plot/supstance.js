@@ -12,7 +12,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
       group.entry.append('g').attr('class', 'supstance')
         .append('path');
 
-      plot.annotation.append(group.entry, p.accessor, p.yScale, annotation, 'y');
+      plot.annotation.append(group.entry, annotation, 'y', p.accessor, p.yScale);
 
       var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
         .call(plot.interaction.mousedispatch(dispatch));
@@ -55,7 +55,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
           annotationSelection = g.selectAll('.axisannotation.y > g');
 
       accessor(d, value);
-      annotationSelection.each(plot.annotation.update(y, annotation, value));
+      annotationSelection.each(plot.annotation.update(annotation, value, y));
       refresh(g, plot, accessor, x, y, annotationSelection, annotation);
       dispatch.drag(d);
     });

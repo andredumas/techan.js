@@ -13,9 +13,12 @@ techanModule('plot/crosshair', function(specBuilder) {
   };
 
   var mockInit = function(crosshair) {
-    var plotmixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
+    spies.d3_select = jasmine.createSpy('d3_select');
+
+    var plot = require('../../../../src/plot/plot')(d3.svg.line, spies.d3_select),
+        plotmixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
     spies.d3_mouse = jasmine.createSpy('d3_mouse');
-    return crosshair(d3.select, d3.event, spies.d3_mouse, d3.dispatch, techan.plot.axisannotation, plotmixin);
+    return crosshair(d3.select, d3.event, spies.d3_mouse, d3.dispatch, plot, plotmixin);
   };
 
   function assertDomStructure(gScope, annotations) {
@@ -372,26 +375,26 @@ techanModule('plot/crosshair', function(specBuilder) {
 
               it('Then should update x event coordinate', function() {
                 var d = { value: 123 };
-                selection.each.calls.argsFor(4)[0]([d], 0);
+                selection.each.calls.argsFor(4)[0].call({ __annotation__: 0}, [d]);
                 expect(d.value).toEqual(new Date(1));
               });
 
               it('Then should update y event coordindate', function() {
                 var d = { value: 321 };
-                selection.each.calls.argsFor(5)[0]([d], 0);
+                selection.each.calls.argsFor(5)[0].call({ __annotation__: 0 }, [d]);
                 expect(d.value).toEqual(2);
               });
 
               it('Then should refresh x annotation', function() {
                 expect(selection.selectAll.calls.argsFor(8)[0]).toEqual('g.axisannotation.x > g');
-                selection.each.calls.argsFor(6)[0](undefined, 0);
+                selection.each.calls.argsFor(6)[0].call({ __annotation__: 0 });
                 expect(crosshair.xAnnotation()[0].refresh).toHaveBeenCalled();
                 expect(crosshair.yAnnotation()[0].refresh).not.toHaveBeenCalled();
               });
 
               it('Then should refresh y annotation', function() {
                 expect(selection.selectAll.calls.argsFor(9)[0]).toEqual('g.axisannotation.y > g');
-                selection.each.calls.argsFor(7)[0](undefined, 0);
+                selection.each.calls.argsFor(7)[0].call({ __annotation__: 0 });
                 expect(crosshair.xAnnotation()[0].refresh).not.toHaveBeenCalled();
                 expect(crosshair.yAnnotation()[0].refresh).toHaveBeenCalled();
               });
