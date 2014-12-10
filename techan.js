@@ -1,9 +1,9 @@
 /*
- TechanJS v0.4.0-2
+ TechanJS v0.4.0-4
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-'use strict';module.exports='0.4.0-2';
+'use strict';module.exports='0.4.0-4';
 },{}],2:[function(_dereq_,module,exports){
 'use strict';
 
@@ -917,7 +917,7 @@ function opacity(g, d3_scale_linear, d3_extent, accessor_volume) {
 },{}],17:[function(_dereq_,module,exports){
 'use strict';
 
-module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannotation, plotMixin) { // Injected dependencies
+module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plotMixin) { // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
         dispatch = d3_dispatch('enter', 'out', 'move'),
@@ -937,8 +937,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
       dataEnter.append('path').attr('class', 'horizontal wire');
       dataEnter.append('path').attr('class', 'vertical wire');
 
-      appendAnnotation(dataEnter, 'x', xAnnotation);
-      appendAnnotation(dataEnter, 'y', yAnnotation);
+      plot.annotation.append(dataEnter, xAnnotation, 'x');
+      plot.annotation.append(dataEnter, yAnnotation, 'y');
 
       g.selectAll('rect').data([0]).enter().append('rect').style({ fill: 'none', 'pointer-events': 'all' });
 
@@ -978,18 +978,18 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
 
     function mousemoveRefresh(pathVerticalSelection, pathHorizontalSelection,
                               xAnnotationSelection, yAnnotationSelection) {
-      var event = [new Array(xAnnotation.length), new Array(yAnnotation.length)];
-
       return function() {
-        var coords = d3_mouse(this);
+        var coords = d3_mouse(this),
+            x = p.xScale.invert(coords[0]),
+            y = p.yScale.invert(coords[1]);
 
-        refresh(pathVerticalSelection.datum(p.xScale.invert(coords[0])),
-          pathHorizontalSelection.datum(p.yScale.invert(coords[1])),
-          xAnnotationSelection.each(updateAnnotationValue(xAnnotation, coords[0], event[0])),
-          yAnnotationSelection.each(updateAnnotationValue(yAnnotation, coords[1], event[1]))
+        refresh(pathVerticalSelection.datum(x),
+          pathHorizontalSelection.datum(y),
+          xAnnotationSelection.each(plot.annotation.update(xAnnotation, coords[0])),
+          yAnnotationSelection.each(plot.annotation.update(yAnnotation, coords[1]))
         );
 
-        dispatch.move(event);
+        dispatch.move([x, y]);
       };
     }
 
@@ -999,8 +999,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
 
       xPath.attr('d', verticalPathLine(x, verticalWireRange || y.range()));
       yPath.attr('d', horizontalPathLine(y, horizontalWireRange || x.range()));
-      xAnnotationSelection.each(refreshAnnotation(xAnnotation));
-      yAnnotationSelection.each(refreshAnnotation(yAnnotation));
+      xAnnotationSelection.each(plot.annotation.refresh(xAnnotation));
+      yAnnotationSelection.each(plot.annotation.refresh(yAnnotation));
     }
 
     crosshair.xAnnotation = function(_) {
@@ -1037,20 +1037,6 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, axisannota
 
     return crosshair;
   };
-
-  function appendAnnotation(selection, clazz, annotation) {
-    var annotationSelection = selection.append('g').attr('class', 'axisannotation ' + clazz)
-      .selectAll('g').data(annotation.map(function() { return [{ value: null }]; }));
-
-    annotationSelection.enter().append('g').attr('class', function(d, i) { return i; })
-      .each(function(d, i) { annotation[i](d3_select(this)); });
-  }
-
-  function refreshAnnotation(annotation) {
-    return function(d, i) {
-      annotation[i].refresh(d3_select(this));
-    };
-  }
 };
 
 function display(g, style) {
@@ -1072,14 +1058,6 @@ function verticalPathLine(x, range) {
     return ['M', value, range[0], 'L', value, range[range.length-1]].join(' ');
   };
 }
-
-function updateAnnotationValue(annotations, value, event) {
-  return function(d, i) {
-    event[i] = annotations[i].axis().scale().invert(value);
-    // d[0] because only ever 1 value for crosshairs
-    annotations[i].accessor()(d[0], event[i]);
-  };
-}
 },{}],18:[function(_dereq_,module,exports){
 'use strict';
 
@@ -1094,7 +1072,7 @@ module.exports = function(d3) {
   return {
     axisannotation: axisannotation,
     candlestick: _dereq_('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
-    crosshair: _dereq_('./crosshair')(d3.select, d3_event, d3.mouse, d3.dispatch, axisannotation, plotMixin),
+    crosshair: _dereq_('./crosshair')(d3.select, d3_event, d3.mouse, d3.dispatch, plot, plotMixin),
     ema: line(accessor.value, plot, plotMixin),
     ohlc: _dereq_('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
     close: line(accessor.ohlc, plot, plotMixin),
@@ -1345,17 +1323,22 @@ module.exports = function(d3_svg_line, d3_select) {
     },
 
     annotation: {
-      append: function(selection, accessor, scale, annotations, clazz) {
+      append: function(selection, annotations, clazz, accessor, scale) {
+        // Use this to either scale the data or initialise to null if accessor and scales are not provided
+        var argumentLength = arguments.length;
+
         var annotationSelection = selection.append('g').attr('class', 'axisannotation ' + clazz)
-          .selectAll('g').data(function(supstance) {
-            // Transform the data to values for each annotation
-            var y = scale(accessor(supstance));
+          .selectAll('g').data(function(d) {
+            // Transform the data to values for each annotation, only if we have accessor and scale
+            var y = argumentLength > 3 ? scale(accessor(d)) : null;
 
             return annotations.map(function(annotation) {
-              var d = {};
-              annotation.accessor()(d, annotation.axis().scale().invert(y));
+              var annotationData = {},
+                  value = argumentLength > 3 ? annotation.axis().scale().invert(y) : null;
+
+              annotation.accessor()(annotationData, value);
               // Only ever 1 data point per annotation
-              return [d];
+              return [annotationData];
             });
           }
         );
@@ -1368,8 +1351,9 @@ module.exports = function(d3_svg_line, d3_select) {
           });
       },
 
-      update: function(scale, annotations, value) {
-        var y = scale(value);
+      update: function(annotations, value, scale) {
+        // If we have a scale, scale it, otherwise it's an already scaled value
+        var y = arguments.length > 2 ? scale(value) : value;
 
         return function(d) {
           var annotation = annotations[this.__annotation__];
@@ -1507,7 +1491,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
       group.entry.append('g').attr('class', 'supstance')
         .append('path');
 
-      plot.annotation.append(group.entry, p.accessor, p.yScale, annotation, 'y');
+      plot.annotation.append(group.entry, annotation, 'y', p.accessor, p.yScale);
 
       var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
         .call(plot.interaction.mousedispatch(dispatch));
@@ -1550,7 +1534,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
           annotationSelection = g.selectAll('.axisannotation.y > g');
 
       accessor(d, value);
-      annotationSelection.each(plot.annotation.update(y, annotation, value));
+      annotationSelection.each(plot.annotation.update(annotation, value, y));
       refresh(g, plot, accessor, x, y, annotationSelection, annotation);
       dispatch.drag(d);
     });
