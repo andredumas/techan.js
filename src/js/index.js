@@ -79,13 +79,14 @@ var techanSite = techanSite || {};
           .append("rect")
             .attr("x", 0);
 
+        svg.append('text')
+            .attr("class", "version")
+            .style("text-anchor", "end")
+            .text("TechanJS v" + techan.version);
+
         svg = svg.append("g")
           .attr("class", "chart")
           .attr("transform", "translate(" + dim.margin.left + "," + dim.margin.top + ")");
-
-//        svg.append('text')
-//          .attr('y', dim.height)
-//          .text(techan.version);
 
         svg.append('text')
           .attr("class", "symbol")
@@ -242,6 +243,10 @@ var techanSite = techanSite || {};
         selection.select("svg")
           .attr("width", dim.width)
           .attr("height", dim.height);
+
+        selection.select("text.version")
+            .attr("x", dim.width-5)
+            .attr("y", dim.height);
 
         selection.selectAll("defs #ohlcClip > rect")
           .attr("width", dim.plot.width)
