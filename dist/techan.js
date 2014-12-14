@@ -1,9 +1,9 @@
 /*
- TechanJS v0.4.0
+ TechanJS v0.5.0-0
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-'use strict';module.exports='0.4.0';
+'use strict';module.exports='0.5.0-0';
 },{}],2:[function(_dereq_,module,exports){
 'use strict';
 
@@ -1351,14 +1351,11 @@ module.exports = function(d3_svg_line, d3_select) {
           });
       },
 
-      update: function(annotations, value, scale) {
-        // If we have a scale, scale it, otherwise it's an already scaled value
-        var y = arguments.length > 2 ? scale(value) : value;
-
+      update: function(annotations, value) {
         return function(d) {
           var annotation = annotations[this.__annotation__];
           // As in append, should only ever be 1 in the array
-          annotation.accessor()(d[0], annotation.axis().scale().invert(y));
+          annotation.accessor()(d[0], annotation.axis().scale().invert(value));
         };
       },
 
@@ -1534,7 +1531,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
           annotationSelection = g.selectAll('.axisannotation.y > g');
 
       accessor(d, value);
-      annotationSelection.each(plot.annotation.update(annotation, value, y));
+      annotationSelection.each(plot.annotation.update(annotation, d3_event().y));
       refresh(g, plot, accessor, x, y, annotationSelection, annotation);
       dispatch.drag(d);
     });
