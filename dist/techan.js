@@ -2,23 +2,23 @@
  TechanJS v0.4.0-4
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';module.exports='0.4.0-4';
-},{}],2:[function(_dereq_,module,exports){
+},{}],2:[function(require,module,exports){
 'use strict';
 
 // TODO Could these be singletons? Generally will be accessing the same data and data structures at the same time
 module.exports = function() {
   return {
-    ohlc: _dereq_('./ohlc'),
-    volume: _dereq_('./volume'),
-    macd: _dereq_('./macd'),
-    rsi: _dereq_('./rsi'),
-    trendline: _dereq_('./trendline'),
-    value: _dereq_('./value')
+    ohlc: require('./ohlc'),
+    volume: require('./volume'),
+    macd: require('./macd'),
+    rsi: require('./rsi'),
+    trendline: require('./trendline'),
+    value: require('./value')
   };
 };
-},{"./macd":3,"./ohlc":4,"./rsi":5,"./trendline":6,"./value":7,"./volume":8}],3:[function(_dereq_,module,exports){
+},{"./macd":3,"./ohlc":4,"./rsi":5,"./trendline":6,"./value":7,"./volume":8}],3:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -70,7 +70,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],4:[function(_dereq_,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -136,7 +136,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],5:[function(_dereq_,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -194,7 +194,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],6:[function(_dereq_,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -255,7 +255,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],7:[function(_dereq_,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -307,7 +307,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],8:[function(_dereq_,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -341,7 +341,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],9:[function(_dereq_,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injected dependencies
@@ -398,20 +398,20 @@ module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injec
     return indicator;
   };
 };
-},{}],10:[function(_dereq_,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
-  var indicatorMixin = _dereq_('./indicatormixin')(),
-      accessor = _dereq_('../accessor')(),
-      ema_init = _dereq_('./ema'),
+  var indicatorMixin = require('./indicatormixin')(),
+      accessor = require('../accessor')(),
+      ema_init = require('./ema'),
       ema = ema_init(indicatorMixin, accessor.ohlc, ema_alpha_init);
 
   return {
     ema: ema,
-    macd: _dereq_('./macd')(indicatorMixin, accessor.ohlc, ema),
-    rsi: _dereq_('./rsi')(indicatorMixin, accessor.ohlc, ema),
-    sma: _dereq_('./sma')(indicatorMixin, accessor.ohlc),
+    macd: require('./macd')(indicatorMixin, accessor.ohlc, ema),
+    rsi: require('./rsi')(indicatorMixin, accessor.ohlc, ema),
+    sma: require('./sma')(indicatorMixin, accessor.ohlc),
     wilderma: ema_init(indicatorMixin, accessor.ohlc, wilder_alpha_init)
   };
 };
@@ -423,7 +423,7 @@ function ema_alpha_init(period) {
 function wilder_alpha_init(period) {
   return 1/period;
 }
-},{"../accessor":2,"./ema":9,"./indicatormixin":11,"./macd":12,"./rsi":13,"./sma":14}],11:[function(_dereq_,module,exports){
+},{"../accessor":2,"./ema":9,"./indicatormixin":11,"./macd":12,"./rsi":13,"./sma":14}],11:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -445,7 +445,7 @@ module.exports = function() {
     bind();
   };
 };
-},{}],12:[function(_dereq_,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
@@ -504,7 +504,7 @@ function datum(date, macd, signal, difference, zero) {
   if(macd) return { date: date, macd: macd, signal: signal, difference: difference, zero: zero };
   else return { date: date, macd: null, signal: null, difference: null, zero: null };
 }
-},{}],13:[function(_dereq_,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
@@ -570,7 +570,7 @@ function datum(date, rsi, middle, overbought, oversold) {
   if(rsi) return { date: date, rsi: rsi, middle: middle, overbought: overbought, oversold: oversold };
   else return { date: date, rsi: null, middle: null, overbought: null, oversold: null };
 }
-},{}],14:[function(_dereq_,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
@@ -634,7 +634,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
     return indicator;
   };
 };
-},{}],15:[function(_dereq_,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 /**
@@ -804,7 +804,7 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
     }
   };
 }
-},{}],16:[function(_dereq_,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
@@ -914,7 +914,7 @@ function opacity(g, d3_scale_linear, d3_extent, accessor_volume) {
     return isNaN(volume) ? null : volumeOpacityScale(volume);
   });
 }
-},{}],17:[function(_dereq_,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plotMixin) { // Injected dependencies
@@ -1058,32 +1058,32 @@ function verticalPathLine(x, range) {
     return ['M', value, range[0], 'L', value, range[range.length-1]].join(' ');
   };
 }
-},{}],18:[function(_dereq_,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3) {
-  var scale = _dereq_('../scale')(d3),
-      accessor = _dereq_('../accessor')(),
-      plot = _dereq_('./plot')(d3.svg.line, d3.select),
-      plotMixin = _dereq_('./plotmixin')(d3.scale.linear, scale.financetime),
-      line = _dereq_('./line'),
-      axisannotation = _dereq_('./axisannotation')(d3.svg.axis, accessor.value, plot, plotMixin);
+  var scale = require('../scale')(d3),
+      accessor = require('../accessor')(),
+      plot = require('./plot')(d3.svg.line, d3.select),
+      plotMixin = require('./plotmixin')(d3.scale.linear, scale.financetime),
+      line = require('./line'),
+      axisannotation = require('./axisannotation')(d3.svg.axis, accessor.value, plot, plotMixin);
 
   return {
     axisannotation: axisannotation,
-    candlestick: _dereq_('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
-    crosshair: _dereq_('./crosshair')(d3.select, d3_event, d3.mouse, d3.dispatch, plot, plotMixin),
+    candlestick: require('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
+    crosshair: require('./crosshair')(d3.select, d3_event, d3.mouse, d3.dispatch, plot, plotMixin),
     ema: line(accessor.value, plot, plotMixin),
-    ohlc: _dereq_('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
+    ohlc: require('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
     close: line(accessor.ohlc, plot, plotMixin),
-    volume: _dereq_('./volume')(accessor.volume, plot, plotMixin),
-    rsi: _dereq_('./rsi')(accessor.rsi, plot, plotMixin),
-    macd: _dereq_('./macd')(accessor.macd, plot, plotMixin),
+    volume: require('./volume')(accessor.volume, plot, plotMixin),
+    rsi: require('./rsi')(accessor.rsi, plot, plotMixin),
+    macd: require('./macd')(accessor.macd, plot, plotMixin),
     momentum: line(accessor.value, plot, plotMixin, true),
     moneyflow: line(accessor.value, plot, plotMixin, true),
     sma: line(accessor.value, plot, plotMixin),
-    supstance: _dereq_('./supstance')(d3.behavior.drag, d3_event, d3.select, d3.dispatch, accessor.value, plot, plotMixin),
-    trendline: _dereq_('./trendline')(d3.behavior.drag, d3_event, d3.select, d3.dispatch, accessor.trendline, plot, plotMixin),
+    supstance: require('./supstance')(d3.behavior.drag, d3_event, d3.select, d3.dispatch, accessor.value, plot, plotMixin),
+    trendline: require('./trendline')(d3.behavior.drag, d3_event, d3.select, d3.dispatch, accessor.trendline, plot, plotMixin),
     wilderma: line(accessor.value, plot, plotMixin)
   };
 };
@@ -1091,7 +1091,7 @@ module.exports = function(d3) {
 function d3_event() {
   return d3.event;
 }
-},{"../accessor":2,"../scale":29,"./axisannotation":15,"./candlestick":16,"./crosshair":17,"./line":19,"./macd":20,"./ohlc":21,"./plot":22,"./plotmixin":23,"./rsi":24,"./supstance":25,"./trendline":26,"./volume":27}],19:[function(_dereq_,module,exports){
+},{"../accessor":2,"../scale":29,"./axisannotation":15,"./candlestick":16,"./crosshair":17,"./line":19,"./macd":20,"./ohlc":21,"./plot":22,"./plotmixin":23,"./rsi":24,"./supstance":25,"./trendline":26,"./volume":27}],19:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
@@ -1130,7 +1130,7 @@ function refresh(g, accessor, x, y, plot, showZero) {
     g.selectAll('path.zero').attr('d', plot.horizontalPathLine(x, accessor.z, y));
   }
 }
-},{}],20:[function(_dereq_,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_macd, plot, plotMixin) {  // Injected dependencies
@@ -1187,7 +1187,7 @@ function differencePath(accessor, x, y) {
       ].join(' ');
   };
 }
-},{}],21:[function(_dereq_,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
@@ -1234,7 +1234,7 @@ function ohlcPath(accessor, x, y) {
       ].join(' ');
   };
 }
-},{}],22:[function(_dereq_,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_svg_line, d3_select) {
@@ -1370,7 +1370,7 @@ module.exports = function(d3_svg_line, d3_select) {
     }
   };
 };
-},{}],23:[function(_dereq_,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1441,7 +1441,7 @@ module.exports = function(d3_scale_linear, techan_scale_financetime) {
     return plotMixin;
   };
 };
-},{}],24:[function(_dereq_,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependencies
@@ -1476,7 +1476,7 @@ function refresh(g, accessor, x, y, plot) {
   g.selectAll('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
   g.selectAll('path.rsi').attr('d', plot.pathLine(accessor.d, x, accessor.r, y));
 }
-},{}],25:[function(_dereq_,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, accessor_value, plot, plotMixin) {  // Injected dependencies
@@ -1562,7 +1562,7 @@ function supstancePath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],26:[function(_dereq_,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, accessor_trendline, plot, plotMixin) {  // Injected dependencies
@@ -1682,7 +1682,7 @@ function trendlineEnd(accessor_x, x, accessor_y, y) {
     cy: function(d) { return y(accessor_y(d)); }
   };
 }
-},{}],27:[function(_dereq_,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_volume, plot, plotMixin) {  // Injected dependencies
@@ -1735,7 +1735,7 @@ function volumePath(accessor, x, y) {
       ].join(' ');
   };
 }
-},{}],28:[function(_dereq_,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 /*
@@ -2040,14 +2040,14 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
 
   return financetime;
 };
-},{}],29:[function(_dereq_,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3) {
-  var zoomable = _dereq_('./zoomable')(),
-      util = _dereq_('../util')(),
-      accessors = _dereq_('../accessor')(),
-      financetime = _dereq_('./financetime')(d3.scale.linear, d3.time, d3.bisect, util.rebindCallback, widen, zoomable);
+  var zoomable = require('./zoomable')(),
+      util = require('../util')(),
+      accessors = require('../accessor')(),
+      financetime = require('./financetime')(d3.scale.linear, d3.time, d3.bisect, util.rebindCallback, widen, zoomable);
 
   return {
     financetime: financetime,
@@ -2144,7 +2144,7 @@ function widen(widening, width) {
     return d + (i*2-1)*width*widening;
   };
 }
-},{"../accessor":2,"../util":32,"./financetime":28,"./zoomable":30}],30:[function(_dereq_,module,exports){
+},{"../accessor":2,"../util":32,"./financetime":28,"./zoomable":30}],30:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2194,19 +2194,19 @@ module.exports = function() {
 
   return zoomable;
 };
-},{}],31:[function(_dereq_,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 module.exports = (function(d3) {
   return {
-    version: _dereq_('../build/version'),
-    accessor: _dereq_('./accessor')(),
-    indicator: _dereq_('./indicator')(),
-    plot: _dereq_('./plot')(d3),
-    scale: _dereq_('./scale')(d3)
+    version: require('../build/version'),
+    accessor: require('./accessor')(),
+    indicator: require('./indicator')(),
+    plot: require('./plot')(d3),
+    scale: require('./scale')(d3)
   };
 })(d3);
-},{"../build/version":1,"./accessor":2,"./indicator":10,"./plot":18,"./scale":29}],32:[function(_dereq_,module,exports){
+},{"../build/version":1,"./accessor":2,"./indicator":10,"./plot":18,"./scale":29}],32:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -2238,6 +2238,5 @@ function doRebind(target, source, method, postSetCallback) {
     return value === source ? target : value;
   };
 }
-},{}]},{},[31])
-(31)
+},{}]},{},[31])(31)
 });

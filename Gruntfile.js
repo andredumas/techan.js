@@ -47,7 +47,7 @@ module.exports = function(grunt) {
     browserify: {
       dist: {
         options: {
-          bundleOptions: {
+          browserifyOptions: {
             standalone: 'techan'
           }
         },
