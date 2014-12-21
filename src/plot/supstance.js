@@ -55,7 +55,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
           annotationSelection = g.selectAll('.axisannotation.y > g');
 
       accessor(d, value);
-      annotationSelection.each(plot.annotation.update(annotation, value, y));
+      annotationSelection.each(plot.annotation.update(annotation, d3_event().y));
       refresh(g, plot, accessor, x, y, annotationSelection, annotation);
       dispatch.drag(d);
     });

@@ -114,14 +114,11 @@ module.exports = function(d3_svg_line, d3_select) {
           });
       },
 
-      update: function(annotations, value, scale) {
-        // If we have a scale, scale it, otherwise it's an already scaled value
-        var y = arguments.length > 2 ? scale(value) : value;
-
+      update: function(annotations, value) {
         return function(d) {
           var annotation = annotations[this.__annotation__];
           // As in append, should only ever be 1 in the array
-          annotation.accessor()(d[0], annotation.axis().scale().invert(y));
+          annotation.accessor()(d[0], annotation.axis().scale().invert(value));
         };
       },
 
