@@ -30,6 +30,7 @@ range of [static and interactive plots](http://bl.ocks.org/andredumas/edf630690c
 
 ## Algorithms
 
+* [Ichimoku Cloud](http://bl.ocks.org/andredumas/ef212e7c26d2b7ba5403)
 * [Moving Averages (Simple & Exponential)](http://bl.ocks.org/andredumas/274b54b4d2c2ffa19fca)
 * [RSI](http://bl.ocks.org/andredumas/6da267f1c51a13dea35b)
 * [MACD](http://bl.ocks.org/andredumas/10d701ccb3b8b1e99878)
@@ -53,6 +54,8 @@ Cloning and building the base project:
 ```shell
 git clone git@github.com:andredumas/techan.js.git
 npm install
+
+# Then to build
 npm test
 # OR
 grunt
