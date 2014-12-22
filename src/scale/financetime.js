@@ -28,10 +28,12 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
      * was added.
      *
      * @param x The value to scale
+     * @param offset Apply an index offset to the mapped x (date) parameter
      * @returns {*}
      */
-    function scale(x) {
+    function scale(x, offset) {
       var mappedIndex = dateIndexMap[+x];
+      offset = offset || 0;
 
       // Make sure the value has been mapped, if not, determine if it's just before, round in, or just after domain
       if(mappedIndex === undefined) {
@@ -39,17 +41,30 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
         else mappedIndex = d3_bisect(domain, x); // else let bisect determine where in or just after than domain it is
       }
 
-      return index(mappedIndex);
+      return index(mappedIndex + offset);
     }
 
+    /**
+     * Invert the passed range coordinate to the corresponding domain. Returns null if no valid domain available.
+     *
+     * @param y
+     * @returns {null} If the range value cannot be mapped. eg, if range value is outside of the mapped domain
+     */
     scale.invert = function(y) {
-      var i = scale.invertToIndex(y);
-      return i === null ? null : domain[i];
+      var d = domain[scale.invertToIndex(y)];
+      return d ? d : null;
     };
 
+    /**
+     * Inverts the coordinate to the corresponding domain. <b>NOTE: </b> May return values outside of the domain such
+     * as negative indexes, or an index greater than what is available in the domain.
+     *
+     * @param y
+     * @returns {number} A number representing the index in the domain the range value has been inverted to. May return
+     * values outside of the domain such as negatives or value greater than domain().length-1
+     */
     scale.invertToIndex = function(y) {
-      var i = Math.round(index.invert(y));
-      return domain[i] ? Math.abs(i) : null;
+      return Math.round(index.invert(y));
     };
 
     /**

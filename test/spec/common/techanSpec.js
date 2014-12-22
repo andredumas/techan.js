@@ -14,6 +14,14 @@ function techanSpec(techan) {
       expect(techan.accessor).toBeDefined();
     });
 
+    it('Then techan.accessor.ichimoku should be defined', function () {
+      expect(techan.accessor.ichimoku).toBeDefined();
+    });
+
+    it('Then techan.accessor.ichimoku can be constructed', function () {
+      expect(techan.accessor.ichimoku()).toBeDefined();
+    });
+
     it('Then techan.accessor.ohlc should be defined', function () {
       expect(techan.accessor.ohlc).toBeDefined();
     });
@@ -56,6 +64,14 @@ function techanSpec(techan) {
 
     it('Then techan.indicator.ema can be constructed', function () {
       expect(techan.indicator.ema()).toBeDefined();
+    });
+
+    it('Then techan.indicator.ichimoku should be defined', function () {
+      expect(techan.indicator.ichimoku).toBeDefined();
+    });
+
+    it('Then techan.indicator.ema can be constructed', function () {
+      expect(techan.indicator.ichimoku()).toBeDefined();
     });
 
     it('Then techan.indicator.macd should be defined', function () {
@@ -132,6 +148,14 @@ function techanSpec(techan) {
 
     it('Then techan.plot.ema can be constructed', function () {
       expect(techan.plot.ema()).toBeDefined();
+    });
+
+    it('Then techan.plot.ichimoku should be defined', function () {
+      expect(techan.plot.ichimoku).toBeDefined();
+    });
+
+    it('Then techan.plot.ichimoku can be constructed', function () {
+      expect(techan.plot.ichimoku()).toBeDefined();
     });
 
     it('Then techan.plot.macd should be defined', function () {

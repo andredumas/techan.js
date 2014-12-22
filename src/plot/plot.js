@@ -49,9 +49,10 @@ module.exports = function(d3_svg_line, d3_select) {
       };
     },
 
-    pathLine: function(accessor_date, x, accessor_value, y) {
+    pathLine: function(accessor_date, x, accessor_value, y, offset) {
       return d3_svg_line().interpolate('monotone')
-        .x(function(d) { return x(accessor_date(d)); } )
+        .defined(function(d) { return accessor_value(d) !== null; })
+        .x(function(d) { return x(accessor_date(d), offset === undefined ? offset : offset(d)); } )
         .y(function(d) { return y(accessor_value(d)); } );
     },
 

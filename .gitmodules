@@ -43,3 +43,6 @@
 [submodule "examples/plot/feed"]
 	path = examples/plot/feed
 	url = https://gist.github.com/95f1f22130fb1a3a8181.git
+[submodule "examples/indicator/ichimoku"]
+	path = examples/indicator/ichimoku
+	url = https://gist.github.com/ef212e7c26d2b7ba5403.git

@@ -25,6 +25,29 @@ module.exports = function(d3) {
         return financetime().domain(data.map(accessor.d));
       },
 
+      ichimoku: function(data, accessor) {
+        accessor = accessor || accessors.ichimoku();
+
+        // Lots of values in each data point, assemble them together as they are plotted considering offsets, flatten, remove nulls
+        var values = data.map(function(d, i) {
+          var chikouSpanData = data[i+accessor.pks(d)],  // Apply offset +pks (is plotted behind, so get data ahead)
+              senkouSpanBData = data[i-accessor.pks(d)]; // Apply offset -pks (is plotted in front, so get data behind)
+
+          return [
+            accessor.ts(d), accessor.ks(d),
+            senkouSpanBData ? accessor.sa(senkouSpanBData) : null,
+            senkouSpanBData ? accessor.sb(senkouSpanBData) : null,
+            chikouSpanData ? accessor.c(chikouSpanData) : null
+          ];
+        })
+        .reduce(function(a, b) { return a.concat(b); }) // Flatten
+        .filter(function(d) { return d; }); // Remove nulls
+
+        return d3.scale.linear()
+          .domain(d3.extent(values).map(widen(0.02)))
+          .range([1, 0]);
+      },
+
       percent: function (scale, reference) {
         var domain = scale.domain();
         reference = reference || domain[0];

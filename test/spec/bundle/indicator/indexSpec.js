@@ -11,6 +11,10 @@ techanModule('indicator', function(specBuilder) {
         expect(scope.indicator.ema).toBeDefined();
       });
 
+      it('Then indicator.ichimoku should be defined', function() {
+        expect(scope.indicator.ichimoku).toBeDefined();
+      });
+
       it('Then indicator.macd should be defined', function() {
         expect(scope.indicator.macd).toBeDefined();
       });

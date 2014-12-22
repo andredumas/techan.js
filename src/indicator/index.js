@@ -8,6 +8,7 @@ module.exports = function() {
 
   return {
     ema: ema,
+    ichimoku: require('./ichimoku')(indicatorMixin, accessor.ohlc),
     macd: require('./macd')(indicatorMixin, accessor.ohlc, ema),
     rsi: require('./rsi')(indicatorMixin, accessor.ohlc, ema),
     sma: require('./sma')(indicatorMixin, accessor.ohlc),

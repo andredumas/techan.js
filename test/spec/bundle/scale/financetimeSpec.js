@@ -40,6 +40,10 @@ techanModule('scale/financetime', function(specBuilder) {
           expect(financetime(data[data.length-1])).toEqual(1000);
         });
 
+        it('Then scale of first index plus offset of data length should return max range', function() {
+          expect(financetime(data[0], data.length-1)).toEqual(1000);
+        });
+
         it('Then scale of a value less than minimum should return less than minimum range', function() {
           expect(financetime(+data[0] - 100)).toEqual(0); // just a bit less, should round down
         });
@@ -64,16 +68,16 @@ techanModule('scale/financetime', function(specBuilder) {
           expect(financetime.invertToIndex(101)).toEqual(0);
         });
 
-        it('Then invertToIndex of less than min range should return null', function() {
-          expect(financetime.invertToIndex(40)).toBeNull();
+        it('Then invertToIndex of less than min range should return a negative index', function() {
+          expect(financetime.invertToIndex(40)).toEqual(-1);
         });
 
         it('Then invertToIndex of just under max range should return the last domain index', function() {
           expect(financetime.invertToIndex(1020)).toEqual(data.length-1);
         });
 
-        it('Then invertToIndex of greater max range should return null', function() {
-          expect(financetime.invertToIndex(1060)).toBeNull();
+        it('Then invertToIndex of greater max range should return relative domain index', function() {
+          expect(financetime.invertToIndex(1060)).toEqual(10);
         });
 
         it('Then invert(financetime(x)) should equal x for each in domain', function() {
