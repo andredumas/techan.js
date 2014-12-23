@@ -1,9 +1,9 @@
 /*
- TechanJS v0.5.0-1
+ TechanJS v0.5.0-2
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.5.0-1';
+'use strict';module.exports='0.5.0-2';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -352,6 +352,12 @@ module.exports = function() {
 
 module.exports = function() {
   var date = function(d) { return d.date; },
+      /**
+       * Supports getter and setter
+       * @param d Underlying data object to get or set the value
+       * @param _ If passed turns into a setter. This is the value to set
+       * @returns {*}
+       */
       value = function(d, _) {
         if(arguments.length < 2) return d.value;
         d.value = _;
@@ -359,14 +365,8 @@ module.exports = function() {
       },
       zero = function(d) { return d.zero; };
 
-  /**
-   * Supports getter and setter
-   * @param d Underlying data object to get or set the value
-   * @param _ If passed turns into a setter. This is the value to set
-   * @returns {*}
-   */
-  function accessor(d, _) {
-    return accessor.v.apply(undefined, arguments);
+  function accessor(d) {
+    return accessor.v(d);
   }
 
   // TODO use d3.rebind to obtain this from 'super class'
@@ -436,14 +436,55 @@ module.exports = function() {
 },{}],10:[function(require,module,exports){
 'use strict';
 
+module.exports = function(indicatorMixin, accessor_ohlc, sma) {  // Injected dependencies
+  return function() { // Closure function
+    var p = {};  // Container for private, direct access mixed in variables
+
+    function indicator(data) {
+      var initialAtr = sma().accessor(indicator.accessor()).period(p.period).init(),
+          previous = null,
+          averageTrueRange = 0;
+
+      return data.map(function(d, i) {
+        var trueRange = previous === null ? p.accessor.h(d)-p.accessor.l(d) :
+          Math.max(p.accessor.h(d)-p.accessor.l(d),
+            Math.abs(p.accessor.h(d)-p.accessor.c(previous)),
+            Math.abs(p.accessor.l(d)-p.accessor.c(previous))
+          );
+
+        previous = d;
+
+        // http://en.wikipedia.org/wiki/Average_true_range
+        averageTrueRange = i <= p.period ? initialAtr.average(trueRange) : (averageTrueRange*(p.period-1)+trueRange)/p.period;
+
+        if(i >= p.period) return datum(p.accessor.d(d), averageTrueRange);
+        else return datum(p.accessor.d(d));
+      }).filter(function(d) { return d.value; });
+    }
+
+    // Mixin 'superclass' methods and variables
+    indicatorMixin(indicator, p)
+      .accessor(accessor_ohlc())
+      .period(14);
+
+    return indicator;
+  };
+};
+
+function datum(date, atr) {
+  if(atr) return { date: date, value: atr };
+  else return { date: date, value: null };
+}
+},{}],11:[function(require,module,exports){
+'use strict';
+
 module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
-      period = 10,
-      previous,
-      alpha,
-      initialTotal,
-      initialCount;
+        previous,
+        alpha,
+        initialTotal,
+        initialCount;
 
     function indicator(data) {
       indicator.init();
@@ -452,7 +493,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injec
 
     indicator.init = function() {
       previous = null;
-      alpha = alpha_init(period);
+      alpha = alpha_init(p.period);
       initialTotal = 0;
       initialCount = 0;
       return indicator;
@@ -460,7 +501,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injec
 
     function ma(d, i) {
       var value = indicator.average(p.accessor(d));
-      if (i+1 < period) {
+      if (i+1 < p.period) {
         value = null;
       }
 
@@ -468,9 +509,9 @@ module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injec
     }
 
     indicator.average = function(value) {
-      if(initialCount < period) return (initialTotal += value)/++initialCount;
+      if(initialCount < p.period) return (initialTotal += value)/++initialCount;
       else {
-        if(initialCount === period) {
+        if(initialCount === p.period) {
           previous = initialTotal/initialCount++;
         }
 
@@ -478,19 +519,15 @@ module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injec
       }
     };
 
-    indicator.period = function(_) {
-      if (!arguments.length) return period;
-      period = _;
-      return indicator;
-    };
-
     // Mixin 'superclass' methods and variables
-    indicatorMixin(indicator, p, accessor_ohlc());
+    indicatorMixin(indicator, p)
+      .accessor(accessor_ohlc())
+      .period(10);
 
     return indicator;
   };
 };
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
@@ -555,7 +592,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
     };
 
     // Mixin 'superclass' methods and variables
-    indicatorMixin(indicator, p, accessor_ohlc());
+    indicatorMixin(indicator, p).accessor(accessor_ohlc());
 
     return indicator;
   };
@@ -572,21 +609,23 @@ function senkouSpanA(tenkanSen, kijunSen) {
 function average(v1, v2) {
   return (v1+v2)/2;
 }
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
   var indicatorMixin = require('./indicatormixin')(),
       accessor = require('../accessor')(),
       ema_init = require('./ema'),
-      ema = ema_init(indicatorMixin, accessor.ohlc, ema_alpha_init);
+      ema = ema_init(indicatorMixin, accessor.ohlc, ema_alpha_init),
+      sma = require('./sma')(indicatorMixin, accessor.ohlc);
 
   return {
+    atr: require('./atr')(indicatorMixin, accessor.ohlc, sma),
     ema: ema,
     ichimoku: require('./ichimoku')(indicatorMixin, accessor.ohlc),
     macd: require('./macd')(indicatorMixin, accessor.ohlc, ema),
     rsi: require('./rsi')(indicatorMixin, accessor.ohlc, ema),
-    sma: require('./sma')(indicatorMixin, accessor.ohlc),
+    sma: sma,
     wilderma: ema_init(indicatorMixin, accessor.ohlc, wilder_alpha_init)
   };
 };
@@ -598,29 +637,42 @@ function ema_alpha_init(period) {
 function wilder_alpha_init(period) {
   return 1/period;
 }
-},{"../accessor":3,"./ema":10,"./ichimoku":11,"./indicatormixin":13,"./macd":14,"./rsi":15,"./sma":16}],13:[function(require,module,exports){
+},{"../accessor":3,"./atr":10,"./ema":11,"./ichimoku":12,"./indicatormixin":14,"./macd":15,"./rsi":16,"./sma":17}],14:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
-  return function(source, priv, accessor) {
-    // Mixin the functions to the source
-    source.accessor = function(_) {
-      if (!arguments.length) return accessor;
-      accessor = _;
-      return bind();
+  return function(source, priv) {
+    var indicatorMixin = {};
+
+    indicatorMixin.period = function(period) {
+      priv.period = period;
+
+      source.period = function(_) {
+        if (!arguments.length) return priv.period;
+        priv.period = _;
+        return source;
+      };
+
+      return indicatorMixin;
     };
 
-    // Add in the private, direct access variables
-    function bind() {
+    indicatorMixin.accessor = function(accessor) {
       priv.accessor = accessor;
 
-      return source;
-    }
+      // Mixin the functions to the source
+      source.accessor = function (_) {
+        if (!arguments.length) return priv.accessor;
+        priv.accessor = _;
+        return source;
+      };
 
-    bind();
+      return indicatorMixin;
+    };
+
+    return indicatorMixin;
   };
 };
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
@@ -669,7 +721,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
     };
 
     // Mixin 'superclass' methods and variables
-    indicatorMixin(indicator, p, accessor_ohlc());
+    indicatorMixin(indicator, p).accessor(accessor_ohlc());
 
     return indicator;
   };
@@ -679,20 +731,19 @@ function datum(date, macd, signal, difference, zero) {
   if(macd) return { date: date, macd: macd, signal: signal, difference: difference, zero: zero };
   else return { date: date, macd: null, signal: null, difference: null, zero: null };
 }
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
-        period = 14,
         overbought = 70,
         middle = 50,
         oversold = 30;
 
     function indicator(data) {
-      var lossAverage = indicator_ema().accessor(indicator.accessor()).period(period).init(),
-          gainAverage = indicator_ema().accessor(indicator.accessor()).period(period).init();
+      var lossAverage = indicator_ema().accessor(indicator.accessor()).period(p.period).init(),
+          gainAverage = indicator_ema().accessor(indicator.accessor()).period(p.period).init();
 
       return data.map(function(d, i) {
         if(i < 1) return datum(p.accessor.d(d));
@@ -701,7 +752,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
             averageGain = gainAverage.average(Math.max(difference, 0)),
             averageLoss = Math.abs(lossAverage.average(Math.min(difference, 0)));
 
-        if(i >= period) {
+        if(i >= p.period) {
           var rsi = 100 - (100/(1+(averageGain/averageLoss)));
           return datum(p.accessor.d(d), rsi, middle, overbought, oversold);
         }
@@ -709,12 +760,6 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
 
       }).filter(function(d) { return d.rsi; });
     }
-
-    indicator.period = function(_) {
-      if (!arguments.length) return period;
-      period = _;
-      return indicator;
-    };
 
     indicator.overbought = function(_) {
       if (!arguments.length) return overbought;
@@ -735,7 +780,9 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
     };
 
     // Mixin 'superclass' methods and variables
-    indicatorMixin(indicator, p, accessor_ohlc());
+    indicatorMixin(indicator, p)
+      .accessor(accessor_ohlc())
+      .period(14);
 
     return indicator;
   };
@@ -745,13 +792,12 @@ function datum(date, rsi, middle, overbought, oversold) {
   if(rsi) return { date: date, rsi: rsi, middle: middle, overbought: overbought, oversold: oversold };
   else return { date: date, rsi: null, middle: null, overbought: null, oversold: null };
 }
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
-        period = 10,
         samples,
         currentIndex,
         total;
@@ -770,46 +816,42 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
 
     function ma(d, i) {
       var value = indicator.average(p.accessor(d));
-      if (i+1 < period) value = null;
+      if (i+1 < p.period) value = null;
       return { date: p.accessor.d(d), value: value };
     }
 
     indicator.average = function(value) {
       total += value;
 
-      if(samples.length+1 < period) {
+      if(samples.length+1 < p.period) {
         samples.push(value);
         return total/++currentIndex;
       }
       else {
-        if(samples.length < period) {
+        if(samples.length < p.period) {
           samples.push(value);
           total += value;
         }
 
         total -= samples[currentIndex];
         samples[currentIndex] = value;
-        if(++currentIndex === period) {
+        if(++currentIndex === p.period) {
           currentIndex = 0;
         }
 
-        return total/period;
+        return total/p.period;
       }
     };
 
-    indicator.period = function(_) {
-      if (!arguments.length) return period;
-      period = _;
-      return indicator;
-    };
-
     // Mixin 'superclass' methods and variables
-    indicatorMixin(indicator, p, accessor_ohlc());
+    indicatorMixin(indicator, p)
+      .accessor(accessor_ohlc())
+      .period(10);
 
     return indicator;
   };
 };
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 /**
@@ -979,7 +1021,7 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
     }
   };
 }
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
@@ -1089,7 +1131,7 @@ function opacity(g, d3_scale_linear, d3_extent, accessor_volume) {
     return isNaN(volume) ? null : volumeOpacityScale(volume);
   });
 }
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plotMixin) { // Injected dependencies
@@ -1233,7 +1275,7 @@ function verticalPathLine(x, range) {
     return ['M', value, range[0], 'L', value, range[range.length-1]].join(' ');
   };
 }
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  // Injected dependencies
@@ -1308,7 +1350,7 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
     return ichimoku;
   };
 };
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -1320,6 +1362,7 @@ module.exports = function(d3) {
       axisannotation = require('./axisannotation')(d3.svg.axis, accessor.value, plot, plotMixin);
 
   return {
+    atr: line(accessor.value, plot, plotMixin),
     axisannotation: axisannotation,
     candlestick: require('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
     crosshair: require('./crosshair')(d3.select, d3_event, d3.mouse, d3.dispatch, plot, plotMixin),
@@ -1342,7 +1385,7 @@ module.exports = function(d3) {
 function d3_event() {
   return d3.event;
 }
-},{"../accessor":3,"../scale":32,"./axisannotation":17,"./candlestick":18,"./crosshair":19,"./ichimoku":20,"./line":22,"./macd":23,"./ohlc":24,"./plot":25,"./plotmixin":26,"./rsi":27,"./supstance":28,"./trendline":29,"./volume":30}],22:[function(require,module,exports){
+},{"../accessor":3,"../scale":33,"./axisannotation":18,"./candlestick":19,"./crosshair":20,"./ichimoku":21,"./line":23,"./macd":24,"./ohlc":25,"./plot":26,"./plotmixin":27,"./rsi":28,"./supstance":29,"./trendline":30,"./volume":31}],23:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
@@ -1381,7 +1424,7 @@ function refresh(g, accessor, x, y, plot, showZero) {
     g.selectAll('path.zero').attr('d', plot.horizontalPathLine(x, accessor.z, y));
   }
 }
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_macd, plot, plotMixin) {  // Injected dependencies
@@ -1438,7 +1481,7 @@ function differencePath(accessor, x, y) {
       ].join(' ');
   };
 }
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
@@ -1485,7 +1528,7 @@ function ohlcPath(accessor, x, y) {
       ].join(' ');
   };
 }
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_svg_line, d3_select) {
@@ -1585,12 +1628,9 @@ module.exports = function(d3_svg_line, d3_select) {
             var y = argumentLength > 3 ? scale(accessor(d)) : null;
 
             return annotations.map(function(annotation) {
-              var annotationData = {},
-                  value = argumentLength > 3 ? annotation.axis().scale().invert(y) : null;
-
-              annotation.accessor()(annotationData, value);
+              var value = argumentLength > 3 ? annotation.axis().scale().invert(y) : null;
               // Only ever 1 data point per annotation
-              return [annotationData];
+              return [{ value: value }];
             });
           }
         );
@@ -1607,7 +1647,7 @@ module.exports = function(d3_svg_line, d3_select) {
         return function(d) {
           var annotation = annotations[this.__annotation__];
           // As in append, should only ever be 1 in the array
-          annotation.accessor()(d[0], annotation.axis().scale().invert(value));
+          d[0].value = annotation.axis().scale().invert(value);
         };
       },
 
@@ -1619,7 +1659,7 @@ module.exports = function(d3_svg_line, d3_select) {
     }
   };
 };
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1690,7 +1730,7 @@ module.exports = function(d3_scale_linear, techan_scale_financetime) {
     return plotMixin;
   };
 };
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependencies
@@ -1725,7 +1765,7 @@ function refresh(g, accessor, x, y, plot) {
   g.selectAll('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
   g.selectAll('path.rsi').attr('d', plot.pathLine(accessor.d, x, accessor.r, y));
 }
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, accessor_value, plot, plotMixin) {  // Injected dependencies
@@ -1782,7 +1822,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
           g = d3_select(this.parentNode.parentNode), // Go up to the selected items parent only (not the list of items)
           annotationSelection = g.selectAll('.axisannotation.y > g');
 
-      accessor(d, value);
+      accessor.v(d, value);
       annotationSelection.each(plot.annotation.update(annotation, d3_event().y));
       refresh(g, plot, accessor, x, y, annotationSelection, annotation);
       dispatch.drag(d);
@@ -1811,7 +1851,7 @@ function supstancePath(accessor, x, y) {
     return path.join(' ');
   };
 }
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, accessor_trendline, plot, plotMixin) {  // Injected dependencies
@@ -1931,7 +1971,7 @@ function trendlineEnd(accessor_x, x, accessor_y, y) {
     cy: function(d) { return y(accessor_y(d)); }
   };
 }
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_volume, plot, plotMixin) {  // Injected dependencies
@@ -1984,7 +2024,7 @@ function volumePath(accessor, x, y) {
       ].join(' ');
   };
 }
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 
 /*
@@ -2304,7 +2344,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
 
   return financetime;
 };
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -2330,6 +2370,11 @@ module.exports = function(d3) {
       time: function(data, accessor) {
         accessor = accessor || accessors.value();
         return financetime().domain(data.map(accessor.d));
+      },
+
+      atr: function(data, accessor) {
+        accessor = accessor || accessors.value();
+        return pathScale(d3, data, accessor, 0.04);
       },
 
       ichimoku: function(data, accessor) {
@@ -2408,7 +2453,7 @@ module.exports = function(d3) {
 };
 
 function pathDomain(d3, data, accessor, widening) {
-  return data.length > 0 ? d3.extent(data, accessor).map(widen(widening)) : null;
+  return data.length > 0 ? d3.extent(data, accessor).map(widen(widening)) : [];
 }
 
 function pathScale(d3, data, accessor, widening) {
@@ -2431,7 +2476,7 @@ function widen(widening, width) {
     return d + (i*2-1)*width*widening;
   };
 }
-},{"../accessor":3,"../util":35,"./financetime":31,"./zoomable":33}],33:[function(require,module,exports){
+},{"../accessor":3,"../util":36,"./financetime":32,"./zoomable":34}],34:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2481,7 +2526,7 @@ module.exports = function() {
 
   return zoomable;
 };
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 module.exports = (function(d3) {
@@ -2493,7 +2538,7 @@ module.exports = (function(d3) {
     scale: require('./scale')(d3)
   };
 })(d3);
-},{"../build/version":1,"./accessor":3,"./indicator":12,"./plot":21,"./scale":32}],35:[function(require,module,exports){
+},{"../build/version":1,"./accessor":3,"./indicator":13,"./plot":22,"./scale":33}],36:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -2525,5 +2570,5 @@ function doRebind(target, source, method, postSetCallback) {
     return value === source ? target : value;
   };
 }
-},{}]},{},[34])(34)
+},{}]},{},[35])(35)
 });
