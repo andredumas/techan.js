@@ -58,6 +58,14 @@ function techanSpec(techan) {
       expect(techan.indicator).toBeDefined();
     });
 
+    it('Then techan.indicator.atr should be defined', function () {
+      expect(techan.indicator.atr).toBeDefined();
+    });
+
+    it('Then techan.indicator.atr can be constructed', function () {
+      expect(techan.indicator.atr()).toBeDefined();
+    });
+
     it('Then techan.indicator.ema should be defined', function () {
       expect(techan.indicator.ema).toBeDefined();
     });
@@ -108,6 +116,14 @@ function techanSpec(techan) {
 
     it('Then techan.plot should be defined', function () {
       expect(techan.plot).toBeDefined();
+    });
+
+    it('Then techan.plot.atr should be defined', function () {
+      expect(techan.plot.atr).toBeDefined();
+    });
+
+    it('Then techan.plot.atr can be constructed', function () {
+      expect(techan.plot.atr()).toBeDefined();
     });
 
     it('Then techan.plot.axisannotation should be defined', function () {

@@ -1,21 +1,34 @@
 'use strict';
 
 module.exports = function() {
-  return function(source, priv, accessor) {
-    // Mixin the functions to the source
-    source.accessor = function(_) {
-      if (!arguments.length) return accessor;
-      accessor = _;
-      return bind();
+  return function(source, priv) {
+    var indicatorMixin = {};
+
+    indicatorMixin.period = function(period) {
+      priv.period = period;
+
+      source.period = function(_) {
+        if (!arguments.length) return priv.period;
+        priv.period = _;
+        return source;
+      };
+
+      return indicatorMixin;
     };
 
-    // Add in the private, direct access variables
-    function bind() {
+    indicatorMixin.accessor = function(accessor) {
       priv.accessor = accessor;
 
-      return source;
-    }
+      // Mixin the functions to the source
+      source.accessor = function (_) {
+        if (!arguments.length) return priv.accessor;
+        priv.accessor = _;
+        return source;
+      };
 
-    bind();
+      return indicatorMixin;
+    };
+
+    return indicatorMixin;
   };
 };

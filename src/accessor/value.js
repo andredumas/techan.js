@@ -2,6 +2,12 @@
 
 module.exports = function() {
   var date = function(d) { return d.date; },
+      /**
+       * Supports getter and setter
+       * @param d Underlying data object to get or set the value
+       * @param _ If passed turns into a setter. This is the value to set
+       * @returns {*}
+       */
       value = function(d, _) {
         if(arguments.length < 2) return d.value;
         d.value = _;
@@ -9,14 +15,8 @@ module.exports = function() {
       },
       zero = function(d) { return d.zero; };
 
-  /**
-   * Supports getter and setter
-   * @param d Underlying data object to get or set the value
-   * @param _ If passed turns into a setter. This is the value to set
-   * @returns {*}
-   */
-  function accessor(d, _) {
-    return accessor.v.apply(undefined, arguments);
+  function accessor(d) {
+    return accessor.v(d);
   }
 
   // TODO use d3.rebind to obtain this from 'super class'

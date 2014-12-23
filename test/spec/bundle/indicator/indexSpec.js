@@ -7,6 +7,10 @@ techanModule('indicator', function(specBuilder) {
 
   specBuilder.require(require('../../../../src/indicator'), function(instanceBuilder) {
     instanceBuilder.index('actual', actualInit, function(scope) {
+      it('Then indicator.atr should be defined', function() {
+        expect(scope.indicator.atr).toBeDefined();
+      });
+
       it('Then indicator.ema should be defined', function() {
         expect(scope.indicator.ema).toBeDefined();
       });

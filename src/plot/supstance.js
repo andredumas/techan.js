@@ -54,7 +54,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
           g = d3_select(this.parentNode.parentNode), // Go up to the selected items parent only (not the list of items)
           annotationSelection = g.selectAll('.axisannotation.y > g');
 
-      accessor(d, value);
+      accessor.v(d, value);
       annotationSelection.each(plot.annotation.update(annotation, d3_event().y));
       refresh(g, plot, accessor, x, y, annotationSelection, annotation);
       dispatch.drag(d);

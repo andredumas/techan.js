@@ -62,7 +62,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
     };
 
     // Mixin 'superclass' methods and variables
-    indicatorMixin(indicator, p, accessor_ohlc());
+    indicatorMixin(indicator, p).accessor(accessor_ohlc());
 
     return indicator;
   };

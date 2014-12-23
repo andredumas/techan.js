@@ -478,11 +478,11 @@ ohlc.facebook = [
     date.setHours(0,0,0,0);
     return {
       date: date,
-      open: d[0],
-      high: d[1],
-      low: d[2],
-      close: d[3],
-      volume: d[4]
+      open: d[1],
+      high: d[2],
+      low: d[3],
+      close: d[4],
+      volume: d[5]
     };
   }).sort(function(a, b) {
     return d3.ascending(a.date, b.date);

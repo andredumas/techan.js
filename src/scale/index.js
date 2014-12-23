@@ -25,6 +25,11 @@ module.exports = function(d3) {
         return financetime().domain(data.map(accessor.d));
       },
 
+      atr: function(data, accessor) {
+        accessor = accessor || accessors.value();
+        return pathScale(d3, data, accessor, 0.04);
+      },
+
       ichimoku: function(data, accessor) {
         accessor = accessor || accessors.ichimoku();
 
@@ -101,7 +106,7 @@ module.exports = function(d3) {
 };
 
 function pathDomain(d3, data, accessor, widening) {
-  return data.length > 0 ? d3.extent(data, accessor).map(widen(widening)) : null;
+  return data.length > 0 ? d3.extent(data, accessor).map(widen(widening)) : [];
 }
 
 function pathScale(d3, data, accessor, widening) {

@@ -7,6 +7,10 @@ techanModule('plot', function(specBuilder) {
 
   specBuilder.require(require('../../../../src/plot'), function(instanceBuilder) {
     instanceBuilder.index('actual', actualInit, function(bucket) {
+      it('Then plot.atr should be defined', function() {
+        expect(bucket.plot.atr).toBeDefined();
+      });
+
       it('Then plot.axisannotation should be defined', function() {
         expect(bucket.plot.axisannotation).toBeDefined();
       });

@@ -9,6 +9,7 @@ module.exports = function(d3) {
       axisannotation = require('./axisannotation')(d3.svg.axis, accessor.value, plot, plotMixin);
 
   return {
+    atr: line(accessor.value, plot, plotMixin),
     axisannotation: axisannotation,
     candlestick: require('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
     crosshair: require('./crosshair')(d3.select, d3_event, d3.mouse, d3.dispatch, plot, plotMixin),

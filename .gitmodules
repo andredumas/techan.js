@@ -46,3 +46,6 @@
 [submodule "examples/indicator/ichimoku"]
 	path = examples/indicator/ichimoku
 	url = https://gist.github.com/ef212e7c26d2b7ba5403.git
+[submodule "examples/indicator/atr"]
+	path = examples/indicator/atr
+	url = https://gist.github.com/5cb069d5cc38397d6fc1.git

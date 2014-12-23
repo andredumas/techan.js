@@ -97,12 +97,9 @@ module.exports = function(d3_svg_line, d3_select) {
             var y = argumentLength > 3 ? scale(accessor(d)) : null;
 
             return annotations.map(function(annotation) {
-              var annotationData = {},
-                  value = argumentLength > 3 ? annotation.axis().scale().invert(y) : null;
-
-              annotation.accessor()(annotationData, value);
+              var value = argumentLength > 3 ? annotation.axis().scale().invert(y) : null;
               // Only ever 1 data point per annotation
-              return [annotationData];
+              return [{ value: value }];
             });
           }
         );
@@ -119,7 +116,7 @@ module.exports = function(d3_svg_line, d3_select) {
         return function(d) {
           var annotation = annotations[this.__annotation__];
           // As in append, should only ever be 1 in the array
-          annotation.accessor()(d[0], annotation.axis().scale().invert(value));
+          d[0].value = annotation.axis().scale().invert(value);
         };
       },
 

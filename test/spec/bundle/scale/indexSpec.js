@@ -7,11 +7,12 @@ techanModule('scale', function(specBuilder) {
     return module(d3);
   };
 
-  var data = require('../_fixtures/data/ohlc').facebook.slice(0, 10).map(function(d) { return d.date; }),
+  var dataData = require('../_fixtures/data/ohlc').facebook.slice(0, 10).map(function(d) { return d.date; }),
+      atrData = require('../_fixtures/data/atr').expected,
       ichimokuData = require('../_fixtures/data/ichimoku').expected;
 
   function optionalAccessorTest(name, object, accessor, d) {
-    d = d || data;
+    d = d || dataData;
 
     it('Then ' + name + ' should be defined', function() {
       expect(object()).toBeDefined();
@@ -55,6 +56,16 @@ techanModule('scale', function(specBuilder) {
       describe('And ichimoku invoked using defaults', function() {
         it('Then the domain should be correct and widened without nulls', function() {
           expect(scope.scale.plot.ichimoku(ichimokuData).domain()).toEqual([43.18, 137.82]);
+        });
+      });
+
+      optionalAccessorTest('scale.plot.atr', function() {
+        return scope.scale.plot.atr;
+      }, techan.accessor.value());
+
+      describe('And atr invoked using defaults', function() {
+        it('Then the domain should be correct and widened without nulls', function() {
+          expect(scope.scale.plot.atr(atrData).domain()).toEqual([1.8771407579962436, 2.2101923884287165]);
         });
       });
 
