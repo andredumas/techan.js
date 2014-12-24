@@ -28,7 +28,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
         if(i >= minCount) return datum(p.accessor.d(d), macd, signalValue, macd - signalValue, 0);
         else return datum(p.accessor.d(d));
 
-      }).filter(function(d) { return d.macd; });
+      }).filter(function(d) { return d.macd !== null; });
     }
 
     indicator.fast = function(_) {

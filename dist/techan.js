@@ -599,7 +599,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injec
 
     function indicator(data) {
       indicator.init();
-      return data.map(ma).filter(function(d) { return d.value; });
+      return data.map(ma).filter(function(d) { return d.value !== null; });
     }
 
     indicator.init = function() {
@@ -816,7 +816,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
         if(i >= minCount) return datum(p.accessor.d(d), macd, signalValue, macd - signalValue, 0);
         else return datum(p.accessor.d(d));
 
-      }).filter(function(d) { return d.macd; });
+      }).filter(function(d) { return d.macd !== null; });
     }
 
     indicator.fast = function(_) {
@@ -877,7 +877,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
         }
         else return datum(p.accessor.d(d));
 
-      }).filter(function(d) { return d.rsi; });
+      }).filter(function(d) { return d.rsi !== null; });
     }
 
     indicator.overbought = function(_) {
@@ -923,7 +923,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
 
     function indicator(data) {
       indicator.init();
-      return data.map(ma).filter(function(d) { return d.value; });
+      return data.map(ma).filter(function(d) { return d.value !== null; });
     }
 
     indicator.init = function() {

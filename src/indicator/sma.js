@@ -9,7 +9,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
 
     function indicator(data) {
       indicator.init();
-      return data.map(ma).filter(function(d) { return d.value; });
+      return data.map(ma).filter(function(d) { return d.value !== null; });
     }
 
     indicator.init = function() {

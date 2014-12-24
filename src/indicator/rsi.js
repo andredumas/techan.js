@@ -26,7 +26,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
         }
         else return datum(p.accessor.d(d));
 
-      }).filter(function(d) { return d.rsi; });
+      }).filter(function(d) { return d.rsi !== null; });
     }
 
     indicator.overbought = function(_) {
