@@ -11,6 +11,10 @@ techanModule('indicator', function(specBuilder) {
         expect(scope.indicator.atr).toBeDefined();
       });
 
+      it('Then indicator.atrtrailingstop should be defined', function() {
+        expect(scope.indicator.atrtrailingstop).toBeDefined();
+      });
+
       it('Then indicator.ema should be defined', function() {
         expect(scope.indicator.ema).toBeDefined();
       });

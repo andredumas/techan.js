@@ -5,10 +5,12 @@ module.exports = function() {
       accessor = require('../accessor')(),
       ema_init = require('./ema'),
       ema = ema_init(indicatorMixin, accessor.ohlc, ema_alpha_init),
-      sma = require('./sma')(indicatorMixin, accessor.ohlc);
+      sma = require('./sma')(indicatorMixin, accessor.ohlc),
+      atr = require('./atr')(indicatorMixin, accessor.ohlc, sma);
 
   return {
-    atr: require('./atr')(indicatorMixin, accessor.ohlc, sma),
+    atr: atr,
+    atrtrailingstop: require('./atrtrailingstop')(indicatorMixin, accessor.ohlc, atr),
     ema: ema,
     ichimoku: require('./ichimoku')(indicatorMixin, accessor.ohlc),
     macd: require('./macd')(indicatorMixin, accessor.ohlc, ema),

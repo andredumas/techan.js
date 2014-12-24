@@ -49,3 +49,6 @@
 [submodule "examples/indicator/atr"]
 	path = examples/indicator/atr
 	url = https://gist.github.com/5cb069d5cc38397d6fc1.git
+[submodule "examples/indicator/atrtrailingstop"]
+	path = examples/indicator/atrtrailingstop
+	url = https://gist.github.com/55cacf3a2a4881f0be66.git

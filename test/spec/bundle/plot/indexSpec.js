@@ -11,6 +11,10 @@ techanModule('plot', function(specBuilder) {
         expect(bucket.plot.atr).toBeDefined();
       });
 
+      it('Then plot.atrtrailingstop should be defined', function() {
+        expect(bucket.plot.atrtrailingstop).toBeDefined();
+      });
+
       it('Then plot.axisannotation should be defined', function() {
         expect(bucket.plot.axisannotation).toBeDefined();
       });

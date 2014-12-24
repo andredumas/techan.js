@@ -34,7 +34,7 @@ module.exports = function(d3) {
         accessor = accessor || accessors.ichimoku();
 
         // Lots of values in each data point, assemble them together as they are plotted considering offsets, flatten, remove nulls
-        var values = data.map(function(d, i) {
+        var values = mapReduceFilter(data, function(d, i) {
           var chikouSpanData = data[i+accessor.pks(d)],  // Apply offset +pks (is plotted behind, so get data ahead)
               senkouSpanBData = data[i-accessor.pks(d)]; // Apply offset -pks (is plotted in front, so get data behind)
 
@@ -44,9 +44,7 @@ module.exports = function(d3) {
             senkouSpanBData ? accessor.sb(senkouSpanBData) : null,
             chikouSpanData ? accessor.c(chikouSpanData) : null
           ];
-        })
-        .reduce(function(a, b) { return a.concat(b); }) // Flatten
-        .filter(function(d) { return d; }); // Remove nulls
+        });
 
         return d3.scale.linear()
           .domain(d3.extent(values).map(widen(0.02)))
@@ -70,6 +68,14 @@ module.exports = function(d3) {
         accessor = accessor || accessors.ohlc().v;
         return d3.scale.linear()
           .domain([0, d3.max(data.map(accessor))*1.15])
+          .range([1, 0]);
+      },
+
+      atrtrailingstop: function (data, accessor) {
+        accessor = accessor || accessors.atrtrailingstop();
+
+        var values = mapReduceFilter(data, function(d) { return [accessor.up(d), accessor.dn(d)]; });
+        return d3.scale.linear().domain(d3.extent(values).map(widen(0.04)))
           .range([1, 0]);
       },
 
@@ -128,4 +134,10 @@ function widen(widening, width) {
     width = width || (array[array.length-1] - array[0]);
     return d + (i*2-1)*width*widening;
   };
+}
+
+function mapReduceFilter(data, map) {
+  return data.map(map)
+    .reduce(function(a, b) { return a.concat(b); }) // Flatten
+    .filter(function(d) { return d !== null; }); // Remove nulls
 }

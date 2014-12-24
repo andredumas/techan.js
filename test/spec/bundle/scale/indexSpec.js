@@ -9,6 +9,7 @@ techanModule('scale', function(specBuilder) {
 
   var dataData = require('../_fixtures/data/ohlc').facebook.slice(0, 10).map(function(d) { return d.date; }),
       atrData = require('../_fixtures/data/atr').expected,
+      atrtrailingstopData = require('../_fixtures/data/atrtrailingstop').plot,
       ichimokuData = require('../_fixtures/data/ichimoku').expected;
 
   function optionalAccessorTest(name, object, accessor, d) {
@@ -44,6 +45,16 @@ techanModule('scale', function(specBuilder) {
       optionalAccessorTest('scale.plot.volume', function() {
         return scope.scale.plot.volume;
       }, techan.accessor.ohlc().v);
+
+      optionalAccessorTest('scale.plot.atrtrailingstop', function() {
+        return scope.scale.plot.atrtrailingstop;
+      }, techan.accessor.atrtrailingstop());
+
+      describe('And atrtrailingstop invoked using defaults', function() {
+        it('Then the domain should be correct and widened without nulls', function() {
+          expect(scope.scale.plot.atrtrailingstop(atrtrailingstopData).domain()).toEqual([1.96, 3.04]);
+        });
+      });
 
       optionalAccessorTest('scale.plot.rsi', function() {
         return scope.scale.plot.rsi;

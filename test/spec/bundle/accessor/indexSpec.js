@@ -7,6 +7,10 @@ techanModule('accessor', function(specBuilder) {
 
   specBuilder.require(require('../../../../src/accessor'), function(instanceBuilder) {
     instanceBuilder.index('actual', actualInit, function(scope) {
+      it('Then accessor.atrtrailingstop should be defined', function() {
+        expect(scope.accessor.atrtrailingstop).toBeDefined();
+      });
+
       it('Then accessor.ichimoku should be defined', function() {
         expect(scope.accessor.ichimoku).toBeDefined();
       });

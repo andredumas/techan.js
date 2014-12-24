@@ -14,6 +14,14 @@ function techanSpec(techan) {
       expect(techan.accessor).toBeDefined();
     });
 
+    it('Then techan.accessor.atrtrailingstop should be defined', function () {
+      expect(techan.accessor.atrtrailingstop).toBeDefined();
+    });
+
+    it('Then techan.accessor.atrtrailingstop can be constructed', function () {
+      expect(techan.accessor.atrtrailingstop()).toBeDefined();
+    });
+
     it('Then techan.accessor.ichimoku should be defined', function () {
       expect(techan.accessor.ichimoku).toBeDefined();
     });
@@ -64,6 +72,14 @@ function techanSpec(techan) {
 
     it('Then techan.indicator.atr can be constructed', function () {
       expect(techan.indicator.atr()).toBeDefined();
+    });
+
+    it('Then techan.indicator.atrtrailingstop should be defined', function () {
+      expect(techan.indicator.atrtrailingstop).toBeDefined();
+    });
+
+    it('Then techan.indicator.atrtrailingstop can be constructed', function () {
+      expect(techan.indicator.atrtrailingstop()).toBeDefined();
     });
 
     it('Then techan.indicator.ema should be defined', function () {
@@ -124,6 +140,14 @@ function techanSpec(techan) {
 
     it('Then techan.plot.atr can be constructed', function () {
       expect(techan.plot.atr()).toBeDefined();
+    });
+
+    it('Then techan.plot.atrtrailingstop should be defined', function () {
+      expect(techan.plot.atrtrailingstop).toBeDefined();
+    });
+
+    it('Then techan.plot.atrtrailingstop can be constructed', function () {
+      expect(techan.plot.atrtrailingstop()).toBeDefined();
     });
 
     it('Then techan.plot.axisannotation should be defined', function () {
