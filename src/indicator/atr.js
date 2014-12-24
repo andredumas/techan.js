@@ -1,9 +1,9 @@
 'use strict';
 
-module.exports = function(indicatorMixin, accessor_ohlc, sma) {  // Injected dependencies
+module.exports = function(indicatorMixin, accessor_ohlc, indicator_sma) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
-        initialAtr = sma(),
+        initialAtr = indicator_sma(),
         previous = null,
         averageTrueRange = 0,
         currentIndex = 0;

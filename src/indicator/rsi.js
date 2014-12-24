@@ -5,11 +5,13 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
     var p = {},  // Container for private, direct access mixed in variables
         overbought = 70,
         middle = 50,
-        oversold = 30;
+        oversold = 30,
+        lossAverage = indicator_ema(),
+        gainAverage = indicator_ema();
 
     function indicator(data) {
-      var lossAverage = indicator_ema().accessor(indicator.accessor()).period(p.period).init(),
-          gainAverage = indicator_ema().accessor(indicator.accessor()).period(p.period).init();
+      lossAverage.accessor(indicator.accessor()).period(p.period).init();
+      gainAverage.accessor(indicator.accessor()).period(p.period).init();
 
       return data.map(function(d, i) {
         if(i < 1) return datum(p.accessor.d(d));

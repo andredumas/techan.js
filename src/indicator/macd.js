@@ -5,14 +5,18 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
     var p = {},  // Container for private, direct access mixed in variables
         fast = 12,
         slow = 26,
-        signal = 9;
+        signal = 9,
+        signalLine = indicator_ema(),
+        fastAverage = indicator_ema(),
+        slowAverage = indicator_ema();
 
     function indicator(data) {
       var minFastSlow = Math.max(fast, slow) - 1,
-          minCount = minFastSlow + signal - 1,
-          signalLine = indicator_ema().accessor(indicator.accessor()).period(signal).init(),
-          fastAverage = indicator_ema().accessor(indicator.accessor()).period(fast).init(),
-          slowAverage = indicator_ema().accessor(indicator.accessor()).period(slow).init();
+          minCount = minFastSlow + signal - 1;
+
+      signalLine.accessor(indicator.accessor()).period(signal).init();
+      fastAverage.accessor(indicator.accessor()).period(fast).init();
+      slowAverage.accessor(indicator.accessor()).period(slow).init();
 
       return data.map(function(d, i) {
         slow = fastAverage.average(p.accessor(d));
