@@ -1434,13 +1434,13 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
 
     function ichimoku(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array),
-          clipUpId = 'cloudclipup-' + randomID(),
-          clipDownId = 'cloudclipdown-' + randomID();
+          clipUpId = 'kumoclipup-' + randomID(),
+          clipDownId = 'kumoclipdown-' + randomID();
 
-      group.entry.append('clipPath').attr({ id: clipUpId, class: 'cloudclipup' }).append('path');
-      group.entry.append('clipPath').attr({ id: clipDownId, class: 'cloudclipdown' }).append('path');
-      group.entry.append('path').attr({ class: 'cloud up', 'clip-path':'url(#' + clipUpId + ')' });
-      group.entry.append('path').attr({ class: 'cloud down', 'clip-path': 'url(#' + clipDownId + ')' });
+      group.entry.append('clipPath').attr({ id: clipUpId, class: 'kumoclipup' }).append('path');
+      group.entry.append('clipPath').attr({ id: clipDownId, class: 'kumoclipdown' }).append('path');
+      group.entry.append('path').attr({ class: 'kumo up', 'clip-path':'url(#' + clipUpId + ')' });
+      group.entry.append('path').attr({ class: 'kumo down', 'clip-path': 'url(#' + clipDownId + ')' });
       group.entry.append('path').attr('class', 'senkouspana');
       group.entry.append('path').attr('class', 'senkouspanb');
 
@@ -1456,10 +1456,10 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
     };
 
     function refresh(g, accessor, x, y, plot) {
-      g.selectAll('.cloudclipup path').attr('d', clipArea(accessor, x, y, y.range()[1]));
-      g.selectAll('.cloudclipdown path').attr('d', clipArea(accessor, x, y, y.range()[0]));
-      g.selectAll('path.cloud.up').attr('d', pathArea(accessor, x, y));
-      g.selectAll('path.cloud.down').attr('d', pathArea(accessor, x, y));
+      g.selectAll('.kumoclipup path').attr('d', clipArea(accessor, x, y, y.range()[1]));
+      g.selectAll('.kumoclipdown path').attr('d', clipArea(accessor, x, y, y.range()[0]));
+      g.selectAll('path.kumo.up').attr('d', pathArea(accessor, x, y));
+      g.selectAll('path.kumo.down').attr('d', pathArea(accessor, x, y));
       g.selectAll('path.senkouspana').attr('d', plot.pathLine(accessor.d, x, accessor.sa, y, accessor.pks));
       g.selectAll('path.senkouspanb').attr('d', plot.pathLine(accessor.d, x, accessor.sb, y, accessor.pks));
 
