@@ -11,6 +11,26 @@ module.exports = function(d3_svg_line, d3_select) {
     return dataSelection.enter().append('g').attr('class', 'data');
   }
 
+  function PathLine() {
+    var d3Line = d3_svg_line().interpolate('monotone');
+
+    function line(data) {
+      return d3Line(data);
+    }
+
+    line.init = function(accessor_date, x, accessor_value, y, offset) {
+      return d3Line.defined(function(d) { return accessor_value(d) !== null; })
+          .x(function(d) { return x(accessor_date(d), offset === undefined ? offset : offset(d)); } )
+          .y(function(d) { return y(accessor_value(d)); } );
+    };
+
+    line.d3 = function() {
+      return d3Line;
+    };
+
+    return line;
+  }
+
   return {
     dataMapper: {
       unity: function(d) { return d; },
@@ -49,12 +69,7 @@ module.exports = function(d3_svg_line, d3_select) {
       };
     },
 
-    pathLine: function(accessor_date, x, accessor_value, y, offset) {
-      return d3_svg_line().interpolate('monotone')
-        .defined(function(d) { return accessor_value(d) !== null; })
-        .x(function(d) { return x(accessor_date(d), offset === undefined ? offset : offset(d)); } )
-        .y(function(d) { return y(accessor_value(d)); } );
-    },
+    pathLine: PathLine,
 
     interaction: {
       mousedispatch: function(dispatch) {

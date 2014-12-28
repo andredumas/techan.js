@@ -2,7 +2,9 @@
 
 module.exports = function(accessor_atrtrailingstop, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        upLine = plot.pathLine(),
+        downLine = plot.pathLine();
 
     function atrtrailingstop(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array);
@@ -14,17 +16,23 @@ module.exports = function(accessor_atrtrailingstop, plot, plotMixin) {  // Injec
     }
 
     atrtrailingstop.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot);
+      refresh(g, upLine, downLine);
     };
 
+    function binder() {
+      upLine.init(p.accessor.d, p.xScale, p.accessor.up, p.yScale);
+      downLine.init(p.accessor.d, p.xScale, p.accessor.dn, p.yScale);
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(atrtrailingstop, p).plot(accessor_atrtrailingstop());
+    plotMixin(atrtrailingstop, p).plot(accessor_atrtrailingstop(), binder);
+    binder();
 
     return atrtrailingstop;
   };
 };
 
-function refresh(g, accessor, x, y, plot) {
-  g.selectAll('path.up').attr('d', plot.pathLine(accessor.d, x, accessor.up, y));
-  g.selectAll('path.down').attr('d', plot.pathLine(accessor.d, x, accessor.dn, y));
+function refresh(g, upLine, downLine) {
+  g.selectAll('path.up').attr('d', upLine);
+  g.selectAll('path.down').attr('d', downLine);
 }

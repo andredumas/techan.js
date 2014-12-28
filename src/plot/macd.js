@@ -2,7 +2,9 @@
 
 module.exports = function(accessor_macd, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        macdLine = plot.pathLine(),
+        signalLine = plot.pathLine();
 
     function macd(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
@@ -22,21 +24,27 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
     }
 
     macd.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot);
+      refresh(g, p.accessor, p.xScale, p.yScale, plot, macdLine, signalLine);
     };
 
+    function binder() {
+      macdLine.init(p.accessor.d, p.xScale, p.accessor.m, p.yScale);
+      signalLine.init(p.accessor.d, p.xScale, p.accessor.s, p.yScale);
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(macd, p).plot(accessor_macd());
+    plotMixin(macd, p).plot(accessor_macd(), binder);
+    binder();
 
     return macd;
   };
 };
 
-function refresh(g, accessor, x, y, plot) {
+function refresh(g, accessor, x, y, plot, macdLine, signalLine) {
   g.selectAll('path.difference').attr('d', differencePath(accessor, x, y));
   g.selectAll('path.zero').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.z, y));
-  g.selectAll('path.macd').attr('d', plot.pathLine(accessor.d, x, accessor.m, y));
-  g.selectAll('path.signal').attr('d', plot.pathLine(accessor.d, x, accessor.s, y));
+  g.selectAll('path.macd').attr('d', macdLine);
+  g.selectAll('path.signal').attr('d', signalLine);
 }
 
 function differencePath(accessor, x, y) {

@@ -2,7 +2,14 @@
 
 module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        kumoClip = kumoClipArea(),
+        kumo = kumoPathArea(),
+        senkouSpanA = plot.pathLine(),
+        senkouSpanB = plot.pathLine(),
+        chikouSpan = plot.pathLine(),
+        tenkanSen = plot.pathLine(),
+        kijunsen = plot.pathLine();
 
     function ichimoku(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array),
@@ -24,51 +31,59 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
     }
 
     ichimoku.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot);
+      refresh(g, p.yScale);
     };
 
-    function refresh(g, accessor, x, y, plot) {
-      g.selectAll('.kumoclipup path').attr('d', clipArea(accessor, x, y, y.range()[1]));
-      g.selectAll('.kumoclipdown path').attr('d', clipArea(accessor, x, y, y.range()[0]));
-      g.selectAll('path.kumo.up').attr('d', pathArea(accessor, x, y));
-      g.selectAll('path.kumo.down').attr('d', pathArea(accessor, x, y));
-      g.selectAll('path.senkouspana').attr('d', plot.pathLine(accessor.d, x, accessor.sa, y, accessor.pks));
-      g.selectAll('path.senkouspanb').attr('d', plot.pathLine(accessor.d, x, accessor.sb, y, accessor.pks));
+    function refresh(g, y) {
+      g.selectAll('.kumoclipup path').attr('d', kumoClip.y1(y.range()[1])); // Fill the top of the cloud to be clipped
+      g.selectAll('.kumoclipdown path').attr('d', kumoClip.y1(y.range()[0])); // Fill the bottom of the cloud to be clipped
+      g.selectAll('path.kumo.up').attr('d', kumo);
+      g.selectAll('path.kumo.down').attr('d', kumo);
+      g.selectAll('path.senkouspana').attr('d', senkouSpanA);
+      g.selectAll('path.senkouspanb').attr('d', senkouSpanB);
 
-      g.selectAll('path.chikouspan').attr('d', plot.pathLine(accessor.d, x, accessor.c, y, negate(accessor.pks)));
-      g.selectAll('path.tenkansen').attr('d', plot.pathLine(accessor.d, x, accessor.ts, y));
-      g.selectAll('path.kijunsen').attr('d', plot.pathLine(accessor.d, x, accessor.ks, y));
+      g.selectAll('path.chikouspan').attr('d', chikouSpan);
+      g.selectAll('path.tenkansen').attr('d', tenkanSen);
+      g.selectAll('path.kijunsen').attr('d', kijunsen);
     }
 
-    function clipArea(accessor, x, y, top) {
-      return d3_svg_area()
-        .defined(function(d) { return accessor.sb(d) !== null; })
-        .x(function(d) { return x(accessor.d(d), accessor.pks(d)); } )
-        .y0(function(d) { return y(accessor.sb(d)); } )
-        .y1(top);
+    function binder() {
+      senkouSpanA.init(p.accessor.d, p.xScale, p.accessor.sa, p.yScale, p.accessor.pks);
+      senkouSpanB.init(p.accessor.d, p.xScale, p.accessor.sb, p.yScale, p.accessor.pks);
+      chikouSpan .init(p.accessor.d, p.xScale, p.accessor.c,  p.yScale, negate(p.accessor.pks));
+      tenkanSen  .init(p.accessor.d, p.xScale, p.accessor.ts, p.yScale);
+      kijunsen   .init(p.accessor.d, p.xScale, p.accessor.ks, p.yScale);
     }
 
-    function pathArea(accessor, x, y) {
-      return d3_svg_area()
-        .defined(function(d) { return accessor.sa(d) !== null && accessor.sb(d) !== null; })
-        .x(function(d) { return x(accessor.d(d), accessor.pks(d)); } )
-        .y0(function(d) { return y(accessor.sa(d)); } )
-        .y1(function(d) { return y(accessor.sb(d)); } );
+    function kumoClipArea() {
+      return d3_svg_area().interpolate('monotone')
+        .defined(function(d) { return p.accessor.sb(d) !== null; })
+        .x(function(d) { return p.xScale(p.accessor.d(d), p.accessor.pks(d)); } )
+        .y0(function(d) { return p.yScale(p.accessor.sb(d)); } );
     }
 
-    function negate(accessor) {
-      return function(d) {
-        return -accessor(d);
-      };
-    }
-
-    function randomID() {
-      return Math.random().toString(36).substr(2, 9);
+    function kumoPathArea() {
+      return d3_svg_area().interpolate('monotone')
+        .defined(function(d) { return p.accessor.sa(d) !== null && p.accessor.sb(d) !== null; })
+        .x(function(d) { return p.xScale(p.accessor.d(d), p.accessor.pks(d)); } )
+        .y0(function(d) { return p.yScale(p.accessor.sa(d)); } )
+        .y1(function(d) { return p.yScale(p.accessor.sb(d)); } );
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(ichimoku, p).plot(accessor_ichimoku());
+    plotMixin(ichimoku, p).plot(accessor_ichimoku(), binder);
+    binder();
 
     return ichimoku;
   };
 };
+
+function negate(accessor) {
+  return function(d) {
+    return -accessor(d);
+  };
+}
+
+function randomID() {
+  return Math.random().toString(36).substr(2, 9);
+}
