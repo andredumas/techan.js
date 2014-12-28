@@ -1,9 +1,9 @@
 /*
- TechanJS v0.5.0-3
+ TechanJS v0.5.0-4
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.5.0-3';
+'use strict';module.exports='0.5.0-4';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -1452,16 +1452,16 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
           clipUpId = 'kumoclipup-' + randomID(),
           clipDownId = 'kumoclipdown-' + randomID();
 
-      group.entry.append('clipPath').attr({ id: clipUpId, class: 'kumoclipup' }).append('path');
       group.entry.append('clipPath').attr({ id: clipDownId, class: 'kumoclipdown' }).append('path');
-      group.entry.append('path').attr({ class: 'kumo up', 'clip-path':'url(#' + clipUpId + ')' });
+      group.entry.append('clipPath').attr({ id: clipUpId, class: 'kumoclipup' }).append('path');
       group.entry.append('path').attr({ class: 'kumo down', 'clip-path': 'url(#' + clipDownId + ')' });
-      group.entry.append('path').attr('class', 'senkouspana');
+      group.entry.append('path').attr({ class: 'kumo up', 'clip-path':'url(#' + clipUpId + ')' });
       group.entry.append('path').attr('class', 'senkouspanb');
+      group.entry.append('path').attr('class', 'senkouspana');
 
       group.entry.append('path').attr('class', 'chikouspan');
-      group.entry.append('path').attr('class', 'tenkansen');
       group.entry.append('path').attr('class', 'kijunsen');
+      group.entry.append('path').attr('class', 'tenkansen');
 
       ichimoku.refresh(g);
     }
@@ -1471,16 +1471,16 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
     };
 
     function refresh(g, y) {
-      g.selectAll('.kumoclipup path').attr('d', kumoClip.y1(y.range()[1])); // Fill the top of the cloud to be clipped
       g.selectAll('.kumoclipdown path').attr('d', kumoClip.y1(y.range()[0])); // Fill the bottom of the cloud to be clipped
-      g.selectAll('path.kumo.up').attr('d', kumo);
+      g.selectAll('.kumoclipup path').attr('d', kumoClip.y1(y.range()[1])); // Fill the top of the cloud to be clipped
       g.selectAll('path.kumo.down').attr('d', kumo);
-      g.selectAll('path.senkouspana').attr('d', senkouSpanA);
+      g.selectAll('path.kumo.up').attr('d', kumo);
       g.selectAll('path.senkouspanb').attr('d', senkouSpanB);
+      g.selectAll('path.senkouspana').attr('d', senkouSpanA);
 
       g.selectAll('path.chikouspan').attr('d', chikouSpan);
-      g.selectAll('path.tenkansen').attr('d', tenkanSen);
       g.selectAll('path.kijunsen').attr('d', kijunsen);
+      g.selectAll('path.tenkansen').attr('d', tenkanSen);
     }
 
     function binder() {

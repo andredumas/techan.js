@@ -16,16 +16,16 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
           clipUpId = 'kumoclipup-' + randomID(),
           clipDownId = 'kumoclipdown-' + randomID();
 
-      group.entry.append('clipPath').attr({ id: clipUpId, class: 'kumoclipup' }).append('path');
       group.entry.append('clipPath').attr({ id: clipDownId, class: 'kumoclipdown' }).append('path');
-      group.entry.append('path').attr({ class: 'kumo up', 'clip-path':'url(#' + clipUpId + ')' });
+      group.entry.append('clipPath').attr({ id: clipUpId, class: 'kumoclipup' }).append('path');
       group.entry.append('path').attr({ class: 'kumo down', 'clip-path': 'url(#' + clipDownId + ')' });
-      group.entry.append('path').attr('class', 'senkouspana');
+      group.entry.append('path').attr({ class: 'kumo up', 'clip-path':'url(#' + clipUpId + ')' });
       group.entry.append('path').attr('class', 'senkouspanb');
+      group.entry.append('path').attr('class', 'senkouspana');
 
       group.entry.append('path').attr('class', 'chikouspan');
-      group.entry.append('path').attr('class', 'tenkansen');
       group.entry.append('path').attr('class', 'kijunsen');
+      group.entry.append('path').attr('class', 'tenkansen');
 
       ichimoku.refresh(g);
     }
@@ -35,16 +35,16 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
     };
 
     function refresh(g, y) {
-      g.selectAll('.kumoclipup path').attr('d', kumoClip.y1(y.range()[1])); // Fill the top of the cloud to be clipped
       g.selectAll('.kumoclipdown path').attr('d', kumoClip.y1(y.range()[0])); // Fill the bottom of the cloud to be clipped
-      g.selectAll('path.kumo.up').attr('d', kumo);
+      g.selectAll('.kumoclipup path').attr('d', kumoClip.y1(y.range()[1])); // Fill the top of the cloud to be clipped
       g.selectAll('path.kumo.down').attr('d', kumo);
-      g.selectAll('path.senkouspana').attr('d', senkouSpanA);
+      g.selectAll('path.kumo.up').attr('d', kumo);
       g.selectAll('path.senkouspanb').attr('d', senkouSpanB);
+      g.selectAll('path.senkouspana').attr('d', senkouSpanA);
 
       g.selectAll('path.chikouspan').attr('d', chikouSpan);
-      g.selectAll('path.tenkansen').attr('d', tenkanSen);
       g.selectAll('path.kijunsen').attr('d', kijunsen);
+      g.selectAll('path.tenkansen').attr('d', tenkanSen);
     }
 
     function binder() {
