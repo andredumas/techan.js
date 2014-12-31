@@ -2,29 +2,31 @@
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure constructor
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        ohlcGenerator;
 
     function ohlc(g) {
-      plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
-        .entry.append('path').attr({ class: 'ohlc' });
+      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+
+      plot.appendUpDownEqual(group.selection, p.accessor, 'ohlc');
 
       ohlc.refresh(g);
     }
 
     ohlc.refresh = function(g) {
-      refresh(g, plot, p.accessor, p.xScale, p.yScale);
+      g.selectAll('path.ohlc').attr('d', ohlcGenerator);
     };
 
+    function binder() {
+      ohlcGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, ohlcPath);
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(ohlc, p).plot(accessor_ohlc());
+    plotMixin(ohlc, p).plot(accessor_ohlc(), binder);
 
     return ohlc;
   };
 };
-
-function refresh(g, plot, accessor, x, y) {
-  g.selectAll('path.ohlc').attr({ d: ohlcPath(accessor, x, y) }).classed(plot.classedUpDown(accessor));
-}
 
 function ohlcPath(accessor, x, y) {
   return function(d) {

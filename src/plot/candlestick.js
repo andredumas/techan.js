@@ -3,40 +3,36 @@
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure constructor
     var p = {},  // Container for private, direct access mixed in variables
-        volumeOpacity = false;
+        bodyPathGenerator,
+        wickGenerator;
 
     function candlestick(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d);
+      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d),
+          upDownEqual = plot.groupUpDownEqual(g.datum(), p.accessor);
 
-      // Two path's as wick and body can be styled slightly differently (stroke and fills)
-      group.entry.append('path').attr('class', 'candle body');
-      group.entry.append('path').attr('class', 'candle wick');
+      // 3x2 path's as wick and body can be styled slightly differently (stroke and fills)
+      plot.appendUpDownEqual(group.selection, p.accessor, ['candle', 'body'], upDownEqual);
+      plot.appendUpDownEqual(group.selection, p.accessor, ['candle', 'wick'], upDownEqual);
 
       candlestick.refresh(g);
     }
 
     candlestick.refresh = function(g) {
-      if(volumeOpacity) opacity(g, d3_scale_linear, d3_extent, p.accessor.v);
-      refresh(g, plot, p.accessor, p.xScale, p.yScale);
+      g.selectAll('path.candle.body').attr('d', bodyPathGenerator);
+      g.selectAll('path.candle.wick').attr('d', wickGenerator);
     };
 
-    candlestick.volumeOpacity = function(_) {
-      if (!arguments.length) return volumeOpacity;
-      volumeOpacity = _;
-      return candlestick;
-    };
+    function binder() {
+      bodyPathGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, bodyPath);
+      wickGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, wickPath);
+    }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(candlestick, p).plot(accessor_ohlc());
+    plotMixin(candlestick, p).plot(accessor_ohlc(), binder);
 
     return candlestick;
   };
 };
-
-function refresh(g, plot, accessor, x, y) {
-  g.selectAll('path.candle.body').attr('d', bodyPath(accessor, x, y)).classed(plot.classedUpDown(accessor));
-  g.selectAll('path.candle.wick').attr('d', wickPath(accessor, x, y)).classed(plot.classedUpDown(accessor));
-}
 
 function bodyPath(accessor, x, y) {
   return function(d) {
@@ -94,16 +90,4 @@ function wickPath(accessor, x, y) {
 
     return path.join(' ');
   };
-}
-
-function opacity(g, d3_scale_linear, d3_extent, accessor_volume) {
-  var selection = g.selectAll('g.data'),
-      volumeOpacityScale = d3_scale_linear()
-        .domain(d3_extent(selection.data().map(accessor_volume).filter(function(d) { return !isNaN(d); })))
-        .range([0.2, 1]);
-
-  selection.selectAll('path.candle').style('opacity', function(d) {
-    var volume = accessor_volume(d);
-    return isNaN(volume) ? null : volumeOpacityScale(volume);
-  });
 }

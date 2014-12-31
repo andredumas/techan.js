@@ -2,34 +2,32 @@
 
 module.exports = function(accessor_volume, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        volumeGenerator;
 
     function volume(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
-        .entry.append('path')
-          .attr('class', 'volume');
+      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
-      if(p.accessor.o && p.accessor.c) {
-        group.classed(plot.classedUpDown(p.accessor));
-      }
+      if(p.accessor.o && p.accessor.c) plot.appendUpDownEqual(group.selection, p.accessor, 'volume');
+      else group.entry.append('path').attr('class', 'volume');
 
       volume.refresh(g);
     }
 
     volume.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale);
+      g.selectAll('path.volume').attr('d', volumeGenerator);
     };
 
+    function binder() {
+      volumeGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, volumePath);
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(volume, p).plot(accessor_volume());
+    plotMixin(volume, p).plot(accessor_volume(), binder);
 
     return volume;
   };
 };
-
-function refresh(g, accessor, x, y) {
-  g.selectAll('path.volume').attr('d', volumePath(accessor, x, y));
-}
 
 function volumePath(accessor, x, y) {
   return function(d) {

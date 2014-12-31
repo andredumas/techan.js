@@ -31,6 +31,38 @@ module.exports = function(d3_svg_line, d3_select) {
     return line;
   }
 
+  function up(accessor, d) {
+    return accessor.o(d) < accessor.c(d);
+  }
+
+  function down(accessor, d) {
+    return accessor.o(d) > accessor.c(d);
+  }
+
+  function groupUpDownEqual(data, accessor) {
+    return data.reduce(function(result, d) {
+      if (up(accessor, d)) result.up.push(d);
+      else if (down(accessor, d)) result.down.push(d);
+      else result.equal.push(d);
+      return result;
+    }, { up: [], down: [], equal: [] });
+  }
+
+  function appendUpDownEqual(g, accessor, plotName, upDownEqual) {
+    var plotNames = plotName instanceof Array ? plotName : [plotName];
+
+    upDownEqual = upDownEqual || groupUpDownEqual(g.datum(), accessor);
+
+    appendPlotType(g, upDownEqual.up, plotNames, 'up');
+    appendPlotType(g, upDownEqual.down, plotNames, 'down');
+    appendPlotType(g, upDownEqual.equal, plotNames, 'equal');
+  }
+
+  function appendPlotType(g, data, plotNames, direction) {
+    g.selectAll('path.' + plotNames.join('.') + '.' + direction).data([data])
+      .enter().append('path').attr('class', plotNames.join(' ') + ' ' + direction);
+  }
+
   return {
     dataMapper: {
       unity: function(d) { return d; },
@@ -50,12 +82,9 @@ module.exports = function(d3_svg_line, d3_select) {
       };
     },
 
-    classedUpDown: function(accessor) {
-      return {
-        up: function(d) { return accessor.o(d) < accessor.c(d); },
-        down: function(d) { return accessor.o(d) > accessor.c(d); }
-      };
-    },
+    groupUpDownEqual: groupUpDownEqual,
+
+    appendUpDownEqual: appendUpDownEqual,
 
     horizontalPathLine: function(accessor_date, x, accessor_value, y) {
       return function(d) {
@@ -70,6 +99,12 @@ module.exports = function(d3_svg_line, d3_select) {
     },
 
     pathLine: PathLine,
+
+    joinPath: function(accessor, x, y, path) {
+      return function(data) {
+        return data.map(path(accessor, x, y)).join(' ');
+      };
+    },
 
     interaction: {
       mousedispatch: function(dispatch) {
