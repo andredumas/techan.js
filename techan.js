@@ -1,9 +1,9 @@
 /*
- TechanJS v0.5.0-3
+ TechanJS v0.5.0-5
  (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.5.0-3';
+'use strict';module.exports='0.5.0-5';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -480,10 +480,10 @@ module.exports = function() {
 },{}],11:[function(require,module,exports){
 'use strict';
 
-module.exports = function(indicatorMixin, accessor_ohlc, sma) {  // Injected dependencies
+module.exports = function(indicatorMixin, accessor_ohlc, indicator_sma) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
-        initialAtr = sma(),
+        initialAtr = indicator_sma(),
         previous = null,
         averageTrueRange = 0,
         currentIndex = 0;
@@ -599,7 +599,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injec
 
     function indicator(data) {
       indicator.init();
-      return data.map(ma).filter(function(d) { return d.value; });
+      return data.map(ma).filter(function(d) { return d.value !== null; });
     }
 
     indicator.init = function() {
@@ -793,14 +793,18 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
     var p = {},  // Container for private, direct access mixed in variables
         fast = 12,
         slow = 26,
-        signal = 9;
+        signal = 9,
+        signalLine = indicator_ema(),
+        fastAverage = indicator_ema(),
+        slowAverage = indicator_ema();
 
     function indicator(data) {
       var minFastSlow = Math.max(fast, slow) - 1,
-          minCount = minFastSlow + signal - 1,
-          signalLine = indicator_ema().accessor(indicator.accessor()).period(signal).init(),
-          fastAverage = indicator_ema().accessor(indicator.accessor()).period(fast).init(),
-          slowAverage = indicator_ema().accessor(indicator.accessor()).period(slow).init();
+          minCount = minFastSlow + signal - 1;
+
+      signalLine.accessor(indicator.accessor()).period(signal).init();
+      fastAverage.accessor(indicator.accessor()).period(fast).init();
+      slowAverage.accessor(indicator.accessor()).period(slow).init();
 
       return data.map(function(d, i) {
         slow = fastAverage.average(p.accessor(d));
@@ -812,7 +816,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
         if(i >= minCount) return datum(p.accessor.d(d), macd, signalValue, macd - signalValue, 0);
         else return datum(p.accessor.d(d));
 
-      }).filter(function(d) { return d.macd; });
+      }).filter(function(d) { return d.macd !== null; });
     }
 
     indicator.fast = function(_) {
@@ -852,11 +856,13 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
     var p = {},  // Container for private, direct access mixed in variables
         overbought = 70,
         middle = 50,
-        oversold = 30;
+        oversold = 30,
+        lossAverage = indicator_ema(),
+        gainAverage = indicator_ema();
 
     function indicator(data) {
-      var lossAverage = indicator_ema().accessor(indicator.accessor()).period(p.period).init(),
-          gainAverage = indicator_ema().accessor(indicator.accessor()).period(p.period).init();
+      lossAverage.accessor(indicator.accessor()).period(p.period).init();
+      gainAverage.accessor(indicator.accessor()).period(p.period).init();
 
       return data.map(function(d, i) {
         if(i < 1) return datum(p.accessor.d(d));
@@ -871,7 +877,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
         }
         else return datum(p.accessor.d(d));
 
-      }).filter(function(d) { return d.rsi; });
+      }).filter(function(d) { return d.rsi !== null; });
     }
 
     indicator.overbought = function(_) {
@@ -917,7 +923,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
 
     function indicator(data) {
       indicator.init();
-      return data.map(ma).filter(function(d) { return d.value; });
+      return data.map(ma).filter(function(d) { return d.value !== null; });
     }
 
     indicator.init = function() {
@@ -969,7 +975,9 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
 
 module.exports = function(accessor_atrtrailingstop, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        upLine = plot.pathLine(),
+        downLine = plot.pathLine();
 
     function atrtrailingstop(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array);
@@ -981,19 +989,25 @@ module.exports = function(accessor_atrtrailingstop, plot, plotMixin) {  // Injec
     }
 
     atrtrailingstop.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot);
+      refresh(g, upLine, downLine);
     };
 
+    function binder() {
+      upLine.init(p.accessor.d, p.xScale, p.accessor.up, p.yScale);
+      downLine.init(p.accessor.d, p.xScale, p.accessor.dn, p.yScale);
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(atrtrailingstop, p).plot(accessor_atrtrailingstop());
+    plotMixin(atrtrailingstop, p).plot(accessor_atrtrailingstop(), binder);
+    binder();
 
     return atrtrailingstop;
   };
 };
 
-function refresh(g, accessor, x, y, plot) {
-  g.selectAll('path.up').attr('d', plot.pathLine(accessor.d, x, accessor.up, y));
-  g.selectAll('path.down').attr('d', plot.pathLine(accessor.d, x, accessor.dn, y));
+function refresh(g, upLine, downLine) {
+  g.selectAll('path.up').attr('d', upLine);
+  g.selectAll('path.down').attr('d', downLine);
 }
 },{}],21:[function(require,module,exports){
 'use strict';
@@ -1171,40 +1185,36 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure constructor
     var p = {},  // Container for private, direct access mixed in variables
-        volumeOpacity = false;
+        bodyPathGenerator,
+        wickGenerator;
 
     function candlestick(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d);
+      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d),
+          upDownEqual = plot.groupUpDownEqual(g.datum(), p.accessor);
 
-      // Two path's as wick and body can be styled slightly differently (stroke and fills)
-      group.entry.append('path').attr('class', 'candle body');
-      group.entry.append('path').attr('class', 'candle wick');
+      // 3x2 path's as wick and body can be styled slightly differently (stroke and fills)
+      plot.appendUpDownEqual(group.selection, p.accessor, ['candle', 'body'], upDownEqual);
+      plot.appendUpDownEqual(group.selection, p.accessor, ['candle', 'wick'], upDownEqual);
 
       candlestick.refresh(g);
     }
 
     candlestick.refresh = function(g) {
-      if(volumeOpacity) opacity(g, d3_scale_linear, d3_extent, p.accessor.v);
-      refresh(g, plot, p.accessor, p.xScale, p.yScale);
+      g.selectAll('path.candle.body').attr('d', bodyPathGenerator);
+      g.selectAll('path.candle.wick').attr('d', wickGenerator);
     };
 
-    candlestick.volumeOpacity = function(_) {
-      if (!arguments.length) return volumeOpacity;
-      volumeOpacity = _;
-      return candlestick;
-    };
+    function binder() {
+      bodyPathGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, bodyPath);
+      wickGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, wickPath);
+    }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(candlestick, p).plot(accessor_ohlc());
+    plotMixin(candlestick, p).plot(accessor_ohlc(), binder);
 
     return candlestick;
   };
 };
-
-function refresh(g, plot, accessor, x, y) {
-  g.selectAll('path.candle.body').attr('d', bodyPath(accessor, x, y)).classed(plot.classedUpDown(accessor));
-  g.selectAll('path.candle.wick').attr('d', wickPath(accessor, x, y)).classed(plot.classedUpDown(accessor));
-}
 
 function bodyPath(accessor, x, y) {
   return function(d) {
@@ -1262,18 +1272,6 @@ function wickPath(accessor, x, y) {
 
     return path.join(' ');
   };
-}
-
-function opacity(g, d3_scale_linear, d3_extent, accessor_volume) {
-  var selection = g.selectAll('g.data'),
-      volumeOpacityScale = d3_scale_linear()
-        .domain(d3_extent(selection.data().map(accessor_volume).filter(function(d) { return !isNaN(d); })))
-        .range([0.2, 1]);
-
-  selection.selectAll('path.candle').style('opacity', function(d) {
-    var volume = accessor_volume(d);
-    return isNaN(volume) ? null : volumeOpacityScale(volume);
-  });
 }
 },{}],23:[function(require,module,exports){
 'use strict';
@@ -1424,76 +1422,91 @@ function verticalPathLine(x, range) {
 
 module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        kumoClip = kumoClipArea(),
+        kumo = kumoPathArea(),
+        senkouSpanA = plot.pathLine(),
+        senkouSpanB = plot.pathLine(),
+        chikouSpan = plot.pathLine(),
+        tenkanSen = plot.pathLine(),
+        kijunsen = plot.pathLine();
 
     function ichimoku(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array),
-          clipUpId = 'cloudclipup-' + randomID(),
-          clipDownId = 'cloudclipdown-' + randomID();
+          clipUpId = 'kumoclipup-' + randomID(),
+          clipDownId = 'kumoclipdown-' + randomID();
 
-      group.entry.append('clipPath').attr({ id: clipUpId, class: 'cloudclipup' }).append('path');
-      group.entry.append('clipPath').attr({ id: clipDownId, class: 'cloudclipdown' }).append('path');
-      group.entry.append('path').attr({ class: 'cloud up', 'clip-path':'url(#' + clipUpId + ')' });
-      group.entry.append('path').attr({ class: 'cloud down', 'clip-path': 'url(#' + clipDownId + ')' });
-      group.entry.append('path').attr('class', 'senkouspana');
+      group.entry.append('clipPath').attr({ id: clipDownId, class: 'kumoclipdown' }).append('path');
+      group.entry.append('clipPath').attr({ id: clipUpId, class: 'kumoclipup' }).append('path');
+      group.entry.append('path').attr({ class: 'kumo down', 'clip-path': 'url(#' + clipDownId + ')' });
+      group.entry.append('path').attr({ class: 'kumo up', 'clip-path':'url(#' + clipUpId + ')' });
       group.entry.append('path').attr('class', 'senkouspanb');
+      group.entry.append('path').attr('class', 'senkouspana');
 
       group.entry.append('path').attr('class', 'chikouspan');
-      group.entry.append('path').attr('class', 'tenkansen');
       group.entry.append('path').attr('class', 'kijunsen');
+      group.entry.append('path').attr('class', 'tenkansen');
 
       ichimoku.refresh(g);
     }
 
     ichimoku.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot);
+      refresh(g, p.yScale);
     };
 
-    function refresh(g, accessor, x, y, plot) {
-      g.selectAll('.cloudclipup path').attr('d', clipArea(accessor, x, y, y.range()[1]));
-      g.selectAll('.cloudclipdown path').attr('d', clipArea(accessor, x, y, y.range()[0]));
-      g.selectAll('path.cloud.up').attr('d', pathArea(accessor, x, y));
-      g.selectAll('path.cloud.down').attr('d', pathArea(accessor, x, y));
-      g.selectAll('path.senkouspana').attr('d', plot.pathLine(accessor.d, x, accessor.sa, y, accessor.pks));
-      g.selectAll('path.senkouspanb').attr('d', plot.pathLine(accessor.d, x, accessor.sb, y, accessor.pks));
+    function refresh(g, y) {
+      g.selectAll('.kumoclipdown path').attr('d', kumoClip.y1(y.range()[0])); // Fill the bottom of the cloud to be clipped
+      g.selectAll('.kumoclipup path').attr('d', kumoClip.y1(y.range()[1])); // Fill the top of the cloud to be clipped
+      g.selectAll('path.kumo.down').attr('d', kumo);
+      g.selectAll('path.kumo.up').attr('d', kumo);
+      g.selectAll('path.senkouspanb').attr('d', senkouSpanB);
+      g.selectAll('path.senkouspana').attr('d', senkouSpanA);
 
-      g.selectAll('path.chikouspan').attr('d', plot.pathLine(accessor.d, x, accessor.c, y, negate(accessor.pks)));
-      g.selectAll('path.tenkansen').attr('d', plot.pathLine(accessor.d, x, accessor.ts, y));
-      g.selectAll('path.kijunsen').attr('d', plot.pathLine(accessor.d, x, accessor.ks, y));
+      g.selectAll('path.chikouspan').attr('d', chikouSpan);
+      g.selectAll('path.kijunsen').attr('d', kijunsen);
+      g.selectAll('path.tenkansen').attr('d', tenkanSen);
     }
 
-    function clipArea(accessor, x, y, top) {
-      return d3_svg_area()
-        .defined(function(d) { return accessor.sb(d) !== null; })
-        .x(function(d) { return x(accessor.d(d), accessor.pks(d)); } )
-        .y0(function(d) { return y(accessor.sb(d)); } )
-        .y1(top);
+    function binder() {
+      senkouSpanA.init(p.accessor.d, p.xScale, p.accessor.sa, p.yScale, p.accessor.pks);
+      senkouSpanB.init(p.accessor.d, p.xScale, p.accessor.sb, p.yScale, p.accessor.pks);
+      chikouSpan .init(p.accessor.d, p.xScale, p.accessor.c,  p.yScale, negate(p.accessor.pks));
+      tenkanSen  .init(p.accessor.d, p.xScale, p.accessor.ts, p.yScale);
+      kijunsen   .init(p.accessor.d, p.xScale, p.accessor.ks, p.yScale);
     }
 
-    function pathArea(accessor, x, y) {
-      return d3_svg_area()
-        .defined(function(d) { return accessor.sa(d) !== null && accessor.sb(d) !== null; })
-        .x(function(d) { return x(accessor.d(d), accessor.pks(d)); } )
-        .y0(function(d) { return y(accessor.sa(d)); } )
-        .y1(function(d) { return y(accessor.sb(d)); } );
+    function kumoClipArea() {
+      return d3_svg_area().interpolate('monotone')
+        .defined(function(d) { return p.accessor.sb(d) !== null; })
+        .x(function(d) { return p.xScale(p.accessor.d(d), p.accessor.pks(d)); } )
+        .y0(function(d) { return p.yScale(p.accessor.sb(d)); } );
     }
 
-    function negate(accessor) {
-      return function(d) {
-        return -accessor(d);
-      };
-    }
-
-    function randomID() {
-      return Math.random().toString(36).substr(2, 9);
+    function kumoPathArea() {
+      return d3_svg_area().interpolate('monotone')
+        .defined(function(d) { return p.accessor.sa(d) !== null && p.accessor.sb(d) !== null; })
+        .x(function(d) { return p.xScale(p.accessor.d(d), p.accessor.pks(d)); } )
+        .y0(function(d) { return p.yScale(p.accessor.sa(d)); } )
+        .y1(function(d) { return p.yScale(p.accessor.sb(d)); } );
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(ichimoku, p).plot(accessor_ichimoku());
+    plotMixin(ichimoku, p).plot(accessor_ichimoku(), binder);
+    binder();
 
     return ichimoku;
   };
 };
+
+function negate(accessor) {
+  return function(d) {
+    return -accessor(d);
+  };
+}
+
+function randomID() {
+  return Math.random().toString(36).substr(2, 9);
+}
 },{}],25:[function(require,module,exports){
 'use strict';
 
@@ -1537,7 +1550,8 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
   showZero = showZero || false;
 
   return function() { // Closure function
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        svgLine = plot.pathLine();
 
     function line(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array);
@@ -1552,18 +1566,23 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
     }
 
     line.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, showZero);
+      refresh(g, p.accessor, p.xScale, p.yScale, plot, svgLine, showZero);
     };
 
+    function binder() {
+      svgLine.init(p.accessor.d, p.xScale, p.accessor, p.yScale);
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(line, p).plot(accessor_value());
+    plotMixin(line, p).plot(accessor_value(), binder);
+    binder();
 
     return line;
   };
 };
 
-function refresh(g, accessor, x, y, plot, showZero) {
-  g.selectAll('path.line').attr('d', plot.pathLine(accessor.d, x, accessor, y));
+function refresh(g, accessor, x, y, plot, svgLine, showZero) {
+  g.selectAll('path.line').attr('d', svgLine);
 
   if(showZero) {
     g.selectAll('path.zero').attr('d', plot.horizontalPathLine(x, accessor.z, y));
@@ -1574,18 +1593,15 @@ function refresh(g, accessor, x, y, plot, showZero) {
 
 module.exports = function(accessor_macd, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        differenceGenerator,
+        macdLine = plot.pathLine(),
+        signalLine = plot.pathLine();
 
     function macd(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
-      var histogramSelection = group.selection
-        .append('g').attr('class', 'difference')
-        .selectAll('g.difference').data(function(data) { return data; });
-
-      histogramSelection.exit().remove();
-      histogramSelection.enter().append('path').attr('class', 'difference');
-
+      group.selection.append('path').attr('class', 'difference');
       group.selection.append('path').attr('class', 'zero');
       group.selection.append('path').attr('class', 'macd');
       group.selection.append('path').attr('class', 'signal');
@@ -1594,21 +1610,28 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
     }
 
     macd.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot);
+      refresh(g, p.accessor, p.xScale, p.yScale, plot, differenceGenerator, macdLine, signalLine);
     };
 
+    function binder() {
+      differenceGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, differencePath);
+      macdLine.init(p.accessor.d, p.xScale, p.accessor.m, p.yScale);
+      signalLine.init(p.accessor.d, p.xScale, p.accessor.s, p.yScale);
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(macd, p).plot(accessor_macd());
+    plotMixin(macd, p).plot(accessor_macd(), binder);
+    binder();
 
     return macd;
   };
 };
 
-function refresh(g, accessor, x, y, plot) {
-  g.selectAll('path.difference').attr('d', differencePath(accessor, x, y));
+function refresh(g, accessor, x, y, plot, differenceGenerator, macdLine, signalLine) {
+  g.selectAll('path.difference').attr('d', differenceGenerator);
   g.selectAll('path.zero').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.z, y));
-  g.selectAll('path.macd').attr('d', plot.pathLine(accessor.d, x, accessor.m, y));
-  g.selectAll('path.signal').attr('d', plot.pathLine(accessor.d, x, accessor.s, y));
+  g.selectAll('path.macd').attr('d', macdLine);
+  g.selectAll('path.signal').attr('d', signalLine);
 }
 
 function differencePath(accessor, x, y) {
@@ -1631,29 +1654,31 @@ function differencePath(accessor, x, y) {
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure constructor
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        ohlcGenerator;
 
     function ohlc(g) {
-      plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
-        .entry.append('path').attr({ class: 'ohlc' });
+      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+
+      plot.appendUpDownEqual(group.selection, p.accessor, 'ohlc');
 
       ohlc.refresh(g);
     }
 
     ohlc.refresh = function(g) {
-      refresh(g, plot, p.accessor, p.xScale, p.yScale);
+      g.selectAll('path.ohlc').attr('d', ohlcGenerator);
     };
 
+    function binder() {
+      ohlcGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, ohlcPath);
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(ohlc, p).plot(accessor_ohlc());
+    plotMixin(ohlc, p).plot(accessor_ohlc(), binder);
 
     return ohlc;
   };
 };
-
-function refresh(g, plot, accessor, x, y) {
-  g.selectAll('path.ohlc').attr({ d: ohlcPath(accessor, x, y) }).classed(plot.classedUpDown(accessor));
-}
 
 function ohlcPath(accessor, x, y) {
   return function(d) {
@@ -1687,6 +1712,58 @@ module.exports = function(d3_svg_line, d3_select) {
     return dataSelection.enter().append('g').attr('class', 'data');
   }
 
+  function PathLine() {
+    var d3Line = d3_svg_line().interpolate('monotone');
+
+    function line(data) {
+      return d3Line(data);
+    }
+
+    line.init = function(accessor_date, x, accessor_value, y, offset) {
+      return d3Line.defined(function(d) { return accessor_value(d) !== null; })
+          .x(function(d) { return x(accessor_date(d), offset === undefined ? offset : offset(d)); } )
+          .y(function(d) { return y(accessor_value(d)); } );
+    };
+
+    line.d3 = function() {
+      return d3Line;
+    };
+
+    return line;
+  }
+
+  function up(accessor, d) {
+    return accessor.o(d) < accessor.c(d);
+  }
+
+  function down(accessor, d) {
+    return accessor.o(d) > accessor.c(d);
+  }
+
+  function groupUpDownEqual(data, accessor) {
+    return data.reduce(function(result, d) {
+      if (up(accessor, d)) result.up.push(d);
+      else if (down(accessor, d)) result.down.push(d);
+      else result.equal.push(d);
+      return result;
+    }, { up: [], down: [], equal: [] });
+  }
+
+  function appendUpDownEqual(g, accessor, plotName, upDownEqual) {
+    var plotNames = plotName instanceof Array ? plotName : [plotName];
+
+    upDownEqual = upDownEqual || groupUpDownEqual(g.datum(), accessor);
+
+    appendPlotType(g, upDownEqual.up, plotNames, 'up');
+    appendPlotType(g, upDownEqual.down, plotNames, 'down');
+    appendPlotType(g, upDownEqual.equal, plotNames, 'equal');
+  }
+
+  function appendPlotType(g, data, plotNames, direction) {
+    g.selectAll('path.' + plotNames.join('.') + '.' + direction).data([data])
+      .enter().append('path').attr('class', plotNames.join(' ') + ' ' + direction);
+  }
+
   return {
     dataMapper: {
       unity: function(d) { return d; },
@@ -1706,12 +1783,9 @@ module.exports = function(d3_svg_line, d3_select) {
       };
     },
 
-    classedUpDown: function(accessor) {
-      return {
-        up: function(d) { return accessor.o(d) < accessor.c(d); },
-        down: function(d) { return accessor.o(d) > accessor.c(d); }
-      };
-    },
+    groupUpDownEqual: groupUpDownEqual,
+
+    appendUpDownEqual: appendUpDownEqual,
 
     horizontalPathLine: function(accessor_date, x, accessor_value, y) {
       return function(d) {
@@ -1725,11 +1799,12 @@ module.exports = function(d3_svg_line, d3_select) {
       };
     },
 
-    pathLine: function(accessor_date, x, accessor_value, y, offset) {
-      return d3_svg_line().interpolate('monotone')
-        .defined(function(d) { return accessor_value(d) !== null; })
-        .x(function(d) { return x(accessor_date(d), offset === undefined ? offset : offset(d)); } )
-        .y(function(d) { return y(accessor_value(d)); } );
+    pathLine: PathLine,
+
+    joinPath: function(accessor, x, y, path) {
+      return function(data) {
+        return data.map(path(accessor, x, y)).join(' ');
+      };
     },
 
     interaction: {
@@ -1819,45 +1894,49 @@ module.exports = function(d3_scale_linear, techan_scale_financetime) {
   return function(source, priv) {
     var plotMixin = {};
 
-    plotMixin.xScale = function() {
+    plotMixin.xScale = function(binder) {
       priv.xScale = techan_scale_financetime();
 
       source.xScale = function(_) {
         if (!arguments.length) return priv.xScale;
         priv.xScale = _;
+        if(binder) binder();
         return source;
       };
 
       return plotMixin;
     };
 
-    plotMixin.yScale = function() {
+    plotMixin.yScale = function(binder) {
       priv.yScale = d3_scale_linear();
 
       source.yScale = function(_) {
         if (!arguments.length) return priv.yScale;
         priv.yScale = _;
+        if(binder) binder();
         return source;
       };
 
       return plotMixin;
     };
 
-    plotMixin.accessor = function(accessor) {
+    plotMixin.accessor = function(accessor, binder) {
       priv.accessor = accessor;
 
       source.accessor = function(_) {
         if (!arguments.length) return priv.accessor;
         priv.accessor = _;
+        if(binder) binder();
         return source;
       };
 
       return plotMixin;
     };
 
-    plotMixin.on = function(dispatch) {
+    plotMixin.on = function(dispatch, binder) {
       source.on = function(type, listener) {
         dispatch.on(type, listener);
+        if(binder) binder();
         return source;
       };
 
@@ -1868,8 +1947,8 @@ module.exports = function(d3_scale_linear, techan_scale_financetime) {
     * Generic mixin used for most plots
     * @returns {plotMixin}
     */
-    plotMixin.plot = function(accessor) {
-      return plotMixin.xScale().yScale().accessor(accessor);
+    plotMixin.plot = function(accessor, binder) {
+      return plotMixin.xScale(binder).yScale(binder).accessor(accessor, binder);
     };
 
     return plotMixin;
@@ -1880,7 +1959,8 @@ module.exports = function(d3_scale_linear, techan_scale_financetime) {
 
 module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        rsiLine = plot.pathLine();
 
     function rsi(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
@@ -1894,21 +1974,26 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
     }
 
     rsi.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot);
+      refresh(g, p.accessor, p.xScale, p.yScale, plot, rsiLine);
     };
 
+    function binder() {
+      rsiLine.init(p.accessor.d, p.xScale, p.accessor.r, p.yScale);
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(rsi, p).plot(accessor_rsi());
+    plotMixin(rsi, p).plot(accessor_rsi(), binder);
+    binder();
 
     return rsi;
   };
 };
 
-function refresh(g, accessor, x, y, plot) {
+function refresh(g, accessor, x, y, plot, rsiLine) {
   g.selectAll('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
   g.selectAll('path.middle').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.m, y));
   g.selectAll('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
-  g.selectAll('path.rsi').attr('d', plot.pathLine(accessor.d, x, accessor.r, y));
+  g.selectAll('path.rsi').attr('d', rsiLine);
 }
 },{}],32:[function(require,module,exports){
 'use strict';
@@ -2121,34 +2206,32 @@ function trendlineEnd(accessor_x, x, accessor_y, y) {
 
 module.exports = function(accessor_volume, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
-    var p = {};  // Container for private, direct access mixed in variables
+    var p = {},  // Container for private, direct access mixed in variables
+        volumeGenerator;
 
     function volume(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.unity, p.accessor.d)
-        .entry.append('path')
-          .attr('class', 'volume');
+      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
-      if(p.accessor.o && p.accessor.c) {
-        group.classed(plot.classedUpDown(p.accessor));
-      }
+      if(p.accessor.o && p.accessor.c) plot.appendUpDownEqual(group.selection, p.accessor, 'volume');
+      else group.entry.append('path').attr('class', 'volume');
 
       volume.refresh(g);
     }
 
     volume.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale);
+      g.selectAll('path.volume').attr('d', volumeGenerator);
     };
 
+    function binder() {
+      volumeGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, volumePath);
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(volume, p).plot(accessor_volume());
+    plotMixin(volume, p).plot(accessor_volume(), binder);
 
     return volume;
   };
 };
-
-function refresh(g, accessor, x, y) {
-  g.selectAll('path.volume').attr('d', volumePath(accessor, x, y));
-}
 
 function volumePath(accessor, x, y) {
   return function(d) {
