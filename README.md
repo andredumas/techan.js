@@ -4,7 +4,7 @@ This site is a github pages jekyll site. Vagrant box supplied for a consistent d
 
 ```
 # Using Docker
-docker run -v $PWD:/site -p 4000:4000 -t andredumas/github-pages serve --watch --force_polling
+docker run -v $PWD:/site -p 4000:4000 -t andredumas/github-pages serve --watch
 
 # Using Vagrant
 vagrant up
