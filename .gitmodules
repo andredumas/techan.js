@@ -52,3 +52,6 @@
 [submodule "examples/indicator/atrtrailingstop"]
 	path = examples/indicator/atrtrailingstop
 	url = https://gist.github.com/55cacf3a2a4881f0be66.git
+[submodule "examples/scale/brush"]
+	path = examples/scale/brush
+	url = https://gist.github.com/a5acb93bae58f0805b53.git
