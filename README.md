@@ -55,6 +55,7 @@ Cloning and building the base project:
 
 ```shell
 git clone git@github.com:andredumas/techan.js.git
+cd techan.js
 npm install
 
 # Then to build
@@ -69,6 +70,7 @@ Cloning the project with all examples and usage:
 
 ```shell
 git clone --recursive git@github.com:andredumas/techan.js.git
+cd techan.js
 npm install
 grunt serve
 ```
