@@ -220,7 +220,7 @@ module.exports = function(grunt) {
   grunt.registerTask('examples', ['newer:replace', 'newer:copy']);
   grunt.registerTask('dist', ['browserify:dist', 'usebanner', 'karma:dist']);
   grunt.registerTask('minify', ['uglify', 'karma:minify']);
-  grunt.registerTask('serve', ['clean', 'filegen:version', 'examples', 'test', 'connect', 'karma:watch:start', 'watch']);
+  grunt.registerTask('serve', ['bower', 'clean', 'filegen:version', 'examples', 'test', 'connect', 'karma:watch:start', 'watch']);
   grunt.registerTask('release:pre', ['bump-only:prerelease', 'default']);
   grunt.registerTask('release:minor', ['bump-only:minor', 'default', 'bump-commit']);
   grunt.registerTask('release:major', ['bump-only:major', 'default', 'bump-commit']);
