@@ -146,10 +146,6 @@ path.candle.body {
     stroke-width: 0;
 }
 
-path.candle.wick {
-    stroke-width: 1;
-}
-
 path.candle {
     fill: #777777;
     stroke: #777777;

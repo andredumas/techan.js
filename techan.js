@@ -1,9 +1,9 @@
 /*
- TechanJS v0.5.0-5
- (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
+ TechanJS v0.5.0-6
+ (c) 2014 - 2015 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.5.0-5';
+'use strict';module.exports='0.5.0-6';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -1186,7 +1186,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   return function() { // Closure constructor
     var p = {},  // Container for private, direct access mixed in variables
         bodyPathGenerator,
-        wickGenerator;
+        wickGenerator,
+        wickWidthGenerator;
 
     function candlestick(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d),
@@ -1201,12 +1202,13 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 
     candlestick.refresh = function(g) {
       g.selectAll('path.candle.body').attr('d', bodyPathGenerator);
-      g.selectAll('path.candle.wick').attr('d', wickGenerator);
+      g.selectAll('path.candle.wick').attr('d', wickGenerator).style('stroke-width', wickWidthGenerator);
     };
 
     function binder() {
       bodyPathGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, bodyPath);
       wickGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, wickPath);
+      wickWidthGenerator = plot.lineWidth(p.xScale, 1, 4);
     }
 
     // Mixin 'superclass' methods and variables
@@ -1216,12 +1218,12 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   };
 };
 
-function bodyPath(accessor, x, y) {
+function bodyPath(accessor, x, y, barWidth) {
   return function(d) {
     var path = [],
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push(
@@ -1242,12 +1244,12 @@ function bodyPath(accessor, x, y) {
   };
 }
 
-function wickPath(accessor, x, y) {
+function wickPath(accessor, x, y, barWidth) {
   return function(d) {
     var path = [],
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xPoint = x(accessor.d(d)),
         xValue = xPoint - rangeBand/2;
 
@@ -1634,11 +1636,11 @@ function refresh(g, accessor, x, y, plot, differenceGenerator, macdLine, signalL
   g.selectAll('path.signal').attr('d', signalLine);
 }
 
-function differencePath(accessor, x, y) {
+function differencePath(accessor, x, y, barWidth) {
   return function(d) {
     var zero = y(0),
         height = y(accessor.dif(d)) - zero,
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     return [
@@ -1655,7 +1657,8 @@ function differencePath(accessor, x, y) {
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure constructor
     var p = {},  // Container for private, direct access mixed in variables
-        ohlcGenerator;
+        ohlcGenerator,
+        lineWidthGenerator;
 
     function ohlc(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
@@ -1666,11 +1669,12 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     }
 
     ohlc.refresh = function(g) {
-      g.selectAll('path.ohlc').attr('d', ohlcGenerator);
+      g.selectAll('path.ohlc').attr('d', ohlcGenerator).style('stroke-width', lineWidthGenerator);
     };
 
     function binder() {
       ohlcGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, ohlcPath);
+      lineWidthGenerator = plot.lineWidth(p.xScale, 1, 2);
     }
 
     // Mixin 'superclass' methods and variables
@@ -1680,11 +1684,11 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   };
 };
 
-function ohlcPath(accessor, x, y) {
+function ohlcPath(accessor, x, y, barWidth) {
   return function(d) {
     var open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xPoint = x(accessor.d(d)),
         xValue = xPoint - rangeBand/2;
 
@@ -1764,6 +1768,10 @@ module.exports = function(d3_svg_line, d3_select) {
       .enter().append('path').attr('class', plotNames.join(' ') + ' ' + direction);
   }
 
+  function barWidth(x) {
+    return Math.max(x.band(), 1);
+  }
+
   return {
     dataMapper: {
       unity: function(d) { return d; },
@@ -1801,9 +1809,20 @@ module.exports = function(d3_svg_line, d3_select) {
 
     pathLine: PathLine,
 
+    barWidth: barWidth,
+
+    lineWidth: function(x, max, div) {
+      max = max || 1;
+      div = div || 1;
+
+      return function() {
+        return Math.min(max, barWidth(x)/div);
+      };
+    },
+
     joinPath: function(accessor, x, y, path) {
       return function(data) {
-        return data.map(path(accessor, x, y)).join(' ');
+        return data.map(path(accessor, x, y, barWidth)).join(' ');
       };
     },
 
@@ -2233,7 +2252,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
   };
 };
 
-function volumePath(accessor, x, y) {
+function volumePath(accessor, x, y, barWidth) {
   return function(d) {
     var vol = accessor.v(d);
 
@@ -2241,7 +2260,7 @@ function volumePath(accessor, x, y) {
 
     var zero = y(0),
         height = y(vol) - zero,
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     return [
