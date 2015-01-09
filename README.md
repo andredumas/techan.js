@@ -54,7 +54,7 @@ Download the latest release [https://github.com/andredumas/techan.js/releases/la
 Cloning and building the base project:
 
 ```shell
-git clone git@github.com:andredumas/techan.js.git
+git clone https://github.com/andredumas/techan.js.git
 cd techan.js
 npm install
 
@@ -69,10 +69,10 @@ grunt
 Cloning the project with all examples and usage:
 
 ```shell
-git clone --recursive git@github.com:andredumas/techan.js.git
+git clone --recursive https://github.com/andredumas/techan.js.git
 cd techan.js
 npm install
-grunt serve
+npm start
 ```
 
 Once running browse to [http://localhost:8000/examples/](http://localhost:8000/examples/) to see examples using the remote
