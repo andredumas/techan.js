@@ -43,11 +43,11 @@ function refresh(g, accessor, x, y, plot, differenceGenerator, macdLine, signalL
   g.selectAll('path.signal').attr('d', signalLine);
 }
 
-function differencePath(accessor, x, y) {
+function differencePath(accessor, x, y, barWidth) {
   return function(d) {
     var zero = y(0),
         height = y(accessor.dif(d)) - zero,
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     return [

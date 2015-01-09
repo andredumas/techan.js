@@ -63,6 +63,10 @@ module.exports = function(d3_svg_line, d3_select) {
       .enter().append('path').attr('class', plotNames.join(' ') + ' ' + direction);
   }
 
+  function barWidth(x) {
+    return Math.max(x.band(), 1);
+  }
+
   return {
     dataMapper: {
       unity: function(d) { return d; },
@@ -100,9 +104,20 @@ module.exports = function(d3_svg_line, d3_select) {
 
     pathLine: PathLine,
 
+    barWidth: barWidth,
+
+    lineWidth: function(x, max, div) {
+      max = max || 1;
+      div = div || 1;
+
+      return function() {
+        return Math.min(max, barWidth(x)/div);
+      };
+    },
+
     joinPath: function(accessor, x, y, path) {
       return function(data) {
-        return data.map(path(accessor, x, y)).join(' ');
+        return data.map(path(accessor, x, y, barWidth)).join(' ');
       };
     },
 

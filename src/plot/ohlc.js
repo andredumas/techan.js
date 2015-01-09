@@ -3,7 +3,8 @@
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure constructor
     var p = {},  // Container for private, direct access mixed in variables
-        ohlcGenerator;
+        ohlcGenerator,
+        lineWidthGenerator;
 
     function ohlc(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
@@ -14,11 +15,12 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     }
 
     ohlc.refresh = function(g) {
-      g.selectAll('path.ohlc').attr('d', ohlcGenerator);
+      g.selectAll('path.ohlc').attr('d', ohlcGenerator).style('stroke-width', lineWidthGenerator);
     };
 
     function binder() {
       ohlcGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, ohlcPath);
+      lineWidthGenerator = plot.lineWidth(p.xScale, 1, 2);
     }
 
     // Mixin 'superclass' methods and variables
@@ -28,11 +30,11 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   };
 };
 
-function ohlcPath(accessor, x, y) {
+function ohlcPath(accessor, x, y, barWidth) {
   return function(d) {
     var open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xPoint = x(accessor.d(d)),
         xValue = xPoint - rangeBand/2;
 

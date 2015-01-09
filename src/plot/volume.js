@@ -29,7 +29,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
   };
 };
 
-function volumePath(accessor, x, y) {
+function volumePath(accessor, x, y, barWidth) {
   return function(d) {
     var vol = accessor.v(d);
 
@@ -37,7 +37,7 @@ function volumePath(accessor, x, y) {
 
     var zero = y(0),
         height = y(vol) - zero,
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     return [

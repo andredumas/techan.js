@@ -4,7 +4,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   return function() { // Closure constructor
     var p = {},  // Container for private, direct access mixed in variables
         bodyPathGenerator,
-        wickGenerator;
+        wickGenerator,
+        wickWidthGenerator;
 
     function candlestick(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d),
@@ -19,12 +20,13 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 
     candlestick.refresh = function(g) {
       g.selectAll('path.candle.body').attr('d', bodyPathGenerator);
-      g.selectAll('path.candle.wick').attr('d', wickGenerator);
+      g.selectAll('path.candle.wick').attr('d', wickGenerator).style('stroke-width', wickWidthGenerator);
     };
 
     function binder() {
       bodyPathGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, bodyPath);
       wickGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, wickPath);
+      wickWidthGenerator = plot.lineWidth(p.xScale, 1, 4);
     }
 
     // Mixin 'superclass' methods and variables
@@ -34,12 +36,12 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   };
 };
 
-function bodyPath(accessor, x, y) {
+function bodyPath(accessor, x, y, barWidth) {
   return function(d) {
     var path = [],
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push(
@@ -60,12 +62,12 @@ function bodyPath(accessor, x, y) {
   };
 }
 
-function wickPath(accessor, x, y) {
+function wickPath(accessor, x, y, barWidth) {
   return function(d) {
     var path = [],
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xPoint = x(accessor.d(d)),
         xValue = xPoint - rangeBand/2;
 
