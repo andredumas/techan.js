@@ -82,7 +82,7 @@ var techanSite = techanSite || {};
         svg.append('text')
             .attr("class", "version")
             .style("text-anchor", "end")
-            .text("TechanJS v" + techan.version);
+            .text("TechanJS v" + techan.version + ", D3 v" + d3.version);
 
         svg = svg.append("g")
           .attr("class", "chart")

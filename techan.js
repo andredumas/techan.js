@@ -1,9 +1,9 @@
 /*
- TechanJS v0.5.0-5
- (c) 2014 - 2014 Andre Dumas | https://github.com/andredumas/techan.js
+ TechanJS v0.5.0
+ (c) 2014 - 2015 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.5.0-5';
+'use strict';module.exports='0.5.0';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -1186,7 +1186,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   return function() { // Closure constructor
     var p = {},  // Container for private, direct access mixed in variables
         bodyPathGenerator,
-        wickGenerator;
+        wickGenerator,
+        wickWidthGenerator;
 
     function candlestick(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d),
@@ -1201,12 +1202,13 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 
     candlestick.refresh = function(g) {
       g.selectAll('path.candle.body').attr('d', bodyPathGenerator);
-      g.selectAll('path.candle.wick').attr('d', wickGenerator);
+      g.selectAll('path.candle.wick').attr('d', wickGenerator).style('stroke-width', wickWidthGenerator);
     };
 
     function binder() {
       bodyPathGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, bodyPath);
       wickGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, wickPath);
+      wickWidthGenerator = plot.lineWidth(p.xScale, 1, 4);
     }
 
     // Mixin 'superclass' methods and variables
@@ -1216,12 +1218,12 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   };
 };
 
-function bodyPath(accessor, x, y) {
+function bodyPath(accessor, x, y, barWidth) {
   return function(d) {
     var path = [],
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     path.push(
@@ -1242,12 +1244,12 @@ function bodyPath(accessor, x, y) {
   };
 }
 
-function wickPath(accessor, x, y) {
+function wickPath(accessor, x, y, barWidth) {
   return function(d) {
     var path = [],
         open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xPoint = x(accessor.d(d)),
         xValue = xPoint - rangeBand/2;
 
@@ -1315,8 +1317,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
           yAnnotationSelection = group.selectAll('g.axisannotation.y > g');
 
       mouseSelection.attr({
-          x: Math.min(xRange[0], xRange[xRange.length-1]),
-          y: Math.min(yRange[0], yRange[yRange.length-1]),
+          x: Math.min.apply(null, xRange),
+          y: Math.min.apply(null, yRange),
           height: Math.abs(yRange[yRange.length-1] - yRange[0]),
           width: Math.abs(xRange[xRange.length-1] - xRange[0])
         })
@@ -1634,11 +1636,11 @@ function refresh(g, accessor, x, y, plot, differenceGenerator, macdLine, signalL
   g.selectAll('path.signal').attr('d', signalLine);
 }
 
-function differencePath(accessor, x, y) {
+function differencePath(accessor, x, y, barWidth) {
   return function(d) {
     var zero = y(0),
         height = y(accessor.dif(d)) - zero,
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     return [
@@ -1655,7 +1657,8 @@ function differencePath(accessor, x, y) {
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure constructor
     var p = {},  // Container for private, direct access mixed in variables
-        ohlcGenerator;
+        ohlcGenerator,
+        lineWidthGenerator;
 
     function ohlc(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
@@ -1666,11 +1669,12 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     }
 
     ohlc.refresh = function(g) {
-      g.selectAll('path.ohlc').attr('d', ohlcGenerator);
+      g.selectAll('path.ohlc').attr('d', ohlcGenerator).style('stroke-width', lineWidthGenerator);
     };
 
     function binder() {
       ohlcGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, ohlcPath);
+      lineWidthGenerator = plot.lineWidth(p.xScale, 1, 2);
     }
 
     // Mixin 'superclass' methods and variables
@@ -1680,11 +1684,11 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
   };
 };
 
-function ohlcPath(accessor, x, y) {
+function ohlcPath(accessor, x, y, barWidth) {
   return function(d) {
     var open = y(accessor.o(d)),
         close = y(accessor.c(d)),
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xPoint = x(accessor.d(d)),
         xValue = xPoint - rangeBand/2;
 
@@ -1764,6 +1768,10 @@ module.exports = function(d3_svg_line, d3_select) {
       .enter().append('path').attr('class', plotNames.join(' ') + ' ' + direction);
   }
 
+  function barWidth(x) {
+    return Math.max(x.band(), 1);
+  }
+
   return {
     dataMapper: {
       unity: function(d) { return d; },
@@ -1801,9 +1809,20 @@ module.exports = function(d3_svg_line, d3_select) {
 
     pathLine: PathLine,
 
+    barWidth: barWidth,
+
+    lineWidth: function(x, max, div) {
+      max = max || 1;
+      div = div || 1;
+
+      return function() {
+        return Math.min(max, barWidth(x)/div);
+      };
+    },
+
     joinPath: function(accessor, x, y, path) {
       return function(data) {
-        return data.map(path(accessor, x, y)).join(' ');
+        return data.map(path(accessor, x, y, barWidth)).join(' ');
       };
     },
 
@@ -2233,7 +2252,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
   };
 };
 
-function volumePath(accessor, x, y) {
+function volumePath(accessor, x, y, barWidth) {
   return function(d) {
     var vol = accessor.v(d);
 
@@ -2241,7 +2260,7 @@ function volumePath(accessor, x, y) {
 
     var zero = y(0),
         height = y(vol) - zero,
-        rangeBand = x.band(),
+        rangeBand = barWidth(x),
         xValue = x(accessor.d(d)) - rangeBand/2;
 
     return [
@@ -2261,7 +2280,7 @@ function volumePath(accessor, x, y) {
  and weekends respectively. When plot, is done so without weekend gaps.
  */
 module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, scale_widen, zoomable) {  // Injected dependencies
-  function financetime(index, domain, padding, outerPadding) {
+  function financetime(index, domain, padding, outerPadding, zoomLimit) {
     var dateIndexMap,
         tickState = { tickFormat: dailyTickMethod[dailyTickMethod.length-1][2] },
         band = 3;
@@ -2270,6 +2289,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     domain = domain || [new Date(0), new Date(1)];
     padding = padding === undefined ? 0.2 : padding;
     outerPadding = outerPadding === undefined ? 0.65 : outerPadding;
+    zoomLimit = zoomLimit || index.domain();
 
     /**
      * Scales the value to domain. If the value is not within the domain, will currently brutally round the data:
@@ -2361,11 +2381,12 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
       zoomed();
       // Apply outerPadding and widen the outer edges by pulling the domain in to ensure start and end bands are fully visible
       index.domain(index.range().map(scale_widen(outerPadding, band)).map(index.invert));
+      zoomLimit = index.domain(); // Capture the zoom limit after the domain has been applied
       return zoomed();
     }
 
     scale.copy = function() {
-      return financetime(index.copy(), domain, padding, outerPadding);
+      return financetime(index.copy(), domain, padding, outerPadding, zoomLimit);
     };
 
     /**
@@ -2393,7 +2414,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     };
 
     scale.zoomable = function() {
-      return zoomable(index, zoomed);
+      return zoomable(index, zoomed, zoomLimit);
     };
 
     /*
@@ -2729,9 +2750,8 @@ function mapReduceFilter(data, map) {
  * NOTE: This is not a complete scale, it will throw errors if it is used for anything else but zooming
  */
 module.exports = function() {
-  function zoomable(linear, zoomed) {
+  function zoomable(linear, zoomed, domainLimit) {
     var scale = {},
-        domainLimit = linear.domain(),
         clamp = true;
 
     scale.invert = linear.invert;
@@ -2752,7 +2772,7 @@ module.exports = function() {
     };
 
     scale.copy = function() {
-      return zoomable(linear.copy(), zoomed);
+      return zoomable(linear.copy(), zoomed, domainLimit);
     };
 
     scale.clamp = function(_) {
