@@ -10,9 +10,8 @@
  * NOTE: This is not a complete scale, it will throw errors if it is used for anything else but zooming
  */
 module.exports = function() {
-  function zoomable(linear, zoomed) {
+  function zoomable(linear, zoomed, domainLimit) {
     var scale = {},
-        domainLimit = linear.domain(),
         clamp = true;
 
     scale.invert = linear.invert;
@@ -33,7 +32,7 @@ module.exports = function() {
     };
 
     scale.copy = function() {
-      return zoomable(linear.copy(), zoomed);
+      return zoomable(linear.copy(), zoomed, domainLimit);
     };
 
     scale.clamp = function(_) {

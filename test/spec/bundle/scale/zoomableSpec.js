@@ -18,7 +18,7 @@ techanModule('scale/zoomable', function(specBuilder) {
         beforeEach(function() {
           zoomedCallback = jasmine.createSpy('zoomedCallback');
           linear = d3.scale.linear().domain([0,10]);
-          zoomable = scope.zoomable(linear, zoomedCallback);
+          zoomable = scope.zoomable(linear, zoomedCallback, linear.domain());
         });
 
         it('Then returns the domain when reading the domain', function() {
@@ -56,6 +56,10 @@ techanModule('scale/zoomable', function(specBuilder) {
 
           it('Then should not be equal to source', function() {
             expect(cloned).not.toEqual(zoomable);
+          });
+
+          it('Then setting domain outside of undlerying linear indexes should clamp', function() {
+            expect(cloned.domain([-1, 11]).domain()).toEqual([0, 10]);
           });
         });
 

@@ -1317,8 +1317,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
           yAnnotationSelection = group.selectAll('g.axisannotation.y > g');
 
       mouseSelection.attr({
-          x: Math.min(xRange[0], xRange[xRange.length-1]),
-          y: Math.min(yRange[0], yRange[yRange.length-1]),
+          x: Math.min.apply(null, xRange),
+          y: Math.min.apply(null, yRange),
           height: Math.abs(yRange[yRange.length-1] - yRange[0]),
           width: Math.abs(xRange[xRange.length-1] - xRange[0])
         })
@@ -2280,7 +2280,7 @@ function volumePath(accessor, x, y, barWidth) {
  and weekends respectively. When plot, is done so without weekend gaps.
  */
 module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, scale_widen, zoomable) {  // Injected dependencies
-  function financetime(index, domain, padding, outerPadding) {
+  function financetime(index, domain, padding, outerPadding, zoomLimit) {
     var dateIndexMap,
         tickState = { tickFormat: dailyTickMethod[dailyTickMethod.length-1][2] },
         band = 3;
@@ -2289,6 +2289,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     domain = domain || [new Date(0), new Date(1)];
     padding = padding === undefined ? 0.2 : padding;
     outerPadding = outerPadding === undefined ? 0.65 : outerPadding;
+    zoomLimit = zoomLimit || index.domain();
 
     /**
      * Scales the value to domain. If the value is not within the domain, will currently brutally round the data:
@@ -2380,11 +2381,12 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
       zoomed();
       // Apply outerPadding and widen the outer edges by pulling the domain in to ensure start and end bands are fully visible
       index.domain(index.range().map(scale_widen(outerPadding, band)).map(index.invert));
+      zoomLimit = index.domain(); // Capture the zoom limit after the domain has been applied
       return zoomed();
     }
 
     scale.copy = function() {
-      return financetime(index.copy(), domain, padding, outerPadding);
+      return financetime(index.copy(), domain, padding, outerPadding, zoomLimit);
     };
 
     /**
@@ -2412,7 +2414,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     };
 
     scale.zoomable = function() {
-      return zoomable(index, zoomed);
+      return zoomable(index, zoomed, zoomLimit);
     };
 
     /*
@@ -2748,9 +2750,8 @@ function mapReduceFilter(data, map) {
  * NOTE: This is not a complete scale, it will throw errors if it is used for anything else but zooming
  */
 module.exports = function() {
-  function zoomable(linear, zoomed) {
+  function zoomable(linear, zoomed, domainLimit) {
     var scale = {},
-        domainLimit = linear.domain(),
         clamp = true;
 
     scale.invert = linear.invert;
@@ -2771,7 +2772,7 @@ module.exports = function() {
     };
 
     scale.copy = function() {
-      return zoomable(linear.copy(), zoomed);
+      return zoomable(linear.copy(), zoomed, domainLimit);
     };
 
     scale.clamp = function(_) {

@@ -39,8 +39,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
           yAnnotationSelection = group.selectAll('g.axisannotation.y > g');
 
       mouseSelection.attr({
-          x: Math.min(xRange[0], xRange[xRange.length-1]),
-          y: Math.min(yRange[0], yRange[yRange.length-1]),
+          x: Math.min.apply(null, xRange),
+          y: Math.min.apply(null, yRange),
           height: Math.abs(yRange[yRange.length-1] - yRange[0]),
           width: Math.abs(xRange[xRange.length-1] - xRange[0])
         })

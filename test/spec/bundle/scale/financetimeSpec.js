@@ -129,6 +129,10 @@ techanModule('scale/financetime', function(specBuilder) {
             it('Then scale of first index should return min range', function() {
               expect(cloned(data[0])).toEqual(48);
             });
+
+            it('Then zoomable obtained with domain invoked without error', function() {
+              expect(cloned.zoomable().domain).not.toThrowError();
+            });
           });
 
           describe('And padding set to none', function() {
