@@ -1,9 +1,9 @@
 /*
- TechanJS v0.5.0
+ TechanJS v0.6.0-0
  (c) 2014 - 2015 Andre Dumas | https://github.com/andredumas/techan.js
 */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.5.0';
+'use strict';module.exports='0.6.0-0';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -2789,6 +2789,13 @@ module.exports = function() {
 },{}],38:[function(require,module,exports){
 'use strict';
 
+var _d3;
+
+// If running in browser (window !undefined), assume d3 available
+if('undefined' != typeof window) _d3 = window.d3;
+else if('object' == typeof module) _d3 = require('d3'); // else we're in the only other supported mode: v8/node
+else throw "Unsupported runtime environment: Could not find d3. Ensure defined globally on window, or available as dependency.";
+
 module.exports = (function(d3) {
   return {
     version: require('../build/version'),
@@ -2797,8 +2804,8 @@ module.exports = (function(d3) {
     plot: require('./plot')(d3),
     scale: require('./scale')(d3)
   };
-})(d3);
-},{"../build/version":1,"./accessor":4,"./indicator":15,"./plot":25,"./scale":36}],39:[function(require,module,exports){
+})(_d3);
+},{"../build/version":1,"./accessor":4,"./indicator":15,"./plot":25,"./scale":36,"d3":"d3"}],39:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {

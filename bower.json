@@ -1,5 +1,5 @@
 {
-  "name": "TechanJS",
+  "name": "techan",
   "main": "dist/techan.js",
   "ignore": [
     "Gruntfile.js",

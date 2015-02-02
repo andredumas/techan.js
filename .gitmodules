@@ -55,3 +55,6 @@
 [submodule "examples/scale/brush"]
 	path = examples/scale/brush
 	url = https://gist.github.com/a5acb93bae58f0805b53.git
+[submodule "examples/node/candlestick"]
+	path = examples/node/candlestick
+	url = https://gist.github.com/ad585d6d68cf8a894207.git

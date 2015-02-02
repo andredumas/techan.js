@@ -43,10 +43,16 @@ range of [static and interactive plots](http://bl.ocks.org/andredumas/edf630690c
 
 Download the latest release [https://github.com/andredumas/techan.js/releases/latest](https://github.com/andredumas/techan.js/releases/latest)
 
+### npm
+
+```
+npm install --save andredumas/techan.js
+```
+
 ### Bower Dependency
 
 ```
-"techanjs": "andredumas/techan.js"
+bower install --save andredumas/techan.js
 ```
 
 ### Build From Source

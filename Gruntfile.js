@@ -27,18 +27,21 @@ module.exports = function(grunt) {
     },
 
     watchify: {
+      options: {
+        debug: true,
+        callback: function(browserify) {
+          browserify.external('d3');
+          return browserify;
+        }
+      },
       dev: {
         options: {
-          debug: true,
           standalone: 'techan'
         },
         src: './src/techan.js',
         dest: '<%= clean.build %>/techan-bundle.js'
       },
       test: {
-        options: {
-          debug: true
-        },
         src: './test/spec/bundle/**/*.js',
         dest: '<%= clean.build %>/specs-bundle.js'
       }
@@ -49,7 +52,8 @@ module.exports = function(grunt) {
         options: {
           browserifyOptions: {
             standalone: 'techan'
-          }
+          },
+          external: ['d3']
         },
         src: './src/techan.js',
         dest: '<%= clean.dist %>/techan.js'
@@ -190,7 +194,7 @@ module.exports = function(grunt) {
     copy: {
       examples: {
         files: [
-          { expand: true, cwd: 'examples', src: ['**', '!**/*.html'], dest: '<%= clean.build %>/examples/' }
+          { expand: true, cwd: 'examples', src: ['**', '!**/*.html', '!**/node_modules/**'], dest: '<%= clean.build %>/examples/' }
         ]
       }
     },
@@ -204,7 +208,7 @@ module.exports = function(grunt) {
           ]
         },
         files: [
-          { expand: true, cwd: 'examples', src: '**/*.html', dest: '<%= clean.build %>/examples/' }
+          { expand: true, cwd: 'examples', src: ['**/*.html', '!**/node_modules/**'], dest: '<%= clean.build %>/examples/' }
         ]
       }
     }
