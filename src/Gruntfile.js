@@ -47,7 +47,7 @@ module.exports = function(grunt) {
       },
       dist: {
         src: [
-          'bower_components/techanjs/dist/techan.min.js',
+          'bower_components/techan/dist/techan.min.js',
           '<%= uglify.dist.dest %>'
         ],
         dest: 'dist/site.js'
@@ -61,7 +61,7 @@ module.exports = function(grunt) {
 
     jasmine: {
       options: {
-        vendor: ['bower_components/d3/d3.js', 'bower_components/techanjs/dist/techan.js'],
+        vendor: ['bower_components/d3/d3.js', 'bower_components/techan/dist/techan.js'],
         keepRunner: true
       },
       dest: {
@@ -99,7 +99,7 @@ module.exports = function(grunt) {
           {
             expand: true,
             flatten: true,
-            src: 'bower_components/techanjs/dist/*',
+            src: 'bower_components/techan/dist/*',
             dest: '../'
           }
           // TODO Copy css
