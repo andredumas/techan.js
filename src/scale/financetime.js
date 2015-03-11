@@ -212,7 +212,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
       intraDayFormat = d3_time.format.multi([
         [":%S", function(d) { return d.getSeconds(); }],
         ["%I:%M", function(d) { return d.getMinutes(); }],
-        ["%I %p", function(d) { return d.getHours(); }]
+        ["%I %p", function (d) { return true; }]
       ]),
       genericTickMethod = [d3_time.second, 1, d3_time.format.multi([
           [":%S", function(d) { return d.getSeconds(); }],
