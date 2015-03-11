@@ -513,6 +513,7 @@ techanModule('scale/financetime', function(specBuilder) {
             it('Then tickFormat should be intraday format', function() {
               expect(financetime.tickFormat()(new Date(1000))).toEqual(':01');
               expect(financetime.tickFormat()(new Date(2014, 1, 24, 9, 35))).toEqual('09:35');
+              expect(financetime.tickFormat()(new Date(2014, 1, 1, 0, 0, 0, 0))).toEqual('12 AM');
             });
           });
 
