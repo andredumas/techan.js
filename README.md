@@ -88,3 +88,21 @@ built techanjs and bower obtained d3 but **be aware** that the examples are buil
 stable version of techanjs located at [http://techanjs.org/techan.min.js](http://techanjs.org/techan.min.js). Expect that
 HEAD of master will contain unstable features under development. They may not always be compatible with all
 the examples. I will attempt to keep the release tags functional together with correctly referenced examples.
+
+### Docker (Experimental)
+
+Run techan.js in a consistent environment using Docker. This is experimental and for now is only used to assist debugging
+environment build issues.
+
+**NOTE:** On build the project is copied into the docker image and as such any changes made will not be refreshed into a
+running container.
+
+
+```shell
+git clone --recursive https://github.com/andredumas/techan.js.git
+cd techan.js
+docker build -t techan.js .
+docker run --rm -it -p 8000:8000 techan.js
+```
+
+As above, browse to [http://localhost:8000/examples/](http://localhost:8000/examples/) to see the examples.
