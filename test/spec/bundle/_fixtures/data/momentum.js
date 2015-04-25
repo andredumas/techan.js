@@ -1,1 +1,1 @@
-module.exports = [{ date: new Date("2014-03-05"), momentum: -1.06 }];
+module.exports = [{ date: new Date(2014, 2, 5), momentum: -1.06 }];

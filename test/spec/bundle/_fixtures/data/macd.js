@@ -1,8 +1,8 @@
 module.exports = {
   plot: [
-    { date: new Date("2014-03-05"), macd: 0.11, signal: 0.27, difference: -0.16, zero: 0 },
-    { date: new Date("2014-03-06"), macd: -0.12, signal: -0.09, difference: -0.02, zero: 0 },
-    { date: new Date("2014-03-07"), macd: -0.03, signal: -0.13, difference: 0.10, zero: 0 }
+    { date: new Date(2014, 2, 5), macd: 0.11, signal: 0.27, difference: -0.16, zero: 0 },
+    { date: new Date(2014, 2, 6), macd: -0.12, signal: -0.09, difference: -0.02, zero: 0 },
+    { date: new Date(2014, 2, 7), macd: -0.03, signal: -0.13, difference: 0.10, zero: 0 }
   ],
   input: [
     { date: new Date(0), close: 459.99 },

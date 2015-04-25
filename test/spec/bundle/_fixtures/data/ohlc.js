@@ -1,21 +1,22 @@
 'use strict';
 
-var ohlc = {};
+var date = require('../../_util/date'),
+    ohlc = {};
 
 module.exports = ohlc;
 
 ohlc.alternating = {
-  up: { date: new Date("2014-03-05"), open: 1, high: 1.5, low: 0.5, close: 1.1, volume: 10},
-  down: { date: new Date("2014-03-06"), open: 1.1, high: 1.5, low: 0.5, close: 1, volume: 100},
-  even: { date: new Date("2014-03-07"), open: 1, high: 1.5, low: 0.5, close: 1, volume: 1}
+  up: { date: new Date(2014, 2, 5), open: 1, high: 1.5, low: 0.5, close: 1.1, volume: 10},
+  down: { date: new Date(2014, 2, 6), open: 1.1, high: 1.5, low: 0.5, close: 1, volume: 100},
+  even: { date: new Date(2014, 2, 7), open: 1, high: 1.5, low: 0.5, close: 1, volume: 1}
 };
 
 ohlc.alternating.array = [ohlc.alternating.up, ohlc.alternating.down, ohlc.alternating.even];
 
 ohlc.invalidvolume = {
-  up: { date: new Date("2014-03-05"), open: 1, high: 1.5, low: 0.5, close: 1.1, volume: "not valid"},
-  down: { date: new Date("2014-03-06"), open: 1.1, high: 1.5, low: 0.5, close: 1, volume: undefined },
-  even: { date: new Date("2014-03-07"), open: 1, high: 1.5, low: 0.5, close: 1, volume: 1}
+  up: { date: new Date(2014, 2, 5), open: 1, high: 1.5, low: 0.5, close: 1.1, volume: "not valid"},
+  down: { date: new Date(2014, 2, 6), open: 1.1, high: 1.5, low: 0.5, close: 1, volume: undefined },
+  even: { date: new Date(2014, 2, 7), open: 1, high: 1.5, low: 0.5, close: 1, volume: 1}
 };
 
 ohlc.invalidvolume.array = [ohlc.invalidvolume.up, ohlc.invalidvolume.down, ohlc.invalidvolume.even];
@@ -474,10 +475,8 @@ ohlc.facebook = [
   ["2012-05-21",36.53,36.66,33,34.03,168192700],
   ["2012-05-18",42.05,45,38,38.23,573576400]
 ].map(function(d) {
-    var date = new Date(d[0]);
-    date.setHours(0,0,0,0);
     return {
-      date: date,
+      date: date.parse(d[0]),
       open: d[1],
       high: d[2],
       low: d[3],

@@ -1,7 +1,7 @@
 module.exports = {
   plot: [
-    { date: new Date("2014-03-05"), up: 2, down: null },
-    { date: new Date("2014-03-06"), up: null, down: 3 }
+    { date: new Date(2014, 2, 5), up: 2, down: null },
+    { date: new Date(2014, 2, 6), up: null, down: 3 }
   ],
   input: require('./ohlc').facebook.slice(31, 50),
   expected: [

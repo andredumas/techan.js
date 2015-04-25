@@ -105,7 +105,7 @@ techanModule('plot/trendline', function(specBuilder) {
             datum;
 
         beforeEach(function() {
-          trendline.xScale().domain([data[0].start.date, data[0].end.date, new Date("2014-03-08")])
+          trendline.xScale().domain([data[0].start.date, data[0].end.date, new Date(2014, 2, 8)])
             .range([0.48, 3.52]);
           datum = {
             start: { date: trendline.xScale().domain()[0], value: 10 },
