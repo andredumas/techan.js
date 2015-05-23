@@ -12,6 +12,6 @@
     "examples"
   ],
   "dependencies": {
-    "d3": "~3.5.3"
+    "d3": "~3.5.5"
   }
 }

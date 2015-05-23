@@ -9,7 +9,16 @@ module.exports = function(grunt) {
         ' TechanJS v<%= pkg.version %>\n' +
         " (c) 2014 - <%= grunt.template.today('yyyy') %> Andre Dumas | https://github.com/andredumas/techan.js\n" +
         '*/',
-      dist: 'techan-<%= pkg.version %>'
+      dist: 'techan-<%= pkg.version %>',
+      dep: {
+        d3: 'bower_components/d3/d3.js'
+      },
+      src: {
+        test: {
+          common: 'test/spec/common/**/*.js',
+          standalone: 'test/spec/standalone/**/*.js'
+        }
+      }
     },
 
     clean: {
@@ -122,30 +131,27 @@ module.exports = function(grunt) {
 
     karma: {
       options: {
-        configFile: 'karma.conf.js',
-        files: ['bower_components/d3/d3.js', 'test/spec/common/**/*.js']
+        configFile: 'karma.conf.js'
       },
       watch: {
         background: true,
         singleRun: false,
-        options: {
-          files: ['<%= karma.options.files %>', '<%= watchify.test.dest %>'] // Single browserify bundle that includes src under test
+        files: {
+          src: ['<%= config.dep.d3 %>', '<%= config.src.test.common %>', '<%= watchify.test.dest %>'] // Single browserify bundle that includes src under test
         }
       },
       test: {
         //background: true,
-        options: {
-          files: ['<%= karma.options.files %>', '<%= watchify.test.dest %>'] // Single browserify bundle that includes src under test
-        }
+        files: '<%= karma.watch.files %>'
       },
       dist: {
-        options: {
-          files: ['<%= karma.options.files %>', '<%= browserify.dist.dest %>', 'test/spec/standalone/**/*.js']
+        files: {
+          src: ['<%= config.dep.d3 %>', '<%= config.src.test.common %>', '<%= browserify.dist.dest %>', '<%= config.src.test.standalone %>']
         }
       },
       minify: {
-        options: {
-          files: ['<%= karma.options.files %>', '<%= uglify.dist.dest %>', 'test/spec/standalone/**/*.js']
+        files: {
+          src: ['<%= config.dep.d3 %>', '<%= config.src.test.common %>', '<%= uglify.dist.dest %>', '<%= config.src.test.standalone %>']
         }
       }
     },
