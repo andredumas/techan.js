@@ -1,5 +1,6 @@
 .grunt
 .idea
+.project
 .vagrant
 *.iml
 bower_components
