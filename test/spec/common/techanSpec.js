@@ -38,6 +38,14 @@ function techanSpec(techan) {
       expect(techan.accessor.ohlc()).toBeDefined();
     });
 
+    it('Then techan.accessor.tick should be defined', function () {
+      expect(techan.accessor.tick).toBeDefined();
+    });
+
+    it('Then techan.accessor.tick can be constructed', function () {
+      expect(techan.accessor.tick()).toBeDefined();
+    });
+
     it('Then techan.accessor.macd should be defined', function () {
       expect(techan.accessor.macd).toBeDefined();
     });
@@ -236,6 +244,14 @@ function techanSpec(techan) {
 
     it('Then techan.plot.ohlc can be constructed', function () {
       expect(techan.plot.ohlc()).toBeDefined();
+    });
+
+    it('Then techan.plot.tick should be defined', function () {
+      expect(techan.plot.tick).toBeDefined();
+    });
+
+    it('Then techan.plot.tick can be constructed', function () {
+      expect(techan.plot.tick()).toBeDefined();
     });
 
     it('Then techan.plot.rsi should be defined', function () {
