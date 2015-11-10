@@ -39,7 +39,7 @@ techanModule('accessor', function(specBuilder) {
         expect(scope.accessor.volume).toBeDefined();
       });
 
-      it('Then accessor.spread should be defined', function() {
+      it('Then accessor.tick should be defined', function() {
         expect(scope.accessor.tick).toBeDefined();
       });
     });
