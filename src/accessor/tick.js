@@ -7,7 +7,7 @@ module.exports = function() {
       spread = function(d) { return d.spread; };
 
   function accessor(d) {
-    return accessor.c(d);
+    bind();
   }
 
   // TODO use d3.rebind to obtain this from 'super class'
@@ -36,7 +36,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.h = high;
     accessor.l = low;
