@@ -17,6 +17,7 @@ module.exports = function(d3) {
     ema: line(accessor.value, plot, plotMixin),
     ichimoku: require('./ichimoku')(d3.svg.area, accessor.ichimoku, plot, plotMixin),
     ohlc: require('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
+    tick: require('./tick')(d3.scale.linear, d3.extent, accessor.tick, plot, plotMixin),
     close: line(accessor.ohlc, plot, plotMixin),
     volume: require('./volume')(accessor.volume, plot, plotMixin),
     rsi: require('./rsi')(accessor.rsi, plot, plotMixin),

@@ -78,6 +78,10 @@ techanModule('plot', function(specBuilder) {
       it('Then plot.volume should be defined', function() {
         expect(bucket.plot.volume).toBeDefined();
       });
+
+      it('Then plot.tick should be defined', function() {
+        expect(bucket.plot.tick).toBeDefined();
+      });
     });
   });
 });

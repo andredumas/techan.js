@@ -38,6 +38,10 @@ techanModule('accessor', function(specBuilder) {
       it('Then accessor.volume should be defined', function() {
         expect(scope.accessor.volume).toBeDefined();
       });
+
+      it('Then accessor.tick should be defined', function() {
+        expect(scope.accessor.tick).toBeDefined();
+      });
     });
   });
 });
