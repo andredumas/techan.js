@@ -13,6 +13,7 @@ module.exports = (function(d3) {
     accessor: require('./accessor')(),
     indicator: require('./indicator')(),
     plot: require('./plot')(d3),
-    scale: require('./scale')(d3)
+    scale: require('./scale')(d3),
+    svg: require('./svg')(d3)
   };
 })(_d3);

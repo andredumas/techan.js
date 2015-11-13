@@ -290,6 +290,14 @@ function techanSpec(techan) {
       expect(techan.scale.financetime()).toBeDefined();
     });
 
+    it('Then techan.svg should be defined', function () {
+      expect(techan.svg).toBeDefined();
+    });
+
+    it('Then techan.svg.arrow can be constructed', function () {
+      expect(techan.svg.arrow()).toBeDefined();
+    });
+
     it('Then techan.undefinedControl should be undefined', function() {
       expect(techan.undefinedControl).not.toBeDefined();
     });

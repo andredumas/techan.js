@@ -1,6 +1,6 @@
 {
   "name": "techan",
-  "version": "0.6.0-2",
+  "version": "0.6.0-3",
   "main": "dist/techan.js",
   "repository": {
     "type": "git",

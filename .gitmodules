@@ -58,3 +58,6 @@
 [submodule "examples/node/candlestick"]
 	path = examples/node/candlestick
 	url = https://gist.github.com/ad585d6d68cf8a894207.git
+[submodule "examples/svg/arrow"]
+	path = examples/svg/arrow
+	url = https://gist.github.com/26f67acd490c4e48fe0e.git
