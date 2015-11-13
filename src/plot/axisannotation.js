@@ -140,7 +140,7 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
 
         return [
           'M', 0, value,
-          'l', neg*axis.innerTickSize(), -pt,
+          'l', neg*Math.max(axis.innerTickSize(), 1), -pt,
           'l', 0, -h,
           'l', neg*width, 0,
           'l', 0, height,
@@ -156,7 +156,7 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
 
         return [
           'M', value, 0,
-          'l', -pt, neg*axis.innerTickSize(),
+          'l', -pt, neg*Math.max(axis.innerTickSize(), 1),
           'l', -w, 0,
           'l', 0, neg*height,
           'l', width, 0,

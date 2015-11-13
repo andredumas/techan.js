@@ -303,6 +303,17 @@ techanModule('plot/axisannotation', function(specBuilder) {
             it('Then path attribute function execution should generate correct path', function() {
               expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 0 1 l -6 -4 l 0 -3 l -50 0 l 0 14 l 50 0 l 0 -3');
             });
+
+            describe('And inner tick is negative', function() {
+              beforeEach(function() {
+                axisannotation.axis().innerTickSize(-1);
+                axisannotation.refresh(spies.g);
+              });
+
+              it('Then path attribute function execution should generate correct path', function() {
+                expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 0 1 l -1 -4 l 0 -3 l -50 0 l 0 14 l 50 0 l 0 -3');
+              });
+            });
           });
 
           describe('And axis is right', function() {
@@ -332,6 +343,17 @@ techanModule('plot/axisannotation', function(specBuilder) {
 
             it('Then path attribute function execution should generate correct path', function() {
               expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 1 0 l -4 -6 l -21 0 l 0 -14 l 50 0 l 0 14 l -21 0');
+            });
+
+            describe('And inner tick is negative', function() {
+              beforeEach(function() {
+                axisannotation.axis().innerTickSize(-1);
+                axisannotation.refresh(spies.g);
+              });
+
+              it('Then path attribute function execution should generate correct path', function() {
+                expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 1 0 l -4 -1 l -21 0 l 0 -14 l 50 0 l 0 14 l -21 0');
+              });
             });
           });
 
