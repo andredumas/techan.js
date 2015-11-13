@@ -124,7 +124,8 @@ module.exports = function(grunt) {
         files: ['<%= jshint.dev.src %>', 'examples/**/*'],
         tasks: ['examples', 'dev'],
         options: {
-          reload: false
+          reload: false,
+          livereload: true
         }
       }
     },
@@ -194,7 +195,12 @@ module.exports = function(grunt) {
     },
 
     connect: {
-      server: {}
+      server: {
+        options: {
+          open: 'http://localhost:8000/build/examples/',
+          livereload: true
+        }
+      }
     },
 
     copy: {
@@ -210,7 +216,9 @@ module.exports = function(grunt) {
         options: {
           patterns: [
             { match: /http:\/\/d3js\.org\/d3\.v3\.min\.js/g, replacement: '/bower_components/d3/d3.js' },
-            { match: /http:\/\/techanjs\.org\/techan\.min\.js/g, replacement: '/<%= watchify.dev.dest %>' }
+            { match: /http:\/\/techanjs\.org\/techan\.min\.js/g, replacement: '/<%= watchify.dev.dest %>' },
+            // Append the livereload script to the end of the example files
+            { match: /^<\/script>/m, replacement: '</script>\n<script src="//localhost:35729/livereload.js"></script>' }
           ]
         },
         files: [
