@@ -61,3 +61,6 @@
 [submodule "examples/svg/arrow"]
 	path = examples/svg/arrow
 	url = https://gist.github.com/26f67acd490c4e48fe0e.git
+[submodule "examples/plot/tick"]
+	path = examples/plot/tick
+	url = https://gist.github.com/f6b6f776becc34b9c71a.git
