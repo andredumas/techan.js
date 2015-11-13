@@ -1,9 +1,9 @@
 /*
- TechanJS v0.6.0-1
+ TechanJS v0.6.0-3
  (c) 2014 - 2015 Andre Dumas | https://github.com/andredumas/techan.js
 */
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.techan=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.6.0-1';
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.techan = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';module.exports='0.6.0-3';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -2738,7 +2738,7 @@ function mapReduceFilter(data, map) {
     .reduce(function(a, b) { return a.concat(b); }) // Flatten
     .filter(function(d) { return d !== null; }); // Remove nulls
 }
-},{"../accessor":4,"../util":39,"./financetime":35,"./zoomable":37}],37:[function(require,module,exports){
+},{"../accessor":4,"../util":41,"./financetime":35,"./zoomable":37}],37:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2790,6 +2790,106 @@ module.exports = function() {
 },{}],38:[function(require,module,exports){
 'use strict';
 
+module.exports = function(d3_functor) {  // Injected dependencies
+  return function() {
+    var fx = d3_functor(0),
+        fy = d3_functor(0),
+        width = d3_functor(12),
+        height = d3_functor(15),
+        orient = d3_functor('up'),
+        tail = d3_functor(true);
+
+    function arrow(d, i) {
+      var path = [],
+          x = fx(d, i),
+          y = fy(d, i),
+          w = width(d, i),
+          h = height(d, i),
+          o = orient(d, i),
+          t = tail(d, i),
+          neg = o === 'left' || o === 'up' ? 1 : -1,
+          ws = w/3,         // Width Segment
+          pw = w/2,         // Point width
+          ph = t ? h/2 : h; // Point Height
+
+      path.push('M', x, y);
+
+      switch(o) {
+        case 'up':
+        case 'down':
+          path.push('l', -pw, neg*ph, 'l', ws, 0);
+          if(t) path.push('l', 0, neg*ph);
+          path.push('l', ws, 0);
+          if(t) path.push('l', 0, -neg*ph);
+          path.push('l', ws, 0);
+          break;
+
+        case 'left':
+        case 'right':
+          path.push('l', neg*ph, -pw, 'l', 0, ws);
+          if(t) path.push('l', neg*ph, 0);
+          path.push('l', 0, ws);
+          if(t) path.push('l', -neg*ph, 0);
+          path.push('l', 0, ws);
+          break;
+
+        default: throw "Unsupported arrow.orient() = " + orient;
+      }
+
+      path.push('z');
+      return path.join(' ');
+    }
+
+    arrow.x = function(_) {
+      if(!arguments.length) return fx;
+      fx = d3_functor(_);
+      return arrow;
+    };
+
+    arrow.y = function(_) {
+      if(!arguments.length) return fy;
+      fy = d3_functor(_);
+      return arrow;
+    };
+
+    arrow.height = function(_) {
+      if(!arguments.length) return height;
+      height = d3_functor(_);
+      return arrow;
+    };
+
+    arrow.width = function(_) {
+      if(!arguments.length) return width;
+      width = d3_functor(_);
+      return arrow;
+    };
+
+    arrow.orient = function(_) {
+      if(!arguments.length) return orient;
+      orient = d3_functor(_);
+      return arrow;
+    };
+
+    arrow.tail = function(_) {
+      if(!arguments.length) return tail;
+      tail = d3_functor(_);
+      return arrow;
+    };
+
+    return arrow;
+  };
+};
+},{}],39:[function(require,module,exports){
+'use strict';
+
+module.exports = function(d3) {
+  return {
+    arrow: require('./arrow')(d3.functor)
+  };
+};
+},{"./arrow":38}],40:[function(require,module,exports){
+'use strict';
+
 var _d3;
 
 // If running in browser (window !undefined), assume d3 available
@@ -2803,10 +2903,11 @@ module.exports = (function(d3) {
     accessor: require('./accessor')(),
     indicator: require('./indicator')(),
     plot: require('./plot')(d3),
-    scale: require('./scale')(d3)
+    scale: require('./scale')(d3),
+    svg: require('./svg')(d3)
   };
 })(_d3);
-},{"../build/version":1,"./accessor":4,"./indicator":15,"./plot":25,"./scale":36,"d3":"d3"}],39:[function(require,module,exports){
+},{"../build/version":1,"./accessor":4,"./indicator":15,"./plot":25,"./scale":36,"./svg":39,"d3":"d3"}],41:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -2838,5 +2939,5 @@ function doRebind(target, source, method, postSetCallback) {
     return value === source ? target : value;
   };
 }
-},{}]},{},[38])(38)
+},{}]},{},[40])(40)
 });
