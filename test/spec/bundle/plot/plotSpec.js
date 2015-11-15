@@ -1,7 +1,9 @@
 techanModule('plot/plot', function(specBuilder) {
   'use strict';
 
-  var techan = require('../../../../src/techan');
+  var techan = require('../../../../src/techan'),
+      domFixtures = require('../_fixtures/dom'),
+      data = require('../_fixtures/data/ohlc').alternating.array;
 
   var actualInit = function(module) {
     return module(d3.scale.linear, d3.select);
@@ -58,8 +60,58 @@ techanModule('plot/plot', function(specBuilder) {
           expect(plot.lineWidth(x, 2, 2)()).toBe(0.5);
         });
       });
-    });
 
-    // TODO Test group logic...
+      describe('And groupUpDownEqual invoked with default alternating (up,down,even) ohlc fixture', function() {
+        var grouping;
+
+        beforeEach(function() {
+          grouping = plot.groupUpDownEqual(data, techan.accessor.ohlc());
+        });
+
+        it('Then it should result in a single up item', function() {
+          expect(grouping.up.length).toEqual(1);
+          expect(grouping.up).toContain(data[0]);
+        });
+
+        it('Then it should result in a single down item', function() {
+          expect(grouping.down.length).toEqual(1);
+          expect(grouping.down).toContain(data[1]);
+        });
+
+        it('Then it should result in a single equal item', function() {
+          expect(grouping.equal.length).toEqual(1);
+          expect(grouping.equal).toContain(data[2]);
+        });
+      });
+
+      describe('And appendUpDownEqual invoked with default alternating (up,down,even) ohlc fixture', function() {
+        var g,
+            parent;
+
+        beforeEach(function() {
+          g = domFixtures.g([data]);
+          plot.appendUpDownEqual(g, techan.accessor.ohlc(), "test");
+          parent = g[0][0];
+        });
+
+        it('Then 3 nodes should be appended', function() {
+          expect(parent.childNodes.length).toEqual(3);
+        });
+
+        it('Then the first child element should be path.test.up', function() {
+          expect(parent.childNodes[0].nodeName.toLowerCase()).toEqual('path');
+          expect(parent.childNodes[0].className).toEqual('test up');
+        });
+        it('Then the second child element should be path.test.down', function() {
+          expect(parent.childNodes[1].nodeName.toLowerCase()).toEqual('path');
+          expect(parent.childNodes[1].className).toEqual('test down');
+        });
+
+        it('Then the third child element should be path.test.equal', function() {
+          expect(parent.childNodes[2].nodeName.toLowerCase()).toEqual('path');
+          expect(parent.childNodes[2].className).toEqual('test equal');
+        });
+      });
+    });
   });
 });

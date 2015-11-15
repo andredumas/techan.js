@@ -8,12 +8,11 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
         wickWidthGenerator;
 
     function candlestick(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d),
-          upDownEqual = plot.groupUpDownEqual(g.datum(), p.accessor);
+      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
       // 3x2 path's as wick and body can be styled slightly differently (stroke and fills)
-      plot.appendUpDownEqual(group.selection, p.accessor, ['candle', 'body'], upDownEqual);
-      plot.appendUpDownEqual(group.selection, p.accessor, ['candle', 'wick'], upDownEqual);
+      plot.appendUpDownEqual(group.selection, p.accessor, ['candle', 'body']);
+      plot.appendUpDownEqual(group.selection, p.accessor, ['candle', 'wick']);
 
       candlestick.refresh(g);
     }
