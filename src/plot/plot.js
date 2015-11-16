@@ -31,35 +31,30 @@ module.exports = function(d3_svg_line, d3_select) {
     return line;
   }
 
-  function up(accessor, d) {
-    return accessor.o(d) < accessor.c(d);
+  function upDownEqual(accessor) {
+    return {
+      up: function(d) { return accessor.o(d) < accessor.c(d); },
+      down: function(d) { return accessor.o(d) > accessor.c(d); },
+      equal: function(d) { return accessor.o(d) === accessor.c(d); }
+    };
   }
 
-  function down(accessor, d) {
-    return accessor.o(d) > accessor.c(d);
-  }
-
-  function groupUpDownEqual(data, accessor) {
-    return data.reduce(function(result, d) {
-      if (up(accessor, d)) result.up.push(d);
-      else if (down(accessor, d)) result.down.push(d);
-      else result.equal.push(d);
-      return result;
-    }, { up: [], down: [], equal: [] });
-  }
-
-  function appendUpDownEqual(g, accessor, plotName, upDownEqual) {
+  function appendPathsGroupBy(g, accessor, plotName, classes) {
     var plotNames = plotName instanceof Array ? plotName : [plotName];
 
-    upDownEqual = upDownEqual || groupUpDownEqual(g.datum(), accessor);
+    classes = classes || upDownEqual(accessor);
 
-    appendPlotType(g, upDownEqual.up, plotNames, 'up');
-    appendPlotType(g, upDownEqual.down, plotNames, 'down');
-    appendPlotType(g, upDownEqual.equal, plotNames, 'equal');
+    Object.keys(classes).forEach(function(key) {
+      appendPlotTypePath(g, classes[key], plotNames, key);
+    });
   }
 
-  function appendPlotType(g, data, plotNames, direction) {
-    g.selectAll('path.' + plotNames.join('.') + '.' + direction).data([data])
+  function appendPathsUpDownEqual(g, accessor, plotName) {
+    appendPathsGroupBy(g, accessor, plotName, upDownEqual(accessor));
+  }
+
+  function appendPlotTypePath(g, data, plotNames, direction) {
+    g.selectAll('path.' + plotNames.join('.') + '.' + direction).data(function(d) { return [d.filter(data)]; })
       .enter().append('path').attr('class', plotNames.join(' ') + ' ' + direction);
   }
 
@@ -86,9 +81,9 @@ module.exports = function(d3_svg_line, d3_select) {
       };
     },
 
-    groupUpDownEqual: groupUpDownEqual,
+    appendPathsGroupBy: appendPathsGroupBy,
 
-    appendUpDownEqual: appendUpDownEqual,
+    appendPathsUpDownEqual: appendPathsUpDownEqual,
 
     horizontalPathLine: function(accessor_date, x, accessor_value, y) {
       return function(d) {

@@ -8,7 +8,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
     function volume(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
-      if(p.accessor.o && p.accessor.c) plot.appendUpDownEqual(group.selection, p.accessor, 'volume');
+      if(p.accessor.o && p.accessor.c) plot.appendPathsUpDownEqual(group.selection, p.accessor, 'volume');
       else group.entry.append('path').attr('class', 'volume');
 
       volume.refresh(g);

@@ -61,36 +61,13 @@ techanModule('plot/plot', function(specBuilder) {
         });
       });
 
-      describe('And groupUpDownEqual invoked with default alternating (up,down,even) ohlc fixture', function() {
-        var grouping;
-
-        beforeEach(function() {
-          grouping = plot.groupUpDownEqual(data, techan.accessor.ohlc());
-        });
-
-        it('Then it should result in a single up item', function() {
-          expect(grouping.up.length).toEqual(1);
-          expect(grouping.up).toContain(data[0]);
-        });
-
-        it('Then it should result in a single down item', function() {
-          expect(grouping.down.length).toEqual(1);
-          expect(grouping.down).toContain(data[1]);
-        });
-
-        it('Then it should result in a single equal item', function() {
-          expect(grouping.equal.length).toEqual(1);
-          expect(grouping.equal).toContain(data[2]);
-        });
-      });
-
       describe('And appendUpDownEqual invoked with default alternating (up,down,even) ohlc fixture', function() {
         var g,
             parent;
 
         beforeEach(function() {
           g = domFixtures.g([data]);
-          plot.appendUpDownEqual(g, techan.accessor.ohlc(), "test");
+          plot.appendPathsUpDownEqual(g, techan.accessor.ohlc(), "grouping-test");
           parent = g[0][0];
         });
 
@@ -100,16 +77,16 @@ techanModule('plot/plot', function(specBuilder) {
 
         it('Then the first child element should be path.test.up', function() {
           expect(parent.childNodes[0].nodeName.toLowerCase()).toEqual('path');
-          expect(parent.childNodes[0].className).toEqual('test up');
+          expect(parent.childNodes[0].className).toEqual('grouping-test up');
         });
         it('Then the second child element should be path.test.down', function() {
           expect(parent.childNodes[1].nodeName.toLowerCase()).toEqual('path');
-          expect(parent.childNodes[1].className).toEqual('test down');
+          expect(parent.childNodes[1].className).toEqual('grouping-test down');
         });
 
         it('Then the third child element should be path.test.equal', function() {
           expect(parent.childNodes[2].nodeName.toLowerCase()).toEqual('path');
-          expect(parent.childNodes[2].className).toEqual('test equal');
+          expect(parent.childNodes[2].className).toEqual('grouping-test equal');
         });
       });
     });

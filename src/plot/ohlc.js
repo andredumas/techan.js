@@ -9,7 +9,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     function ohlc(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
-      plot.appendUpDownEqual(group.selection, p.accessor, 'ohlc');
+      plot.appendPathsUpDownEqual(group.selection, p.accessor, 'ohlc');
 
       ohlc.refresh(g);
     }
