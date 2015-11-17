@@ -6,9 +6,11 @@ module.exports = function(d3) {
       plot = require('./plot')(d3.svg.line, d3.select),
       plotMixin = require('./plotmixin')(d3.scale.linear, scale.financetime),
       line = require('./line'),
-      axisannotation = require('./axisannotation')(d3.svg.axis, accessor.value, plot, plotMixin);
+      axisannotation = require('./axisannotation')(d3.svg.axis, accessor.value, plot, plotMixin),
+      svg = require('../svg')(d3);
 
   return {
+    tradearrow: require('./tradearrow')(d3.select, d3.functor, d3.mouse, d3.dispatch, accessor.trade, plot, plotMixin, svg.arrow),
     atr: line(accessor.value, plot, plotMixin),
     atrtrailingstop: require('./atrtrailingstop')(accessor.atrtrailingstop, plot, plotMixin),
     axisannotation: axisannotation,

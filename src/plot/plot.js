@@ -110,9 +110,22 @@ module.exports = function(d3_svg_line, d3_select) {
       };
     },
 
+    /**
+     * @deprecated Plots should have access to their own state (including barWidth for #13), and start using simpleJoinPath (which will be renamed)
+     */
     joinPath: function(accessor, x, y, path) {
       return function(data) {
         return data.map(path(accessor, x, y, barWidth)).join(' ');
+      };
+    },
+
+    /**
+     * Similar to above but expects only a function passed, implying all state is contained within the function.
+     * @param path A path generator constructor function that will construct a function that takes data point and returns a path
+     */
+    simpleJoinPath: function(path) {
+      return function(data) {
+        return data.map(path()).join(' ');
       };
     },
 

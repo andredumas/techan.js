@@ -12,6 +12,7 @@ module.exports = function() {
     trendline: require('./trendline'),
     value: require('./value'),
     volume: require('./volume'),
-    tick: require('./tick')
+    tick: require('./tick'),
+    trade: require('./trade')
   };
 };

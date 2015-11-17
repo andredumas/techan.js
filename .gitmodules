@@ -64,3 +64,6 @@
 [submodule "examples/plot/tick"]
 	path = examples/plot/tick
 	url = https://gist.github.com/f6b6f776becc34b9c71a.git
+[submodule "examples/plot/tradearrow"]
+	path = examples/plot/tradearrow
+	url = https://gist.github.com/3c0eefdd77a6380b1a35.git
