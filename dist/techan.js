@@ -1243,8 +1243,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
       // 3x2 path's as wick and body can be styled slightly differently (stroke and fills)
-      plot.appendUpDownEqual(group.selection, p.accessor, ['candle', 'body']);
-      plot.appendUpDownEqual(group.selection, p.accessor, ['candle', 'wick']);
+      plot.appendPathsUpDownEqual(group.selection, p.accessor, ['candle', 'body']);
+      plot.appendPathsUpDownEqual(group.selection, p.accessor, ['candle', 'wick']);
 
       candlestick.refresh(g);
     }
@@ -1713,7 +1713,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     function ohlc(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
-      plot.appendUpDownEqual(group.selection, p.accessor, 'ohlc');
+      plot.appendPathsUpDownEqual(group.selection, p.accessor, 'ohlc');
 
       ohlc.refresh(g);
     }
@@ -1786,35 +1786,30 @@ module.exports = function(d3_svg_line, d3_select) {
     return line;
   }
 
-  function up(accessor, d) {
-    return accessor.o(d) < accessor.c(d);
+  function upDownEqual(accessor) {
+    return {
+      up: function(d) { return accessor.o(d) < accessor.c(d); },
+      down: function(d) { return accessor.o(d) > accessor.c(d); },
+      equal: function(d) { return accessor.o(d) === accessor.c(d); }
+    };
   }
 
-  function down(accessor, d) {
-    return accessor.o(d) > accessor.c(d);
-  }
-
-  function groupUpDownEqual(data, accessor) {
-    return data.reduce(function(result, d) {
-      if (up(accessor, d)) result.up.push(d);
-      else if (down(accessor, d)) result.down.push(d);
-      else result.equal.push(d);
-      return result;
-    }, { up: [], down: [], equal: [] });
-  }
-
-  function appendUpDownEqual(g, accessor, plotName, upDownEqual) {
+  function appendPathsGroupBy(g, accessor, plotName, classes) {
     var plotNames = plotName instanceof Array ? plotName : [plotName];
 
-    upDownEqual = upDownEqual || groupUpDownEqual(g.datum(), accessor);
+    classes = classes || upDownEqual(accessor);
 
-    appendPlotType(g, upDownEqual.up, plotNames, 'up');
-    appendPlotType(g, upDownEqual.down, plotNames, 'down');
-    appendPlotType(g, upDownEqual.equal, plotNames, 'equal');
+    Object.keys(classes).forEach(function(key) {
+      appendPlotTypePath(g, classes[key], plotNames, key);
+    });
   }
 
-  function appendPlotType(g, data, plotNames, direction) {
-    g.selectAll('path.' + plotNames.join('.') + '.' + direction).data([data])
+  function appendPathsUpDownEqual(g, accessor, plotName) {
+    appendPathsGroupBy(g, accessor, plotName, upDownEqual(accessor));
+  }
+
+  function appendPlotTypePath(g, data, plotNames, direction) {
+    g.selectAll('path.' + plotNames.join('.') + '.' + direction).data(function(d) { return [d.filter(data)]; })
       .enter().append('path').attr('class', plotNames.join(' ') + ' ' + direction);
   }
 
@@ -1841,9 +1836,9 @@ module.exports = function(d3_svg_line, d3_select) {
       };
     },
 
-    groupUpDownEqual: groupUpDownEqual,
+    appendPathsGroupBy: appendPathsGroupBy,
 
-    appendUpDownEqual: appendUpDownEqual,
+    appendPathsUpDownEqual: appendPathsUpDownEqual,
 
     horizontalPathLine: function(accessor_date, x, accessor_value, y) {
       return function(d) {
@@ -2332,7 +2327,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
     function volume(g) {
       var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
 
-      if(p.accessor.o && p.accessor.c) plot.appendUpDownEqual(group.selection, p.accessor, 'volume');
+      if(p.accessor.o && p.accessor.c) plot.appendPathsUpDownEqual(group.selection, p.accessor, 'volume');
       else group.entry.append('path').attr('class', 'volume');
 
       volume.refresh(g);
@@ -2683,7 +2678,16 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     return function(d) {
       var value = visibleDomainLookup[+d];
       if (value !== undefined) return visibleDomain[value];
-      return visibleDomain[d3_bisect(visibleDomain, d)];
+      var index = d3_bisect(visibleDomain, d);
+      if (index > 0) {
+        // d3_bisect gets the index of the closest value that is the greater than d,
+        // which may not be the value that is closest to d.
+        // If the closest value that is smaller than d is closer, choose that instead.
+        if ((+d - (+visibleDomain[index-1])) < (+visibleDomain[index] - +d)) {
+          index--;
+        }
+      }
+      return visibleDomain[index];
     };
   }
 
