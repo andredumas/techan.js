@@ -8,3 +8,4 @@ build
 dist/*.zip
 node_modules
 test/html/gist
+npm-debug.log
