@@ -110,7 +110,8 @@ module.exports = function(grunt) {
     connect: {
       server: {
         options: {
-          base: '../'
+          base: '../',
+          open: 'http://localhost:8000/'
         }
       }
     }

@@ -5,4 +5,4 @@ author:       André Dumas
 
 markdown:     kramdown
 permalink:    pretty
-exclude:      [Vagrantfile, README.md, src, CNAME]
+exclude:      [Vagrantfile, README.md, src, CNAME, serve]
