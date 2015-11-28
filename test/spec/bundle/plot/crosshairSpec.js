@@ -16,7 +16,7 @@ techanModule('plot/crosshair', function(specBuilder) {
     spies.d3_select = jasmine.createSpy('d3_select');
 
     var plot = require('../../../../src/plot/plot')(d3.svg.line, spies.d3_select),
-        plotmixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
+        plotmixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, d3.functor, techan.scale.financetime);
     spies.d3_mouse = jasmine.createSpy('d3_mouse');
     return crosshair(d3.select, d3.event, spies.d3_mouse, d3.dispatch, plot, plotmixin);
   };

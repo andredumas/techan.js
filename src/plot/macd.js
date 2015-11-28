@@ -23,13 +23,34 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
     };
 
     function binder() {
-      differenceGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, differencePath);
+      differenceGenerator = plot.joinPath(differencePath);
       macdLine.init(p.accessor.d, p.xScale, p.accessor.m, p.yScale);
       signalLine.init(p.accessor.d, p.xScale, p.accessor.s, p.yScale);
     }
 
+    function differencePath() {
+      var accessor = p.accessor,
+        x = p.xScale,
+        y = p.yScale,
+        width = p.width(x),
+        r = plot.r;
+
+      return function(d) {
+        var zero = y(0),
+          height = y(accessor.dif(d)) - zero,
+          xValue = x(accessor.d(d)) - width/2;
+
+        return [
+          'M', xValue, zero,
+          'l', 0, height,
+          'l', width, 0,
+          'l', 0, -height
+        ].join(' ');
+      };
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(macd, p).plot(accessor_macd(), binder);
+    plotMixin(macd, p).plot(accessor_macd(), binder).width(binder);
     binder();
 
     return macd;
@@ -41,20 +62,4 @@ function refresh(g, accessor, x, y, plot, differenceGenerator, macdLine, signalL
   g.selectAll('path.zero').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.z, y));
   g.selectAll('path.macd').attr('d', macdLine);
   g.selectAll('path.signal').attr('d', signalLine);
-}
-
-function differencePath(accessor, x, y, barWidth) {
-  return function(d) {
-    var zero = y(0),
-        height = y(accessor.dif(d)) - zero,
-        rangeBand = barWidth(x),
-        xValue = x(accessor.d(d)) - rangeBand/2;
-
-    return [
-        'M', xValue, zero,
-        'l', 0, height,
-        'l', rangeBand, 0,
-        'l', 0, -height
-      ].join(' ');
-  };
 }

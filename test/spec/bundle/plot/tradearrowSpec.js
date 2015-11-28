@@ -14,7 +14,7 @@ techanModule('plot/tradearrow', function(specBuilder) {
     spies.d3_mouse = jasmine.createSpy('d3_mouse');
 
     var plot = require('../../../../src/plot/plot')(d3.svg.line, spies.d3_select),
-        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
+        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, d3.functor, techan.scale.financetime);
 
     return tradearrow(d3.select, d3.functor, spies.d3_mouse, d3.dispatch, techan.accessor.trade, plot, plotMixin, techan.svg.arrow);
   };

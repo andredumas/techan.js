@@ -4,7 +4,7 @@ techanModule('plot/plotmixin', function(specBuilder) {
   var techan = require('../../../../src/techan');
 
   var actualInit = function(module) {
-    return module(d3.scale.linear, techan.scale.financetime);
+    return module(d3.scale.linear, d3.functor, techan.scale.financetime);
   };
 
   specBuilder.require(require('../../../../src/plot/plotmixin'), function(instanceBuilder) {
@@ -54,6 +54,10 @@ techanModule('plot/plotmixin', function(specBuilder) {
 
         it('Then the plot mixin private member accessor should equal the set value accessor', function () {
           expect(priv.accessor).toEqual(accessor);
+        });
+
+        it('Then the plot mixin private member width should not be defined', function() {
+          expect(priv.width).not.toBeDefined();
         });
 
         it('Then the plot mixin private member on should not be defined', function() {

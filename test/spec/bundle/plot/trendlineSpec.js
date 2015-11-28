@@ -15,7 +15,7 @@ techanModule('plot/trendline', function(specBuilder) {
     spies.d3_select = jasmine.createSpy('d3_select');
 
     var plot = require('../../../../src/plot/plot')(d3.svg.line, spies.d3_select),
-        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
+        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, d3.functor, techan.scale.financetime);
 
     return trendline(d3.behavior.drag, spies.d3_event, spies.d3_select, d3.dispatch, techan.accessor.trendline, plot, plotMixin);
   };

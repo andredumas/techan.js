@@ -12,7 +12,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
   };
 
   var mockInit = function(axisannotation) {
-    var plotmixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime);
+    var plotmixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, d3.functor, techan.scale.financetime);
     return axisannotation(d3.svg.axis, techan.accessor.value, spies.plot, plotmixin);
   };
 

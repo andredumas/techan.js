@@ -19,32 +19,37 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     };
 
     function binder() {
-      ohlcGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, ohlcPath);
+      ohlcGenerator = plot.joinPath(ohlcPath);
       lineWidthGenerator = plot.lineWidth(p.xScale, 1, 2);
     }
 
+    function ohlcPath() {
+      var accessor = p.accessor,
+        x = p.xScale,
+        y = p.yScale,
+        width = p.width(x),
+        r = plot.r;
+
+      return function(d) {
+        var open = y(accessor.o(d)),
+            close = y(accessor.c(d)),
+            xPoint = x(accessor.d(d)),
+            xValue = xPoint - width/2;
+
+        return [
+          'M', xValue, open,
+          'l', width/2, 0,
+          'M', xPoint, y(accessor.h(d)),
+          'L', xPoint, y(accessor.l(d)),
+          'M', xPoint, close,
+          'l', width/2, 0
+        ].join(' ');
+      };
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(ohlc, p).plot(accessor_ohlc(), binder);
+    plotMixin(ohlc, p).plot(accessor_ohlc(), binder).width(binder);
 
     return ohlc;
   };
 };
-
-function ohlcPath(accessor, x, y, barWidth) {
-  return function(d) {
-    var open = y(accessor.o(d)),
-        close = y(accessor.c(d)),
-        rangeBand = barWidth(x),
-        xPoint = x(accessor.d(d)),
-        xValue = xPoint - rangeBand/2;
-
-    return [
-        'M', xValue, open,
-        'l', rangeBand/2, 0,
-        'M', xPoint, y(accessor.h(d)),
-        'L', xPoint, y(accessor.l(d)),
-        'M', xPoint, close,
-        'l', rangeBand/2, 0
-      ].join(' ');
-  };
-}

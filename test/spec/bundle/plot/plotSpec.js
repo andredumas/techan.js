@@ -89,6 +89,18 @@ techanModule('plot/plot', function(specBuilder) {
           expect(parent.childNodes[2].className).toEqual('grouping-test equal');
         });
       });
+
+      describe('And scale is a d3 time scale', function() {
+        var x;
+
+        beforeEach(function() {
+          x = d3.time.scale();
+        });
+
+        it('Then barWidth should return the default width', function() {
+          expect(plot.barWidth(x)).toBe(3);
+        });
+      });
     });
   });
 });

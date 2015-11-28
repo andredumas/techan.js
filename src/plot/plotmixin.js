@@ -3,12 +3,8 @@
 /**
  * Module allows optionally mixing in helper methods to plots such as xScale, yScale, accessor setters
  * and helpers for defining dispatching methods.
- *
- * @param d3_scale_linear
- * @param techan_scale_financetime
- * @returns {Function}
  */
-module.exports = function(d3_scale_linear, techan_scale_financetime) {
+module.exports = function(d3_scale_linear, d3_functor, techan_scale_financetime, plot_width) {
   return function(source, priv) {
     var plotMixin = {};
 
@@ -44,6 +40,19 @@ module.exports = function(d3_scale_linear, techan_scale_financetime) {
       source.accessor = function(_) {
         if (!arguments.length) return priv.accessor;
         priv.accessor = _;
+        if(binder) binder();
+        return source;
+      };
+
+      return plotMixin;
+    };
+
+    plotMixin.width = function(binder) {
+      priv.width = plot_width;
+
+      source.width = function(_) {
+        if (!arguments.length) return priv.width;
+        priv.width = d3_functor(_);
         if(binder) binder();
         return source;
       };

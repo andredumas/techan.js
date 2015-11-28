@@ -19,32 +19,36 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
     };
 
     function binder() {
-      volumeGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, volumePath);
+      volumeGenerator = plot.joinPath(volumePath);
+    }
+
+    function volumePath() {
+      var accessor = p.accessor,
+          x = p.xScale,
+          y = p.yScale,
+          width = p.width(x);
+
+      return function(d) {
+        var vol = accessor.v(d);
+
+        if(isNaN(vol)) return null;
+
+        var zero = y(0),
+          height = y(vol) - zero,
+          xValue = x(accessor.d(d)) - width/2;
+
+        return [
+          'M', xValue, zero,
+          'l', 0, height,
+          'l', width, 0,
+          'l', 0, -height
+        ].join(' ');
+      };
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(volume, p).plot(accessor_volume(), binder);
+    plotMixin(volume, p).plot(accessor_volume(), binder).width(binder);
 
     return volume;
   };
 };
-
-function volumePath(accessor, x, y, barWidth) {
-  return function(d) {
-    var vol = accessor.v(d);
-
-    if(isNaN(vol)) return null;
-
-    var zero = y(0),
-        height = y(vol) - zero,
-        rangeBand = barWidth(x),
-        xValue = x(accessor.d(d)) - rangeBand/2;
-
-    return [
-        'M', xValue, zero,
-        'l', 0, height,
-        'l', rangeBand, 0,
-        'l', 0, -height
-      ].join(' ');
-  };
-}

@@ -71,7 +71,7 @@ module.exports = function(d3_select, d3_functor, d3_mouse, d3_dispatch, accessor
 
     function binder() {
       svgArrow.x(function(d) { return p.xScale(p.accessor.d(d)); }).y(y);
-      arrowGenerator = plot.simpleJoinPath(function() { return svgArrow; });
+      arrowGenerator = plot.joinPath(function() { return svgArrow; });
       return tradearrow;
     }
 

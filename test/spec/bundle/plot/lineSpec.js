@@ -4,7 +4,7 @@ techanModule('plot/line', function(specBuilder) {
   var techan = require('../../../../src/techan'),
       data = require('./../_fixtures/data/line'),
       plot = require('../../../../src/plot/plot')(d3.svg.line),
-      plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, techan.scale.financetime),
+      plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, d3.functor, techan.scale.financetime),
       domFixtures = require('../_fixtures/dom');
 
   var actualInit = function(module) {
