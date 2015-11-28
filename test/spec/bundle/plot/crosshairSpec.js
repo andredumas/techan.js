@@ -312,11 +312,26 @@ techanModule('plot/crosshair', function(specBuilder) {
             });
 
             it('Then verticalPathLine should return empty on no data invoke', function() {
-              expect(verticalPathLine(null)).toEqual('M 0 0');
+              expect(verticalPathLine(null)).toBeNull();
             });
 
             it('Then verticalPathLine should return vertical line on data invoke', function() {
               expect(verticalPathLine(1)).toEqual('M 1 0 L 1 1');
+            });
+
+            describe('And the scale is zoomed to put domain outside the scale range', function() {
+              beforeEach(function() {
+                var zoomable = crosshair.xScale().zoomable();
+                zoomable.domain([0.1, 0.9]);
+              });
+
+              it('Then verticalPathLine should return empty on minimum item because out of range', function() {
+                expect(verticalPathLine(0)).toBeNull();
+              });
+
+              it('Then verticalPathLine should return empty on maximum item because out of range', function() {
+                expect(verticalPathLine(1)).toBeNull();
+              });
             });
 
             it('Then horizontalPathLine should be defined', function() {
@@ -324,7 +339,7 @@ techanModule('plot/crosshair', function(specBuilder) {
             });
 
             it('Then horizontalPathLine should return empty on no data invoke', function() {
-              expect(horizontalPathLine(null)).toEqual('M 0 0');
+              expect(horizontalPathLine(null)).toBeNull();
             });
 
             it('Then horizontalPathLine should return vertical line on data invoke', function() {
