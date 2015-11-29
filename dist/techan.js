@@ -1,9 +1,9 @@
 /*
- TechanJS v0.6.0-6
+ TechanJS v0.6.0-7
  (c) 2014 - 2015 Andre Dumas | https://github.com/andredumas/techan.js
 */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.techan = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.6.0-6';
+'use strict';module.exports='0.6.0-7';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -1302,75 +1302,83 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     };
 
     function binder() {
-      bodyPathGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, bodyPath);
-      wickGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, wickPath);
+      bodyPathGenerator = plot.joinPath(bodyPath);
+      wickGenerator = plot.joinPath(wickPath);
       wickWidthGenerator = plot.lineWidth(p.xScale, 1, 4);
     }
 
+    function bodyPath() {
+      var accessor = p.accessor,
+          x = p.xScale,
+          y = p.yScale,
+          width = p.width(x);
+
+      return function(d) {
+        var path = [],
+            open = y(accessor.o(d)),
+            close = y(accessor.c(d)),
+            xValue = x(accessor.d(d)) - width/2;
+
+        path.push(
+          'M', xValue, open,
+          'l', width, 0
+        );
+
+        // Draw body only if there is a body (there is no stroke, so will not appear anyway)
+        if(open != close) {
+          path.push(
+            'L', xValue + width, close,
+            'l', -width, 0,
+            'L', xValue, open
+          );
+        }
+
+        return path.join(' ');
+      };
+    }
+
+    function wickPath() {
+      var accessor = p.accessor,
+        x = p.xScale,
+        y = p.yScale,
+        width = p.width(x);
+
+      return function(d) {
+        var path = [],
+            open = y(accessor.o(d)),
+            close = y(accessor.c(d)),
+            xPoint = x(accessor.d(d)),
+            xValue = xPoint - width/2;
+
+        // Top
+        path.push(
+          'M', xPoint, y(accessor.h(d)),
+          'L', xPoint, Math.min(open, close)
+        );
+
+        // Draw another cross wick if there is no body
+        if(open == close) {
+          path.push(
+            'M', xValue, open,
+            'l', width, 0
+          );
+        }
+        // Bottom
+        path.push(
+          'M', xPoint, Math.max(open, close),
+          'L', xPoint, y(accessor.l(d))
+        );
+
+        return path.join(' ');
+      };
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(candlestick, p).plot(accessor_ohlc(), binder);
+    plotMixin(candlestick, p).plot(accessor_ohlc(), binder).width(binder);
 
     return candlestick;
   };
 };
-
-function bodyPath(accessor, x, y, barWidth) {
-  return function(d) {
-    var path = [],
-        open = y(accessor.o(d)),
-        close = y(accessor.c(d)),
-        rangeBand = barWidth(x),
-        xValue = x(accessor.d(d)) - rangeBand/2;
-
-    path.push(
-        'M', xValue, open,
-        'l', rangeBand, 0
-      );
-
-    // Draw body only if there is a body (there is no stroke, so will not appear anyway)
-    if(open != close) {
-      path.push(
-          'L', xValue + rangeBand, close,
-          'l', -rangeBand, 0,
-          'L', xValue, open
-        );
-    }
-
-    return path.join(' ');
-  };
-}
-
-function wickPath(accessor, x, y, barWidth) {
-  return function(d) {
-    var path = [],
-        open = y(accessor.o(d)),
-        close = y(accessor.c(d)),
-        rangeBand = barWidth(x),
-        xPoint = x(accessor.d(d)),
-        xValue = xPoint - rangeBand/2;
-
-    // Top
-    path.push(
-        'M', xPoint, y(accessor.h(d)),
-        'L', xPoint, Math.min(open, close)
-      );
-
-    // Draw another cross wick if there is no body
-    if(open == close) {
-      path.push(
-          'M', xValue, open,
-          'l', rangeBand, 0
-        );
-    }
-    // Bottom
-    path.push(
-        'M', xPoint, Math.max(open, close),
-        'L', xPoint, y(accessor.l(d))
-      );
-
-    return path.join(' ');
-  };
-}
 },{}],25:[function(require,module,exports){
 'use strict';
 
@@ -1502,7 +1510,7 @@ function display(g, style) {
 
 function horizontalPathLine(y, range) {
   return function(d) {
-    if(!d) return "M 0 0";
+    if(d === null) return null;
     var value = y(d);
     return ['M', range[0], value, 'L', range[range.length-1], value].join(' ');
   };
@@ -1510,8 +1518,10 @@ function horizontalPathLine(y, range) {
 
 function verticalPathLine(x, range) {
   return function(d) {
-    if(!d) return "M 0 0";
-    var value = x(d);
+    if(d === null) return null;
+    var value = x(d),
+        sr = x.range();
+    if(value < Math.min(sr[0], sr[sr.length-1]) || value > Math.max(sr[0], sr[sr.length-1])) return null;
     return ['M', value, range[0], 'L', value, range[range.length-1]].join(' ');
   };
 }
@@ -1612,7 +1622,7 @@ module.exports = function(d3) {
   var scale = require('../scale')(d3),
       accessor = require('../accessor')(),
       plot = require('./plot')(d3.svg.line, d3.select),
-      plotMixin = require('./plotmixin')(d3.scale.linear, scale.financetime),
+      plotMixin = require('./plotmixin')(d3.scale.linear, d3.functor, scale.financetime, plot.barWidth),
       line = require('./line'),
       axisannotation = require('./axisannotation')(d3.svg.axis, accessor.value, plot, plotMixin),
       svg = require('../svg')(d3);
@@ -1715,13 +1725,34 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
     };
 
     function binder() {
-      differenceGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, differencePath);
+      differenceGenerator = plot.joinPath(differencePath);
       macdLine.init(p.accessor.d, p.xScale, p.accessor.m, p.yScale);
       signalLine.init(p.accessor.d, p.xScale, p.accessor.s, p.yScale);
     }
 
+    function differencePath() {
+      var accessor = p.accessor,
+        x = p.xScale,
+        y = p.yScale,
+        width = p.width(x),
+        r = plot.r;
+
+      return function(d) {
+        var zero = y(0),
+          height = y(accessor.dif(d)) - zero,
+          xValue = x(accessor.d(d)) - width/2;
+
+        return [
+          'M', xValue, zero,
+          'l', 0, height,
+          'l', width, 0,
+          'l', 0, -height
+        ].join(' ');
+      };
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(macd, p).plot(accessor_macd(), binder);
+    plotMixin(macd, p).plot(accessor_macd(), binder).width(binder);
     binder();
 
     return macd;
@@ -1733,22 +1764,6 @@ function refresh(g, accessor, x, y, plot, differenceGenerator, macdLine, signalL
   g.selectAll('path.zero').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.z, y));
   g.selectAll('path.macd').attr('d', macdLine);
   g.selectAll('path.signal').attr('d', signalLine);
-}
-
-function differencePath(accessor, x, y, barWidth) {
-  return function(d) {
-    var zero = y(0),
-        height = y(accessor.dif(d)) - zero,
-        rangeBand = barWidth(x),
-        xValue = x(accessor.d(d)) - rangeBand/2;
-
-    return [
-        'M', xValue, zero,
-        'l', 0, height,
-        'l', rangeBand, 0,
-        'l', 0, -height
-      ].join(' ');
-  };
 }
 },{}],30:[function(require,module,exports){
 'use strict';
@@ -1772,35 +1787,40 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     };
 
     function binder() {
-      ohlcGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, ohlcPath);
+      ohlcGenerator = plot.joinPath(ohlcPath);
       lineWidthGenerator = plot.lineWidth(p.xScale, 1, 2);
     }
 
+    function ohlcPath() {
+      var accessor = p.accessor,
+        x = p.xScale,
+        y = p.yScale,
+        width = p.width(x),
+        r = plot.r;
+
+      return function(d) {
+        var open = y(accessor.o(d)),
+            close = y(accessor.c(d)),
+            xPoint = x(accessor.d(d)),
+            xValue = xPoint - width/2;
+
+        return [
+          'M', xValue, open,
+          'l', width/2, 0,
+          'M', xPoint, y(accessor.h(d)),
+          'L', xPoint, y(accessor.l(d)),
+          'M', xPoint, close,
+          'l', width/2, 0
+        ].join(' ');
+      };
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(ohlc, p).plot(accessor_ohlc(), binder);
+    plotMixin(ohlc, p).plot(accessor_ohlc(), binder).width(binder);
 
     return ohlc;
   };
 };
-
-function ohlcPath(accessor, x, y, barWidth) {
-  return function(d) {
-    var open = y(accessor.o(d)),
-        close = y(accessor.c(d)),
-        rangeBand = barWidth(x),
-        xPoint = x(accessor.d(d)),
-        xValue = xPoint - rangeBand/2;
-
-    return [
-        'M', xValue, open,
-        'l', rangeBand/2, 0,
-        'M', xPoint, y(accessor.h(d)),
-        'L', xPoint, y(accessor.l(d)),
-        'M', xPoint, close,
-        'l', rangeBand/2, 0
-      ].join(' ');
-  };
-}
 },{}],31:[function(require,module,exports){
 'use strict';
 
@@ -1863,7 +1883,8 @@ module.exports = function(d3_svg_line, d3_select) {
   }
 
   function barWidth(x) {
-    return Math.max(x.band(), 1);
+    if(x.band !== undefined) return Math.max(x.band(), 1);
+    else return 3; // If it's not a finance time, the user should specify the band calculation (or constant) on the plot
   }
 
   return {
@@ -1915,19 +1936,9 @@ module.exports = function(d3_svg_line, d3_select) {
     },
 
     /**
-     * @deprecated Plots should have access to their own state (including barWidth for #13), and start using simpleJoinPath (which will be renamed)
-     */
-    joinPath: function(accessor, x, y, path) {
-      return function(data) {
-        return data.map(path(accessor, x, y, barWidth)).join(' ');
-      };
-    },
-
-    /**
-     * Similar to above but expects only a function passed, implying all state is contained within the function.
      * @param path A path generator constructor function that will construct a function that takes data point and returns a path
      */
-    simpleJoinPath: function(path) {
+    joinPath: function(path) {
       return function(data) {
         return data.map(path()).join(' ');
       };
@@ -2011,12 +2022,8 @@ module.exports = function(d3_svg_line, d3_select) {
 /**
  * Module allows optionally mixing in helper methods to plots such as xScale, yScale, accessor setters
  * and helpers for defining dispatching methods.
- *
- * @param d3_scale_linear
- * @param techan_scale_financetime
- * @returns {Function}
  */
-module.exports = function(d3_scale_linear, techan_scale_financetime) {
+module.exports = function(d3_scale_linear, d3_functor, techan_scale_financetime, plot_width) {
   return function(source, priv) {
     var plotMixin = {};
 
@@ -2052,6 +2059,19 @@ module.exports = function(d3_scale_linear, techan_scale_financetime) {
       source.accessor = function(_) {
         if (!arguments.length) return priv.accessor;
         priv.accessor = _;
+        if(binder) binder();
+        return source;
+      };
+
+      return plotMixin;
+    };
+
+    plotMixin.width = function(binder) {
+      priv.width = plot_width;
+
+      source.width = function(_) {
+        if (!arguments.length) return priv.width;
+        priv.width = d3_functor(_);
         if(binder) binder();
         return source;
       };
@@ -2228,36 +2248,40 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_tick, plot, plotM
     };
 
     function binder() {
-      tickGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, tickPath);
+      tickGenerator = plot.joinPath(tickPath);
       lineWidthGenerator = plot.lineWidth(p.xScale, 1, 2);
     }
 
+    function tickPath() {
+      var accessor = p.accessor,
+        x = p.xScale,
+        y = p.yScale,
+        width = p.width(x),
+        r = plot.r;
+
+      return function(d) {
+        var high = y(accessor.h(d)),
+          low = y(accessor.l(d)),
+          xPoint = x(accessor.d(d)),
+          xValue = xPoint - width/2;
+
+        return [
+          'M', xValue, high,
+          'l', width, 0,
+          'M', xPoint, high,
+          'L', xPoint, low,
+          'M', xValue, low,
+          'l', width, 0
+        ].join(' ');
+      };
+    }
+
     // Mixin 'superclass' methods and variables
-    plotMixin(tick, p).plot(accessor_tick(), binder);
+    plotMixin(tick, p).plot(accessor_tick(), binder).width(binder);
 
     return tick;
   };
 };
-
-function tickPath(accessor, x, y, barWidth) {
-  return function(d) {
-    var high = y(accessor.h(d)),
-        low = y(accessor.l(d)),
-        rangeBand = barWidth(x),
-        xPoint = x(accessor.d(d)),
-        xValue = xPoint - rangeBand/2;
-
-    return [
-        'M', xValue, high,
-        'l', rangeBand, 0,
-        'M', xPoint, high,
-        'L', xPoint, low,
-        'M', xValue, low,
-        'l', rangeBand, 0
-      ].join(' ');
-  };
-}
-
 },{}],36:[function(require,module,exports){
 'use strict';
 
@@ -2332,7 +2356,7 @@ module.exports = function(d3_select, d3_functor, d3_mouse, d3_dispatch, accessor
 
     function binder() {
       svgArrow.x(function(d) { return p.xScale(p.accessor.d(d)); }).y(y);
-      arrowGenerator = plot.simpleJoinPath(function() { return svgArrow; });
+      arrowGenerator = plot.joinPath(function() { return svgArrow; });
       return tradearrow;
     }
 
@@ -2499,35 +2523,39 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
     };
 
     function binder() {
-      volumeGenerator = plot.joinPath(p.accessor, p.xScale, p.yScale, volumePath);
+      volumeGenerator = plot.joinPath(volumePath);
+    }
+
+    function volumePath() {
+      var accessor = p.accessor,
+          x = p.xScale,
+          y = p.yScale,
+          width = p.width(x);
+
+      return function(d) {
+        var vol = accessor.v(d);
+
+        if(isNaN(vol)) return null;
+
+        var zero = y(0),
+          height = y(vol) - zero,
+          xValue = x(accessor.d(d)) - width/2;
+
+        return [
+          'M', xValue, zero,
+          'l', 0, height,
+          'l', width, 0,
+          'l', 0, -height
+        ].join(' ');
+      };
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(volume, p).plot(accessor_volume(), binder);
+    plotMixin(volume, p).plot(accessor_volume(), binder).width(binder);
 
     return volume;
   };
 };
-
-function volumePath(accessor, x, y, barWidth) {
-  return function(d) {
-    var vol = accessor.v(d);
-
-    if(isNaN(vol)) return null;
-
-    var zero = y(0),
-        height = y(vol) - zero,
-        rangeBand = barWidth(x),
-        xValue = x(accessor.d(d)) - rangeBand/2;
-
-    return [
-        'M', xValue, zero,
-        'l', 0, height,
-        'l', rangeBand, 0,
-        'l', 0, -height
-      ].join(' ');
-  };
-}
 },{}],39:[function(require,module,exports){
 'use strict';
 
@@ -3009,8 +3037,14 @@ function mapReduceFilter(data, map) {
  */
 module.exports = function() {
   function zoomable(linear, zoomed, domainLimit) {
-    var scale = {},
-        clamp = true;
+    var clamp = true;
+
+    /**
+     * Delegates the scale call to the underlying linear scale
+     */
+    function scale(_) {
+      return linear.apply(linear, arguments);
+    }
 
     scale.invert = linear.invert;
 
