@@ -18,8 +18,20 @@ techanModule('plot/line', function(specBuilder) {
   specBuilder.require(require('../../../../src/plot/line'), function(instanceBuilder) {
     instanceBuilder.instance('actual', actualInit, function(scope) {
       describe('And line is initialised with defaults', function () {
-        plotMixinShouldBeSetup(scope);
-        plotShouldRenderWithoutError(scope, data, domFixtures);
+        describe('And there is data to be plotted', function() {
+          plotMixinShouldBeSetup(scope);
+          plotShouldRenderWithoutError(scope, data, domFixtures);
+        });
+
+        describe('And there is no data to be plotted', function () {
+          plotMixinShouldBeSetup(scope);
+          plotShouldRenderWithoutError(scope, [], domFixtures);
+        });
+
+        describe('And there is 1 data point to be plotted', function () {
+          plotMixinShouldBeSetup(scope);
+          plotShouldRenderWithoutError(scope, data.slice(0, 1), domFixtures);
+        });
       });
     });
 
