@@ -21,6 +21,10 @@ techanModule('scale/zoomable', function(specBuilder) {
           zoomable = scope.zoomable(linear, zoomedCallback, linear.domain());
         });
 
+        it('Then the default scale function should behave like the underlying linear scale', function() {
+          expect(zoomable(4)).toEqual(linear(4));
+        });
+
         it('Then returns the domain when reading the domain', function() {
           expect(zoomable.domain()).toEqual([0, 10]);
         });

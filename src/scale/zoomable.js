@@ -11,8 +11,14 @@
  */
 module.exports = function() {
   function zoomable(linear, zoomed, domainLimit) {
-    var scale = {},
-        clamp = true;
+    var clamp = true;
+
+    /**
+     * Delegates the scale call to the underlying linear scale
+     */
+    function scale(_) {
+      return linear.apply(linear, arguments);
+    }
 
     scale.invert = linear.invert;
 
