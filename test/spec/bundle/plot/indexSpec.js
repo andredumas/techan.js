@@ -82,6 +82,10 @@ techanModule('plot', function(specBuilder) {
       it('Then plot.tick should be defined', function() {
         expect(bucket.plot.tick).toBeDefined();
       });
+
+      it('Then plot.aroon should be defined', function() {
+        expect(bucket.plot.aroon).toBeDefined();
+      });
     });
   });
 });

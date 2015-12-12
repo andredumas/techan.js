@@ -13,6 +13,11 @@ module.exports = function() {
     value: require('./value'),
     volume: require('./volume'),
     tick: require('./tick'),
-    trade: require('./trade')
+    trade: require('./trade'),
+    adx: require('./adx'),
+    aroon: require('./aroon'),
+    stochastic: require('./stochastic'),
+    williams: require('./williams'),
+    bollinger: require('./bollinger')
   };
 };

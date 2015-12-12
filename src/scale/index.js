@@ -102,6 +102,36 @@ module.exports = function(d3) {
       movingaverage: function(data, accessor) {
         accessor = accessor || accessors.value();
         return pathScale(d3, data, accessor);
+      },
+
+      adx: function () {
+         return d3.scale.linear().domain([0, 100])
+          .range([1, 0]);
+      },
+
+      aroon: function () {
+        return d3.scale.linear().domain([-100, 100])
+          .range([1, 0]);
+      },
+
+      stochastic: function () {
+        return d3.scale.linear().domain([0, 100])
+          .range([1, 0]);
+      },
+
+      williams: function () {
+        return d3.scale.linear().domain([0, 100])
+          .range([1, 0]);
+      },
+
+      bollinger: function (data, accessor) {
+         accessor = accessor || accessors.bollinger();
+         return d3.scale.linear()
+              .domain([
+                 d3.min(data.map(function(d){return accessor.lower(d);})),
+                 d3.max(data.map(function(d){return accessor.upper(d);}))
+                ].map(widen(0.02)))
+              .range([1, 0]);
       }
     },
 
