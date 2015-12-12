@@ -38,6 +38,10 @@ techanModule('indicator', function(specBuilder) {
       it('Then indicator.wilderma should be defined', function() {
         expect(scope.indicator.wilderma).toBeDefined();
       });
+
+      it('Then indicator.vwap should be defined', function() {
+        expect(scope.indicator.vwap).toBeDefined();
+      });
     });
   });
 });

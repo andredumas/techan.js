@@ -317,5 +317,13 @@ function techanSpec(techan) {
     it('Then techan.undefinedControl should be undefined', function() {
       expect(techan.undefinedControl).not.toBeDefined();
     });
+
+    it('Then techan.indicator.vwap should be defined', function () {
+      expect(techan.indicator.vwap).toBeDefined();
+    });
+
+    it('Then techan.indicator.vwap can be constructed', function () {
+      expect(techan.indicator.vwap()).toBeDefined();
+    });
   };
 }

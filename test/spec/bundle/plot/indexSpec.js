@@ -86,6 +86,10 @@ techanModule('plot', function(specBuilder) {
       it('Then plot.aroon should be defined', function() {
         expect(bucket.plot.aroon).toBeDefined();
       });
+
+      it('Then plot.vwap should be defined', function() {
+        expect(bucket.plot.vwap).toBeDefined();
+      });
     });
   });
 });

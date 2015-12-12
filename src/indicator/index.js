@@ -6,7 +6,8 @@ module.exports = function() {
       ema_init = require('./ema'),
       ema = ema_init(indicatorMixin, accessor.ohlc, ema_alpha_init),
       sma = require('./sma')(indicatorMixin, accessor.ohlc),
-      atr = require('./atr')(indicatorMixin, accessor.ohlc, sma);
+      atr = require('./atr')(indicatorMixin, accessor.ohlc, sma),
+      vwap = require('./vwap')(indicatorMixin, accessor.ohlc);
 
   return {
     atr: atr,
@@ -21,7 +22,8 @@ module.exports = function() {
     stochastic: require('./stochastic')(indicatorMixin, accessor.ohlc, ema),
     williams: require('./williams')(indicatorMixin, accessor.ohlc, ema),
     adx: require('./adx')(indicatorMixin, accessor.ohlc, ema),
-    bollinger: require('./bollinger')(indicatorMixin, accessor.ohlc, sma)
+    bollinger: require('./bollinger')(indicatorMixin, accessor.ohlc, sma),
+    vwap: vwap
    };
 };
 

@@ -34,7 +34,8 @@ module.exports = function(d3) {
     aroon: require('./aroon')(accessor.aroon, plot, plotMixin),
     stochastic: require('./stochastic')(accessor.stochastic, plot, plotMixin),
     williams: require('./williams')(accessor.williams, plot, plotMixin),
-    bollinger: require('./bollinger')(accessor.bollinger, plot, plotMixin)
+    bollinger: require('./bollinger')(accessor.bollinger, plot, plotMixin),
+    vwap: line(accessor.value, plot, plotMixin)
   };
 };
 
