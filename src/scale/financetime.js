@@ -308,7 +308,16 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     return function(d) {
       var value = visibleDomainLookup[+d];
       if (value !== undefined) return visibleDomain[value];
-      return visibleDomain[d3_bisect(visibleDomain, d)];
+      var index = d3_bisect(visibleDomain, d);
+      if (index > 0) {
+        // d3_bisect gets the index of the closest value that is the greater than d,
+        // which may not be the value that is closest to d.
+        // If the closest value that is smaller than d is closer, choose that instead.
+        if ((+d - (+visibleDomain[index-1])) < (+visibleDomain[index] - +d)) {
+          index--;
+        }
+      }
+      return visibleDomain[index];
     };
   }
 
