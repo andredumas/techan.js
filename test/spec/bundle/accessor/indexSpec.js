@@ -42,6 +42,10 @@ techanModule('accessor', function(specBuilder) {
       it('Then accessor.tick should be defined', function() {
         expect(scope.accessor.tick).toBeDefined();
       });
+
+      it('Then accessor.aroon should be defined', function() {
+        expect(scope.accessor.aroon).toBeDefined();
+      });
     });
   });
 });

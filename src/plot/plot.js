@@ -31,6 +31,27 @@ module.exports = function(d3_svg_line, d3_select) {
     return line;
   }
 
+  function PathArea() {
+    var d3Area = d3.svg.area().interpolate('monotone');
+
+    function area(data) {
+      return d3Area(data);
+    }
+
+    area.init = function(accessor_date, x, accessor_value, y, yBase) {
+      return d3Area.defined(function(d) { return accessor_value(d) !== null;  })
+           .x(function(d) { return x(accessor_date(d)); } )
+           .y0(function(d) { return y(yBase); } )
+           .y1(function(d) { return y(accessor_value(d)); } );
+    };
+
+    area.d3 = function() {
+      return d3Area;
+    };
+
+    return area;
+  }
+
   function upDownEqual(accessor) {
     return {
       up: function(d) { return accessor.o(d) < accessor.c(d); },
@@ -101,6 +122,8 @@ module.exports = function(d3_svg_line, d3_select) {
     },
 
     pathLine: PathLine,
+
+    pathArea: PathArea,
 
     barWidth: barWidth,
 

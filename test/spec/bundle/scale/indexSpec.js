@@ -60,6 +60,10 @@ techanModule('scale', function(specBuilder) {
         return scope.scale.plot.rsi;
       }, techan.accessor.rsi());
 
+      optionalAccessorTest('scale.plot.adx', function() {
+        return scope.scale.plot.adx;
+      }, techan.accessor.adx());
+
       optionalAccessorTest('scale.plot.ichimoku', function() {
         return scope.scale.plot.ichimoku;
       }, techan.accessor.ichimoku(), ichimokuData);

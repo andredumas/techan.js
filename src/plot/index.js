@@ -29,7 +29,13 @@ module.exports = function(d3) {
     sma: line(accessor.value, plot, plotMixin),
     supstance: require('./supstance')(d3.behavior.drag, d3_event, d3.select, d3.dispatch, accessor.value, plot, plotMixin),
     trendline: require('./trendline')(d3.behavior.drag, d3_event, d3.select, d3.dispatch, accessor.trendline, plot, plotMixin),
-    wilderma: line(accessor.value, plot, plotMixin)
+    wilderma: line(accessor.value, plot, plotMixin),
+    adx: require('./adx')(accessor.adx, plot, plotMixin),
+    aroon: require('./aroon')(accessor.aroon, plot, plotMixin),
+    stochastic: require('./stochastic')(accessor.stochastic, plot, plotMixin),
+    williams: require('./williams')(accessor.williams, plot, plotMixin),
+    bollinger: require('./bollinger')(accessor.bollinger, plot, plotMixin),
+    vwap: line(accessor.value, plot, plotMixin)
   };
 };
 
