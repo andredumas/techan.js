@@ -101,8 +101,8 @@ running container.
 ```shell
 git clone --recursive https://github.com/andredumas/techan.js.git
 cd techan.js
-docker build -t techan.js .
-docker run --rm -it -p 8000:8000 techan.js
+docker build -t andredumas/techan.js .
+docker run --rm -it -p 8000:8000 andredumas/techan.js
 ```
 
 As above, browse to [http://localhost:8000/examples/](http://localhost:8000/examples/) to see the examples.

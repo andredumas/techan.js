@@ -1,4 +1,4 @@
-FROM node:0.12-onbuild
+FROM node:4.2-onbuild
 MAINTAINER André Dumas
 
 # Reconfigure timezone
@@ -7,6 +7,3 @@ MAINTAINER André Dumas
 #  && dpkg-reconfigure --frontend noninteractive tzdata
 
 EXPOSE 8000
-
-ENTRYPOINT ["npm"]
-CMD ["start"]
