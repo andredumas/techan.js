@@ -1,10 +1,15 @@
 techanModule('scale/financetime', function(specBuilder) {
   'use strict';
 
-  var techan = require('../../../../src/techan');
+  var techan = require('../../../../src/techan'),
+      date = require('../_util/date');
 
   var actualInit = function() {
     return techan.scale.financetime;
+  };
+
+  var actualUtcInit = function() {
+    return techan.scale.financetime.utc;
   };
 
   var data = require('../_fixtures/data/ohlc').facebook.slice(0, 10).map(function(d) { return d.date; }),
@@ -510,10 +515,6 @@ techanModule('scale/financetime', function(specBuilder) {
 
             it('Then tickFormat should be generic format', function() {
               expect(financetime.tickFormat()(new Date(1000))).toEqual(':01');
-            });
-
-            it('Then tickFormat should be generic format', function() {
-              expect(financetime.tickFormat()(new Date(1000))).toEqual(':01');
               expect(financetime.tickFormat()(new Date(2014, 1, 24))).toEqual('Feb 24');
             });
           });
@@ -655,6 +656,63 @@ techanModule('scale/financetime', function(specBuilder) {
 
             it('Should have 10 ticks equaling input offset to left', function() {
               expect(time.ticks()).toEqual(timeData);
+            });
+          });
+        });
+      });
+    });
+
+    instanceBuilder.instance('actual (utc)', actualUtcInit, function(scope) {
+      var financetime;
+
+      describe('And domain and range is initialised', function() {
+        beforeEach(function() {
+          financetime = scope.financetime;
+          financetime.domain(data).range([48, 1052]);
+        });
+
+        it('Then domain should equal the domain set', function() {
+          expect(financetime.domain()).toEqual(data);
+        });
+
+        it('Then default tickFormat after ticks invoke should be day', function() {
+          financetime.ticks();
+          expect(financetime.tickFormat()(date.parseZonedIso8601('2012-01-20T00:00:00+1100'))).toEqual('Jan 19');
+          expect(financetime.tickFormat()(date.parseZonedIso8601('2012-04-03T00:00:00+1100'))).toEqual('Apr  2');
+        });
+
+        describe('And initialised with 1 item', function() {
+          beforeEach(function() {
+            financetime.domain([new Date(0)]);
+          });
+
+          describe('And ticks invoked (for tickFormat state)', function() {
+            beforeEach(function() {
+              financetime.ticks();
+            });
+
+            it('Then tickFormat should be generic format', function() {
+              expect(financetime.tickFormat()(new Date(1000))).toEqual(':01');
+              expect(financetime.tickFormat()(date.parseZonedIso8601('2014-01-24T00:00:00+1100'))).toEqual('01 PM');
+            });
+          });
+        });
+
+
+        describe('And initialised with intraday data', function() {
+          beforeEach(function() {
+            financetime.domain(timeData);
+          });
+
+          describe('And ticks invoked (for tickFormat state)', function() {
+            beforeEach(function() {
+              financetime.ticks();
+            });
+
+            it('Then tickFormat should be intraday format', function() {
+              expect(financetime.tickFormat()(new Date(1000))).toEqual(':01');
+              expect(financetime.tickFormat()(date.parseZonedIso8601('2014-01-24T09:35:00+1100'))).toEqual('10:35');
+              expect(financetime.tickFormat()(date.parseZonedIso8601('2014-01-01T00:00:00+1100'))).toEqual('01 PM');
             });
           });
         });

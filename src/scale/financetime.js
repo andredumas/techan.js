@@ -6,9 +6,9 @@
  and weekends respectively. When plot, is done so without weekend gaps.
  */
 module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, scale_widen, zoomable) {  // Injected dependencies
-  function financetime(index, domain, padding, outerPadding, zoomLimit, closestTicks) {
+  function financetime(tickMethods, genericFormat, index, domain, padding, outerPadding, zoomLimit, closestTicks) {
     var dateIndexMap,
-        tickState = { tickFormat: dailyTickMethod[dailyTickMethod.length-1][2] },
+        tickState = { tickFormat: tickMethods.daily[tickMethods.daily.length-1][2] },
         band = 3;
 
     index = index || d3_scale_linear();
@@ -113,7 +113,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     }
 
     scale.copy = function() {
-      return financetime(index.copy(), domain, padding, outerPadding, zoomLimit, closestTicks);
+      return financetime(tickMethods, genericFormat, index.copy(), domain, padding, outerPadding, zoomLimit, closestTicks);
     };
 
     /**
@@ -179,9 +179,24 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
       var intervalRange = interval.range(visibleDomain[0], +visibleDomain[visibleDomain.length-1]+1, steps);
 
       return intervalRange                                // Interval, possibly contains values not in domain
-        .map(domainTicks(visibleDomain, closestTicks))     // Line up interval ticks with domain, possibly adding duplicates
+        .map(domainTicks(visibleDomain, closestTicks))    // Line up interval ticks with domain, possibly adding duplicates
         .reduce(sequentialDuplicates, []);                // Filter out duplicates, produce new 'reduced' array
     };
+
+    function tickMethod(visibleDomain, indexDomain, count) {
+      if(visibleDomain.length == 1) return genericFormat; // If we only have 1 to display, show the generic tick method
+
+      var visibleDomainExtent = visibleDomain[visibleDomain.length-1] - visibleDomain[0],
+        intraday = visibleDomainExtent/dailyStep < 1, // Determine whether we're showing daily or intraday data
+        methods = intraday ? tickMethods.intraday : tickMethods.daily,
+        tickSteps = intraday ? intradayTickSteps : dailyTickSteps,
+        k = Math.min(Math.round(countK(visibleDomain, indexDomain)*count), count),
+        target = visibleDomainExtent/k, // Adjust the target based on proportion of domain that is visible
+        i = d3_bisect(tickSteps, target);
+
+      return i == methods.length ? methods[i-1] : // Return the largest tick method
+        i ? methods[target/tickSteps[i-1] < tickSteps[i]/target ? i-1 : i] : methods[i]; // Else return close approximation or first tickMethod
+    }
 
     /**
      * By default `ticks()` will generate tick values greater than the nearest domain interval value, which may not be
@@ -217,73 +232,6 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     return (Math.abs(linear(domain.length-1) - linear(0))/Math.max(1, domain.length-1))*(1-padding);
   }
 
-  var dayFormat = d3_time.format('%b %e'),
-      yearFormat = d3_time.format.multi([
-        ['%b %Y', function(d) { return d.getMonth(); }],
-        ['%Y', function() { return true; }]
-      ]),
-      intraDayFormat = d3_time.format.multi([
-        [":%S", function(d) { return d.getSeconds(); }],
-        ["%I:%M", function(d) { return d.getMinutes(); }],
-        ["%I %p", function (d) { return true; }]
-      ]),
-      genericTickMethod = [d3_time.second, 1, d3_time.format.multi([
-          [":%S", function(d) { return d.getSeconds(); }],
-          ["%I:%M", function(d) { return d.getMinutes(); }],
-          ["%I %p", function(d) { return d.getHours(); }],
-          ['%b %e', function() { return true; }]
-        ])
-      ];
-
-  var dailyStep = 864e5,
-      dailyTickSteps = [
-        dailyStep,  // 1-day
-        6048e5,     // 1-week
-        2592e6,     // 1-month
-        7776e6,     // 3-month
-        31536e6     // 1-year
-      ];
-
-  var dailyTickMethod = [
-    [d3_time.day, 1, dayFormat],
-    [d3_time.monday, 1, dayFormat],
-    [d3_time.month, 1, yearFormat],
-    [d3_time.month, 3, yearFormat],
-    [d3_time.year, 1, yearFormat]
-  ];
-
-  var intraDayTickSteps = [
-    1e3,    // 1-second
-    5e3,    // 5-second
-    15e3,   // 15-second
-    3e4,    // 30-second
-    6e4,    // 1-minute
-    3e5,    // 5-minute
-    9e5,    // 15-minute
-    18e5,   // 30-minute
-    36e5,   // 1-hour
-    108e5,  // 3-hour
-    216e5,  // 6-hour
-    432e5,  // 12-hour
-    864e5   // 1-day
-  ];
-
-  var intraDayTickMethod = [
-    [d3_time.second, 1, intraDayFormat],
-    [d3_time.second, 5, intraDayFormat],
-    [d3_time.second, 15, intraDayFormat],
-    [d3_time.second, 30, intraDayFormat],
-    [d3_time.minute, 1, intraDayFormat],
-    [d3_time.minute, 5, intraDayFormat],
-    [d3_time.minute, 15, intraDayFormat],
-    [d3_time.minute, 30, intraDayFormat],
-    [d3_time.hour, 1, intraDayFormat],
-    [d3_time.hour, 3, intraDayFormat],
-    [d3_time.hour, 6, intraDayFormat],
-    [d3_time.hour, 12, intraDayFormat],
-    [d3_time.day, 1, dayFormat]
-  ];
-
   /**
    * Calculates the proportion of domain that is visible. Used to reduce the overall count by this factor
    * @param visibleDomain
@@ -292,21 +240,6 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
    */
   function countK(visibleDomain, indexDomain) {
     return visibleDomain.length/(indexDomain[indexDomain.length-1]-indexDomain[0]);
-  }
-
-  function tickMethod(visibleDomain, indexDomain, count) {
-    if(visibleDomain.length == 1) return genericTickMethod; // If we only have 1 to display, show the generic tick method
-
-    var visibleDomainExtent = visibleDomain[visibleDomain.length-1] - visibleDomain[0],
-        intraDay = visibleDomainExtent/dailyStep < 1, // Determine whether we're showing daily or intraday data
-        tickMethods = intraDay ? intraDayTickMethod : dailyTickMethod,
-        tickSteps = intraDay ? intraDayTickSteps : dailyTickSteps,
-        k = Math.min(Math.round(countK(visibleDomain, indexDomain)*count), count),
-        target = visibleDomainExtent/k, // Adjust the target based on proportion of domain that is visible
-        i = d3_bisect(tickSteps, target);
-
-    return i == tickMethods.length ? tickMethods[i-1] : // Return the largest tick method
-      i ? tickMethods[target/tickSteps[i-1] < tickSteps[i]/target ? i-1 : i] : tickMethods[i]; // Else return close approximation or first tickMethod
   }
 
   function lookupIndex(array) {
@@ -339,5 +272,119 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     return previous;
   }
 
-  return financetime;
+  var dailyStep = 864e5,
+      dailyTickSteps = [
+        dailyStep,  // 1-day
+        6048e5,     // 1-week
+        2592e6,     // 1-month
+        7776e6,     // 3-month
+        31536e6     // 1-year
+      ],
+      intradayTickSteps = [
+        1e3,    // 1-second
+        5e3,    // 5-second
+        15e3,   // 15-second
+        3e4,    // 30-second
+        6e4,    // 1-minute
+        3e5,    // 5-minute
+        9e5,    // 15-minute
+        18e5,   // 30-minute
+        36e5,   // 1-hour
+        108e5,  // 3-hour
+        216e5,  // 6-hour
+        432e5,  // 12-hour
+        864e5   // 1-day
+      ];
+
+  var dayFormat = d3_time.format('%b %e'),
+      yearFormat = d3_time.format.multi([
+        ['%b %Y', function(d) { return d.getMonth(); }],
+        ['%Y', function() { return true; }]
+      ]),
+      intradayFormat = d3_time.format.multi([
+        [":%S", function(d) { return d.getSeconds(); }],
+        ["%I:%M", function(d) { return d.getMinutes(); }],
+        ["%I %p", function () { return true; }]
+      ]),
+      genericFormat = [d3_time.second, 1, d3_time.format.multi([
+          [":%S", function(d) { return d.getSeconds(); }],
+          ["%I:%M", function(d) { return d.getMinutes(); }],
+          ["%I %p", function(d) { return d.getHours(); }],
+          ['%b %e', function() { return true; }]
+        ])
+      ];
+
+  var dayFormatUtc = d3_time.format.utc('%b %e'),
+      yearFormatUtc = d3_time.format.utc.multi([
+        ['%b %Y', function(d) { return d.getUTCMonth(); }],
+        ['%Y', function() { return true; }]
+      ]),
+      intradayFormatUtc = d3_time.format.utc.multi([
+        [":%S", function(d) { return d.getUTCSeconds(); }],
+        ["%I:%M", function(d) { return d.getUTCMinutes(); }],
+        ["%I %p", function () { return true; }]
+      ]),
+      genericFormatUtc = [d3_time.second, 1, d3_time.format.utc.multi([
+          [":%S", function(d) { return d.getUTCSeconds(); }],
+          ["%I:%M", function(d) { return d.getUTCMinutes(); }],
+          ["%I %p", function(d) { return d.getUTCHours(); }],
+          ['%b %e', function() { return true; }]
+        ])
+      ];
+
+  var dailyTickMethod = [
+      [d3_time.day, 1, dayFormat],
+      [d3_time.monday, 1, dayFormat],
+      [d3_time.month, 1, yearFormat],
+      [d3_time.month, 3, yearFormat],
+      [d3_time.year, 1, yearFormat]
+    ],
+    intradayTickMethod = [
+      [d3_time.second, 1, intradayFormat],
+      [d3_time.second, 5, intradayFormat],
+      [d3_time.second, 15, intradayFormat],
+      [d3_time.second, 30, intradayFormat],
+      [d3_time.minute, 1, intradayFormat],
+      [d3_time.minute, 5, intradayFormat],
+      [d3_time.minute, 15, intradayFormat],
+      [d3_time.minute, 30, intradayFormat],
+      [d3_time.hour, 1, intradayFormat],
+      [d3_time.hour, 3, intradayFormat],
+      [d3_time.hour, 6, intradayFormat],
+      [d3_time.hour, 12, intradayFormat],
+      [d3_time.day, 1, dayFormat]
+    ];
+
+  var dailyTickMethodUtc = [
+      [d3_time.day.utc, 1, dayFormatUtc],
+      [d3_time.monday.utc, 1, dayFormatUtc],
+      [d3_time.month.utc, 1, yearFormatUtc],
+      [d3_time.month.utc, 3, yearFormatUtc],
+      [d3_time.year.utc, 1, yearFormatUtc]
+    ],
+    intradayTickMethodUtc = [
+      [d3_time.second.utc, 1, intradayFormatUtc],
+      [d3_time.second.utc, 5, intradayFormatUtc],
+      [d3_time.second.utc, 15, intradayFormatUtc],
+      [d3_time.second.utc, 30, intradayFormatUtc],
+      [d3_time.minute.utc, 1, intradayFormatUtc],
+      [d3_time.minute.utc, 5, intradayFormatUtc],
+      [d3_time.minute.utc, 15, intradayFormatUtc],
+      [d3_time.minute.utc, 30, intradayFormatUtc],
+      [d3_time.hour.utc, 1, intradayFormatUtc],
+      [d3_time.hour.utc, 3, intradayFormatUtc],
+      [d3_time.hour.utc, 6, intradayFormatUtc],
+      [d3_time.hour.utc, 12, intradayFormatUtc],
+      [d3_time.day.utc, 1, dayFormatUtc]
+    ];
+
+  function techan_scale_financetime() {
+    return financetime({ daily: dailyTickMethod, intraday: intradayTickMethod }, genericFormat);
+  }
+
+  techan_scale_financetime.utc = function() {
+    return financetime({ daily: dailyTickMethodUtc, intraday: intradayTickMethodUtc }, genericFormatUtc);
+  };
+
+  return techan_scale_financetime;
 };
