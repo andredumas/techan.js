@@ -190,7 +190,6 @@ techanModule('scale/financetime', function(specBuilder) {
 
         it('Then ticks with specified interval and step count returns that number', function() {
           expect(financetime.ticks(d3.time.day, 2)).toEqual([
-            new Date(2012,4,18),
             new Date(2012,4,21),
             new Date(2012,4,23),
             new Date(2012,4,25),
@@ -198,6 +197,24 @@ techanModule('scale/financetime', function(specBuilder) {
             new Date(2012,4,31),
             new Date(2012,5,1)
           ]);
+        });
+
+        describe('And closestTicks is true', function() {
+          beforeEach(function() {
+            financetime.closestTicks(true);
+          });
+
+          it('Then ticks with specified interval and step count returns that number', function() {
+            expect(financetime.ticks(d3.time.day, 2)).toEqual([
+              new Date(2012,4,18),
+              new Date(2012,4,21),
+              new Date(2012,4,23),
+              new Date(2012,4,25),
+              new Date(2012,4,29),
+              new Date(2012,4,31),
+              new Date(2012,5,1)
+            ]);
+          });
         });
 
         it('Then default tickFormat should be yearly', function() {
@@ -426,12 +443,27 @@ techanModule('scale/financetime', function(specBuilder) {
 
             it('Then ticks with specified interval and step count returns that number', function() {
               expect(financetime.ticks(d3.time.day, 2)).toEqual([
-                new Date(2012,4,18),
                 new Date(2012,4,21),
                 new Date(2012,4,23),
                 new Date(2012,4,25),
                 new Date(2012,4,29)
               ]);
+            });
+
+            describe('And closestTicks is true', function() {
+              beforeEach(function() {
+                financetime.closestTicks(true);
+              });
+
+              it('Then ticks with specified interval and step count returns that number', function() {
+                expect(financetime.ticks(d3.time.day, 2)).toEqual([
+                  new Date(2012,4,18),
+                  new Date(2012,4,21),
+                  new Date(2012,4,23),
+                  new Date(2012,4,25),
+                  new Date(2012,4,29)
+                ]);
+              });
             });
 
             describe('And copied', function() {

@@ -6,7 +6,7 @@
  and weekends respectively. When plot, is done so without weekend gaps.
  */
 module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, scale_widen, zoomable) {  // Injected dependencies
-  function financetime(index, domain, padding, outerPadding, zoomLimit) {
+  function financetime(index, domain, padding, outerPadding, zoomLimit, closestTicks) {
     var dateIndexMap,
         tickState = { tickFormat: dailyTickMethod[dailyTickMethod.length-1][2] },
         band = 3;
@@ -16,6 +16,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     padding = padding === undefined ? 0.2 : padding;
     outerPadding = outerPadding === undefined ? 0.65 : outerPadding;
     zoomLimit = zoomLimit || index.domain();
+    closestTicks = closestTicks || false;
 
     /**
      * Scales the value to domain. If the value is not within the domain, will currently brutally round the data:
@@ -112,7 +113,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     }
 
     scale.copy = function() {
-      return financetime(index.copy(), domain, padding, outerPadding, zoomLimit);
+      return financetime(index.copy(), domain, padding, outerPadding, zoomLimit, closestTicks);
     };
 
     /**
@@ -177,9 +178,21 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
 
       var intervalRange = interval.range(visibleDomain[0], +visibleDomain[visibleDomain.length-1]+1, steps);
 
-      return intervalRange                  // Interval, possibly contains values not in domain
-        .map(domainTicks(visibleDomain))    // Line up interval ticks with domain, possibly adding duplicates
-        .reduce(sequentialDuplicates, []);  // Filter out duplicates, produce new 'reduced' array
+      return intervalRange                                // Interval, possibly contains values not in domain
+        .map(domainTicks(visibleDomain, closestTicks))     // Line up interval ticks with domain, possibly adding duplicates
+        .reduce(sequentialDuplicates, []);                // Filter out duplicates, produce new 'reduced' array
+    };
+
+    /**
+     * By default `ticks()` will generate tick values greater than the nearest domain interval value, which may not be
+     * best value, particularly for irregular intraday domains. Setting this to true will cause tick generation to choose
+     * values closest to the corresponding domain value for the calculated interval.
+     * @param _ Optional `boolean` value. If argument is passed, sets the value and returns this instance, if no argument, returns the current value
+     */
+    scale.closestTicks = function(_) {
+      if(!arguments.length) return closestTicks;
+      closestTicks = _;
+      return scale;
     };
 
     /**
@@ -302,14 +315,14 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     return lookup;
   }
 
-  function domainTicks(visibleDomain) {
+  function domainTicks(visibleDomain, closest) {
     var visibleDomainLookup = lookupIndex(visibleDomain); // Quickly lookup index of the domain
 
     return function(d) {
       var value = visibleDomainLookup[+d];
       if (value !== undefined) return visibleDomain[value];
       var index = d3_bisect(visibleDomain, d);
-      if (index > 0) {
+      if (closest && index > 0) {
         // d3_bisect gets the index of the closest value that is the greater than d,
         // which may not be the value that is closest to d.
         // If the closest value that is smaller than d is closer, choose that instead.
