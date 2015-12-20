@@ -19,10 +19,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
       slowAverage.accessor(indicator.accessor()).period(slow).init();
 
       return data.map(function(d, i) {
-        slow = fastAverage.average(p.accessor(d));
-        fast = slowAverage.average(p.accessor(d));
-
-        var macd = slow - fast,
+        var macd = fastAverage.average(p.accessor(d)) - slowAverage.average(p.accessor(d)),
             signalValue = i >= minFastSlow ? signalLine.average(macd) : null;
 
         if(i >= minCount) return datum(p.accessor.d(d), macd, signalValue, macd - signalValue, 0);
