@@ -24,10 +24,9 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_tick, plot, plotM
 
     function tickPath() {
       var accessor = p.accessor,
-        x = p.xScale,
-        y = p.yScale,
-        width = p.width(x),
-        r = plot.r;
+          x = p.xScale,
+          y = p.yScale,
+          width = p.width(x);
 
       return function(d) {
         var high = y(accessor.h(d)),

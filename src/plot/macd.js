@@ -30,10 +30,9 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
 
     function differencePath() {
       var accessor = p.accessor,
-        x = p.xScale,
-        y = p.yScale,
-        width = p.width(x),
-        r = plot.r;
+          x = p.xScale,
+          y = p.yScale,
+          width = p.width(x);
 
       return function(d) {
         var zero = y(0),
