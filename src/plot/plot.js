@@ -1,8 +1,8 @@
 'use strict';
 
 module.exports = function(d3_svg_line, d3_select) {
-  function dataSelection(g, dataMapper, accessor_date) {
-    var selection = g.selectAll('g.data').data(dataMapper, accessor_date);
+  function dataSelection(g, dataMapper, key) {
+    var selection = g.selectAll('g.data').data(dataMapper, key);
     selection.exit().remove();
     return selection;
   }
@@ -94,8 +94,8 @@ module.exports = function(d3_svg_line, d3_select) {
 
     dataEntry: dataEntry,
 
-    groupSelect: function(g, dataMapper, accessor_date) {
-      var selection = dataSelection(g, dataMapper, accessor_date),
+    groupSelect: function(g, dataMapper, key) {
+      var selection = dataSelection(g, dataMapper, key),
           entry = dataEntry(selection);
       return {
         selection: selection,
