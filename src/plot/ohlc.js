@@ -36,14 +36,9 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
             xPoint = x(accessor.d(d)),
             xValue = xPoint - width/2;
 
-        return [
-          'M', xValue, open,
-          'l', width/2, 0,
-          'M', xPoint, y(accessor.h(d)),
-          'L', xPoint, y(accessor.l(d)),
-          'M', xPoint, close,
-          'l', width/2, 0
-        ].join(' ');
+        return 'M ' + xValue + ' ' +
+          open + ' l ' + (width/2) + ' 0 M ' + xPoint + ' ' + y(accessor.h(d)) + ' L ' +
+          xPoint + ' ' + y(accessor.l(d)) + ' M ' + xPoint + ' ' + close + ' l ' + (width/2) + ' 0';
       };
     }
 
