@@ -148,7 +148,7 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
         if(width/2 < point) pt = width/2;
         else w = width/2-point;
 
-        return 'M ' + value + ' 0 l' + String(-pt) + ' ' + (neg*Math.max(axis.innerTickSize(), 1)) +
+        return 'M ' + value + ' 0 l ' + String(-pt) + ' ' + (neg*Math.max(axis.innerTickSize(), 1)) +
           ' l ' + String(-w) + ' 0 l 0 ' + String(neg*height) + ' l ' + width + ' 0 l 0 ' + (neg*-height) +
           ' l ' + String(-w) + ' 0';
       default: throw "Unsupported axis.orient() = " + axis.orient();
