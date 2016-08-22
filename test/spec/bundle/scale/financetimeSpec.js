@@ -37,6 +37,14 @@ techanModule('scale/financetime', function(specBuilder) {
           expect(financetime.band()).toEqual(80);
         });
 
+        it('Then scale of undefined should not throw error and result in value just outside of the greater range extent (+undefined === NaN)', function() {
+          expect(financetime(undefined)).toEqual(1100);
+        });
+
+        it('Then scale of null should not throw error and result in value just outside of the lesser extent (+null === 0)', function() {
+          expect(financetime(null)).toEqual(0);
+        });
+
         it('Then scale of first index should return min widened range', function() {
           expect(Math.round(financetime(data[0])*1000)/1000).toEqual(100);
         });

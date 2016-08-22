@@ -74,12 +74,9 @@ function refresh(g, plot, accessor, x, y, annotationSelection, annotation) {
 
 function supstancePath(accessor, x, y) {
   return function(d) {
-    var path = [],
-        range = x.range();
+    var range = x.range();
 
-    path.push('M', range[0], y(accessor(d)));
-    path.push('L', range[range.length-1], y(accessor(d)));
-
-    return path.join(' ');
+    return 'M ' + range[0] + ' ' + y(accessor(d)) +
+      ' L ' + range[range.length-1] + ' ' + y(accessor(d));
   };
 }

@@ -35,26 +35,17 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
           width = p.width(x);
 
       return function(d) {
-        var path = [],
-            open = y(accessor.o(d)),
+        var open = y(accessor.o(d)),
             close = y(accessor.c(d)),
-            xValue = x(accessor.d(d)) - width/2;
-
-        path.push(
-          'M', xValue, open,
-          'l', width, 0
-        );
+            xValue = x(accessor.d(d)) - width/2,
+            path = 'M ' + xValue + ' ' + open + ' l ' + width + ' ' + 0;
 
         // Draw body only if there is a body (there is no stroke, so will not appear anyway)
         if(open != close) {
-          path.push(
-            'L', xValue + width, close,
-            'l', -width, 0,
-            'L', xValue, open
-          );
+          path += ' L ' + (xValue + width) + ' ' + close + ' l ' + -width + ' ' + 0 + ' L ' + xValue  + ' ' + open;
         }
 
-        return path.join(' ');
+        return path;
       };
     }
 
@@ -65,32 +56,18 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
         width = p.width(x);
 
       return function(d) {
-        var path = [],
-            open = y(accessor.o(d)),
+        var open = y(accessor.o(d)),
             close = y(accessor.c(d)),
             xPoint = x(accessor.d(d)),
-            xValue = xPoint - width/2;
-
-        // Top
-        path.push(
-          'M', xPoint, y(accessor.h(d)),
-          'L', xPoint, Math.min(open, close)
-        );
+            xValue = xPoint - width/2,
+            path = 'M ' + xPoint + ' ' + y(accessor.h(d)) +' L ' + xPoint + ' '+ Math.min(open, close); // Top
 
         // Draw another cross wick if there is no body
         if(open == close) {
-          path.push(
-            'M', xValue, open,
-            'l', width, 0
-          );
+          path += ' M ' + xValue + ' ' + open + ' l ' + width + ' ' + 0;
         }
         // Bottom
-        path.push(
-          'M', xPoint, Math.max(open, close),
-          'L', xPoint, y(accessor.l(d))
-        );
-
-        return path.join(' ');
+        return path + ' M ' + xPoint + ' ' + Math.max(open, close) + ' L ' + xPoint + ' ' + y(accessor.l(d));
       };
     }
 

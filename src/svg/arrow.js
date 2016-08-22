@@ -10,7 +10,7 @@ module.exports = function(d3_functor) {  // Injected dependencies
         tail = d3_functor(true);
 
     function arrow(d, i) {
-      var path = [],
+      var path,
           x = fx(d, i),
           y = fy(d, i),
           w = width(d, i),
@@ -22,32 +22,31 @@ module.exports = function(d3_functor) {  // Injected dependencies
           pw = w/2,         // Point width
           ph = t ? h/2 : h; // Point Height
 
-      path.push('M', x, y);
+      path = 'M ' + x + ' ' + y;
 
       switch(o) {
         case 'up':
         case 'down':
-          path.push('l', -pw, neg*ph, 'l', ws, 0);
-          if(t) path.push('l', 0, neg*ph);
-          path.push('l', ws, 0);
-          if(t) path.push('l', 0, -neg*ph);
-          path.push('l', ws, 0);
+          path += ' l ' + -pw + ' ' + neg*ph + ' l ' + ws + ' ' + 0;
+          if(t) path += ' l ' + 0 + ' ' + neg*ph;
+          path += ' l ' + ws + ' ' + 0;
+          if(t) path += ' l ' + 0 + ' ' + -neg*ph;
+          path += ' l ' + ws + ' ' + 0;
           break;
 
         case 'left':
         case 'right':
-          path.push('l', neg*ph, -pw, 'l', 0, ws);
-          if(t) path.push('l', neg*ph, 0);
-          path.push('l', 0, ws);
-          if(t) path.push('l', -neg*ph, 0);
-          path.push('l', 0, ws);
+          path += ' l ' + neg*ph + ' ' + -pw + ' l ' + 0 + ' ' + ws;
+          if(t) path += ' l ' + neg*ph + ' ' + 0;
+          path += ' l ' + 0 + ' ' + ws;
+          if(t) path += ' l ' + -neg*ph + ' ' + 0;
+          path += ' l ' + 0 + ' ' + ws;
           break;
 
         default: throw "Unsupported arrow.orient() = " + orient;
       }
 
-      path.push('z');
-      return path.join(' ');
+      return path + ' z';
     }
 
     arrow.x = function(_) {

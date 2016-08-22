@@ -19,6 +19,19 @@ techanModule('plot/plot', function(specBuilder) {
         x = techan.scale.financetime();
       });
 
+      describe('And I have a path generator that returns a path', function() {
+        function pathGenerator() {
+          return function(d) {
+            return 'L 123 M 1 Z';
+          };
+        }
+
+        it('Then joinPath will join the paths together to a single string', function() {
+          // Don't care about values in the data array
+          expect(plot.joinPath(pathGenerator)([undefined, undefined, undefined])).toEqual('L 123 M 1 Z L 123 M 1 Z L 123 M 1 Z');
+        });
+      });
+
       describe('And scale has a small domain and large range', function() {
         beforeEach(function() {
           x.range([0, 1000]);

@@ -102,12 +102,8 @@ function refresh(g, accessor, x, y) {
 
 function trendlinePath(accessor, x, y) {
   return function(d) {
-    var path = [];
-
-    path.push('M', x(accessor.sd(d)), y(accessor.sv(d)));
-    path.push('L', x(accessor.ed(d)), y(accessor.ev(d)));
-
-    return path.join(' ');
+    return 'M ' + x(accessor.sd(d))+ ' ' + y(accessor.sv(d)) +
+      ' L ' + x(accessor.ed(d)) + ' ' + y(accessor.ev(d));
   };
 }
 

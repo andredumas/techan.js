@@ -138,9 +138,9 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
         if(height/2 < point) pt = height/2;
         else h = height/2-point;
 
-        return 'M 0 ' + value + ' l ' + String(neg*Math.max(axis.innerTickSize(), 1)) + ' ' + String(-pt) +
-          ' l 0 ' + String(-h) + ' l ' + (neg*width) + ' 0 l 0 ' + height +
-          ' l ' + (neg*-width) + ' 0 l 0 ' + String(-h);
+        return 'M 0 ' + value + ' l ' + (neg*Math.max(axis.innerTickSize(), 1)) + ' ' + (-pt) +
+          ' l 0 ' + (-h) + ' l ' + (neg*width) + ' 0 l 0 ' + height +
+          ' l ' + (neg*-width) + ' 0 l 0 ' + (-h);
       case 'top':
       case 'bottom':
         var w = 0;
@@ -148,9 +148,9 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
         if(width/2 < point) pt = width/2;
         else w = width/2-point;
 
-        return 'M ' + value + ' 0 l ' + String(-pt) + ' ' + (neg*Math.max(axis.innerTickSize(), 1)) +
-          ' l ' + String(-w) + ' 0 l 0 ' + String(neg*height) + ' l ' + width + ' 0 l 0 ' + (neg*-height) +
-          ' l ' + String(-w) + ' 0';
+        return 'M ' + value + ' 0 l ' + (-pt) + ' ' + (neg*Math.max(axis.innerTickSize(), 1)) +
+          ' l ' + (-w) + ' 0 l 0 ' + (neg*height) + ' l ' + width + ' 0 l 0 ' + (neg*-height) +
+          ' l ' + (-w) + ' 0';
       default: throw "Unsupported axis.orient() = " + axis.orient();
     }
   };

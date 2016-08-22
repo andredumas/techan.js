@@ -75,13 +75,22 @@ module.exports = function(d3_svg_line, d3_select) {
   }
 
   function appendPlotTypePath(g, data, plotNames, direction) {
-    g.selectAll('path.' + plotNames.join('.') + '.' + direction).data(function(d) { return [d.filter(data)]; })
-      .enter().append('path').attr('class', plotNames.join(' ') + ' ' + direction);
+    g.selectAll('path.' + arrayJoin(plotNames, '.') + '.' + direction).data(function(d) { return [d.filter(data)]; })
+      .enter().append('path').attr('class', arrayJoin(plotNames, ' ') + ' ' + direction);
   }
 
   function barWidth(x) {
     if(x.band !== undefined) return Math.max(x.band(), 1);
     else return 3; // If it's not a finance time, the user should specify the band calculation (or constant) on the plot
+  }
+
+  function arrayJoin(array, delimiter) {
+    if(!array.length) return;
+    var result = array[0];
+    for(var i = 1; i < array.length; i++) {
+      result += delimiter + array[i];
+    }
+    return result;
   }
 
   return {
@@ -139,7 +148,7 @@ module.exports = function(d3_svg_line, d3_select) {
      */
     joinPath: function(path) {
       return function(data) {
-        return data.map(path()).join(' ');
+        return arrayJoin(data.map(path()), ' ');
       };
     },
 

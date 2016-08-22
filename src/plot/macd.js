@@ -40,7 +40,7 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
           xValue = x(accessor.d(d)) - width/2;
 
         return 'M ' + xValue + ' ' + zero + ' l 0 ' + height + ' l ' + width +
-          ' 0 l 0 ' + String(-height);
+          ' 0 l 0 ' + (-height);
       };
     }
 

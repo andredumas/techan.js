@@ -38,7 +38,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
           xValue = x(accessor.d(d)) - width/2;
 
         return 'M ' + xValue + ' ' + zero + ' l 0 ' + height + ' l ' + width +
-          ' 0 l 0 ' + String(-height);
+          ' 0 l 0 ' + (-height);
       };
     }
 
