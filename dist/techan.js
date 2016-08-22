@@ -1,9 +1,9 @@
 /*
- TechanJS v0.6.0
- (c) 2014 - 2015 Andre Dumas | https://github.com/andredumas/techan.js
+ TechanJS v0.7.0-0
+ (c) 2014 - 2016 Andre Dumas | https://github.com/andredumas/techan.js
 */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.techan = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.6.0';
+'use strict';module.exports='0.7.0-0';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -2581,10 +2581,9 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
 
     function differencePath() {
       var accessor = p.accessor,
-        x = p.xScale,
-        y = p.yScale,
-        width = p.width(x),
-        r = plot.r;
+          x = p.xScale,
+          y = p.yScale,
+          width = p.width(x);
 
       return function(d) {
         var zero = y(0),
@@ -2642,10 +2641,9 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 
     function ohlcPath() {
       var accessor = p.accessor,
-        x = p.xScale,
-        y = p.yScale,
-        width = p.width(x),
-        r = plot.r;
+          x = p.xScale,
+          y = p.yScale,
+          width = p.width(x);
 
       return function(d) {
         var open = y(accessor.o(d)),
@@ -2674,8 +2672,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 'use strict';
 
 module.exports = function(d3_svg_line, d3_select) {
-  function dataSelection(g, dataMapper, accessor_date) {
-    var selection = g.selectAll('g.data').data(dataMapper, accessor_date);
+  function dataSelection(g, dataMapper, key) {
+    var selection = g.selectAll('g.data').data(dataMapper, key);
     selection.exit().remove();
     return selection;
   }
@@ -2767,8 +2765,8 @@ module.exports = function(d3_svg_line, d3_select) {
 
     dataEntry: dataEntry,
 
-    groupSelect: function(g, dataMapper, accessor_date) {
-      var selection = dataSelection(g, dataMapper, accessor_date),
+    groupSelect: function(g, dataMapper, key) {
+      var selection = dataSelection(g, dataMapper, key),
           entry = dataEntry(selection);
       return {
         selection: selection,
@@ -3173,10 +3171,9 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_tick, plot, plotM
 
     function tickPath() {
       var accessor = p.accessor,
-        x = p.xScale,
-        y = p.yScale,
-        width = p.width(x),
-        r = plot.r;
+          x = p.xScale,
+          y = p.yScale,
+          width = p.width(x);
 
       return function(d) {
         var high = y(accessor.h(d)),

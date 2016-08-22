@@ -1,5 +1,6 @@
 {
   "name": "techan",
+  "description": "A visual, technical analysis and charting (Candlestick, OHLC, indicators) library built on D3.",
   "main": "dist/techan.js",
   "ignore": [
     "Gruntfile.js",
@@ -12,6 +13,6 @@
     "examples"
   ],
   "dependencies": {
-    "d3": "~3.5.12"
+    "d3": "~3.5.17"
   }
 }

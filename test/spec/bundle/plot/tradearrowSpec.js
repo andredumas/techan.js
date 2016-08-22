@@ -93,7 +93,7 @@ techanModule('plot/tradearrow', function(specBuilder) {
           });
 
           it('Then highlighted will have choosen the nearest', function() {
-            expect(g[0][0].innerHTML).toEqual('<g class="data"><path class="tradearrow buy" d="M 0.2549019607843137 1.1 l -6 7.5 l 4 0 l 0 7.5 l 4 0 l 0 -7.5 l 4 0 z"></path><path class="tradearrow sell" d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z"></path><path class="highlight sell" style="pointer-events: none; " d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z"></path></g>');
+            expect(g[0][0].innerHTML).toEqual('<g class="data"><path class="tradearrow buy" d="M 0.2549019607843137 1.1 l -6 7.5 l 4 0 l 0 7.5 l 4 0 l 0 -7.5 l 4 0 z"></path><path class="tradearrow sell" d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z"></path><path class="highlight sell" d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z" style="pointer-events: none;"></path></g>');
           });
 
           describe('And the mouse out event is called', function() {
@@ -102,7 +102,7 @@ techanModule('plot/tradearrow', function(specBuilder) {
             });
 
             it('Then highlighted will be cleared', function() {
-              expect(g[0][0].innerHTML).toEqual('<g class="data"><path class="tradearrow buy" d="M 0.2549019607843137 1.1 l -6 7.5 l 4 0 l 0 7.5 l 4 0 l 0 -7.5 l 4 0 z"></path><path class="tradearrow sell" d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z"></path><path class="highlight" style="pointer-events: none; "></path></g>');
+              expect(g[0][0].innerHTML).toEqual('<g class="data"><path class="tradearrow buy" d="M 0.2549019607843137 1.1 l -6 7.5 l 4 0 l 0 7.5 l 4 0 l 0 -7.5 l 4 0 z"></path><path class="tradearrow sell" d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z"></path><path class="highlight" style="pointer-events: none;"></path></g>');
             });
           });
         });
