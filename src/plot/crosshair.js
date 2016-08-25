@@ -130,7 +130,7 @@ function horizontalPathLine(y, range) {
   return function(d) {
     if(d === null) return null;
     var value = y(d);
-    return ['M', range[0], value, 'L', range[range.length-1], value].join(' ');
+    return 'M ' + range[0] + ' ' + value + ' L ' + range[range.length-1] + ' ' + value;
   };
 }
 
@@ -140,6 +140,6 @@ function verticalPathLine(x, range) {
     var value = x(d),
         sr = x.range();
     if(value < Math.min(sr[0], sr[sr.length-1]) || value > Math.max(sr[0], sr[sr.length-1])) return null;
-    return ['M', value, range[0], 'L', value, range[range.length-1]].join(' ');
+    return 'M ' + value + ' ' + range[0] + ' L ' + value + ' ' + range[range.length-1];
   };
 }

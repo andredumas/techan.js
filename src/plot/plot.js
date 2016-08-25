@@ -114,10 +114,8 @@ module.exports = function(d3_svg_line, d3_select) {
         var firstDatum = d[0],
             lastDatum = d[d.length-1];
 
-        return [
-            'M', x(accessor_date(firstDatum)), y(accessor_value(firstDatum)),
-            'L', x(accessor_date(lastDatum)), y(accessor_value(lastDatum))
-          ].join(' ');
+        return 'M ' + x(accessor_date(firstDatum)) + ' ' + y(accessor_value(firstDatum)) +
+          ' L ' + x(accessor_date(lastDatum)) + ' ' + y(accessor_value(lastDatum));
       };
     },
 

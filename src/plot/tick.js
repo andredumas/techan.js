@@ -34,14 +34,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_tick, plot, plotM
           xPoint = x(accessor.d(d)),
           xValue = xPoint - width/2;
 
-        return [
-          'M', xValue, high,
-          'l', width, 0,
-          'M', xPoint, high,
-          'L', xPoint, low,
-          'M', xValue, low,
-          'l', width, 0
-        ].join(' ');
+        return 'M ' + xValue + ' ' + high + ' l ' + width + ' 0 M ' + xPoint + ' ' + high +
+          ' L ' + xPoint + ' ' + low + ' M ' + xValue + ' ' + low + ' l ' + width + ' 0';
       };
     }
 

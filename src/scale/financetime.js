@@ -34,7 +34,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
      * @returns {*}
      */
     function scale(x, offset) {
-      var mappedIndex = dateIndexMap[+x];
+      var mappedIndex = dateIndexMap[x.getTime ? x.getTime() : +x];
       offset = offset || 0;
 
       // Make sure the value has been mapped, if not, determine if it's just before, round in, or just after domain
