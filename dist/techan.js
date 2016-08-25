@@ -1,9 +1,9 @@
 /*
- TechanJS v0.7.0-0
+ TechanJS v0.7.0-1
  (c) 2014 - 2016 Andre Dumas | https://github.com/andredumas/techan.js
 */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.techan = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.7.0-0';
+'use strict';module.exports='0.7.0-1';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -2046,15 +2046,9 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
         if(height/2 < point) pt = height/2;
         else h = height/2-point;
 
-        return [
-          'M', 0, value,
-          'l', neg*Math.max(axis.innerTickSize(), 1), -pt,
-          'l', 0, -h,
-          'l', neg*width, 0,
-          'l', 0, height,
-          'l', neg*-width, 0,
-          'l', 0, -h
-        ].join(' ');
+        return 'M 0 ' + value + ' l ' + (neg*Math.max(axis.innerTickSize(), 1)) + ' ' + (-pt) +
+          ' l 0 ' + (-h) + ' l ' + (neg*width) + ' 0 l 0 ' + height +
+          ' l ' + (neg*-width) + ' 0 l 0 ' + (-h);
       case 'top':
       case 'bottom':
         var w = 0;
@@ -2062,15 +2056,9 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
         if(width/2 < point) pt = width/2;
         else w = width/2-point;
 
-        return [
-          'M', value, 0,
-          'l', -pt, neg*Math.max(axis.innerTickSize(), 1),
-          'l', -w, 0,
-          'l', 0, neg*height,
-          'l', width, 0,
-          'l', 0, neg*-height,
-          'l', -w, 0
-        ].join(' ');
+        return 'M ' + value + ' 0 l ' + (-pt) + ' ' + (neg*Math.max(axis.innerTickSize(), 1)) +
+          ' l ' + (-w) + ' 0 l 0 ' + (neg*height) + ' l ' + width + ' 0 l 0 ' + (neg*-height) +
+          ' l ' + (-w) + ' 0';
       default: throw "Unsupported axis.orient() = " + axis.orient();
     }
   };
@@ -2156,26 +2144,17 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
           width = p.width(x);
 
       return function(d) {
-        var path = [],
-            open = y(accessor.o(d)),
+        var open = y(accessor.o(d)),
             close = y(accessor.c(d)),
-            xValue = x(accessor.d(d)) - width/2;
-
-        path.push(
-          'M', xValue, open,
-          'l', width, 0
-        );
+            xValue = x(accessor.d(d)) - width/2,
+            path = 'M ' + xValue + ' ' + open + ' l ' + width + ' ' + 0;
 
         // Draw body only if there is a body (there is no stroke, so will not appear anyway)
         if(open != close) {
-          path.push(
-            'L', xValue + width, close,
-            'l', -width, 0,
-            'L', xValue, open
-          );
+          path += ' L ' + (xValue + width) + ' ' + close + ' l ' + -width + ' ' + 0 + ' L ' + xValue  + ' ' + open;
         }
 
-        return path.join(' ');
+        return path;
       };
     }
 
@@ -2186,32 +2165,18 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
         width = p.width(x);
 
       return function(d) {
-        var path = [],
-            open = y(accessor.o(d)),
+        var open = y(accessor.o(d)),
             close = y(accessor.c(d)),
             xPoint = x(accessor.d(d)),
-            xValue = xPoint - width/2;
-
-        // Top
-        path.push(
-          'M', xPoint, y(accessor.h(d)),
-          'L', xPoint, Math.min(open, close)
-        );
+            xValue = xPoint - width/2,
+            path = 'M ' + xPoint + ' ' + y(accessor.h(d)) +' L ' + xPoint + ' '+ Math.min(open, close); // Top
 
         // Draw another cross wick if there is no body
         if(open == close) {
-          path.push(
-            'M', xValue, open,
-            'l', width, 0
-          );
+          path += ' M ' + xValue + ' ' + open + ' l ' + width + ' ' + 0;
         }
         // Bottom
-        path.push(
-          'M', xPoint, Math.max(open, close),
-          'L', xPoint, y(accessor.l(d))
-        );
-
-        return path.join(' ');
+        return path + ' M ' + xPoint + ' ' + Math.max(open, close) + ' L ' + xPoint + ' ' + y(accessor.l(d));
       };
     }
 
@@ -2237,7 +2202,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
     function crosshair(g) {
       var group = g.selectAll('g.data.top').data([change], function(d) { return d; }),
           groupEnter = group.enter(),
-          dataEnter = groupEnter.append('g').attr('class', 'data top').style('display', 'none');
+          dataEnter = groupEnter.insert('g', ':first-child').attr('class', 'data top').style('display', 'none'); // Always needs to be before the 'rect pointer-events'
 
       group.exit().remove();
 
@@ -2255,7 +2220,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
     crosshair.refresh = function(g) {
       var xRange = p.xScale.range(),
           yRange = p.yScale.range(),
-          group = g.selectAll('g.data'),
+          group = g.selectAll('g.data.top'),
           mouseSelection = g.selectAll('rect'),
           pathVerticalSelection = group.selectAll('path.vertical'),
           pathHorizontalSelection = group.selectAll('path.horizontal'),
@@ -2269,11 +2234,11 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
           width: Math.abs(xRange[xRange.length-1] - xRange[0])
         })
         .on('mouseenter', function() {
-          display(g, 'inline');
+          display(group, 'inline');
           dispatch.enter();
         })
         .on('mouseout', function() {
-          display(g, 'none');
+          display(group, 'none');
           dispatch.out();
         })
         .on('mousemove', mousemoveRefresh(pathVerticalSelection, pathHorizontalSelection,
@@ -2346,15 +2311,15 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
   };
 };
 
-function display(g, style) {
-  g.select('g.data.top').style('display', style);
+function display(top, style) {
+  top.style('display', style);
 }
 
 function horizontalPathLine(y, range) {
   return function(d) {
     if(d === null) return null;
     var value = y(d);
-    return ['M', range[0], value, 'L', range[range.length-1], value].join(' ');
+    return 'M ' + range[0] + ' ' + value + ' L ' + range[range.length-1] + ' ' + value;
   };
 }
 
@@ -2364,7 +2329,7 @@ function verticalPathLine(x, range) {
     var value = x(d),
         sr = x.range();
     if(value < Math.min(sr[0], sr[sr.length-1]) || value > Math.max(sr[0], sr[sr.length-1])) return null;
-    return ['M', value, range[0], 'L', value, range[range.length-1]].join(' ');
+    return 'M ' + value + ' ' + range[0] + ' L ' + value + ' ' + range[range.length-1];
   };
 }
 },{}],40:[function(require,module,exports){
@@ -2590,12 +2555,8 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
           height = y(accessor.dif(d)) - zero,
           xValue = x(accessor.d(d)) - width/2;
 
-        return [
-          'M', xValue, zero,
-          'l', 0, height,
-          'l', width, 0,
-          'l', 0, -height
-        ].join(' ');
+        return 'M ' + xValue + ' ' + zero + ' l 0 ' + height + ' l ' + width +
+          ' 0 l 0 ' + (-height);
       };
     }
 
@@ -2651,14 +2612,9 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
             xPoint = x(accessor.d(d)),
             xValue = xPoint - width/2;
 
-        return [
-          'M', xValue, open,
-          'l', width/2, 0,
-          'M', xPoint, y(accessor.h(d)),
-          'L', xPoint, y(accessor.l(d)),
-          'M', xPoint, close,
-          'l', width/2, 0
-        ].join(' ');
+        return 'M ' + xValue + ' ' +
+          open + ' l ' + (width/2) + ' 0 M ' + xPoint + ' ' + y(accessor.h(d)) + ' L ' +
+          xPoint + ' ' + y(accessor.l(d)) + ' M ' + xPoint + ' ' + close + ' l ' + (width/2) + ' 0';
       };
     }
 
@@ -2746,13 +2702,22 @@ module.exports = function(d3_svg_line, d3_select) {
   }
 
   function appendPlotTypePath(g, data, plotNames, direction) {
-    g.selectAll('path.' + plotNames.join('.') + '.' + direction).data(function(d) { return [d.filter(data)]; })
-      .enter().append('path').attr('class', plotNames.join(' ') + ' ' + direction);
+    g.selectAll('path.' + arrayJoin(plotNames, '.') + '.' + direction).data(function(d) { return [d.filter(data)]; })
+      .enter().append('path').attr('class', arrayJoin(plotNames, ' ') + ' ' + direction);
   }
 
   function barWidth(x) {
     if(x.band !== undefined) return Math.max(x.band(), 1);
     else return 3; // If it's not a finance time, the user should specify the band calculation (or constant) on the plot
+  }
+
+  function arrayJoin(array, delimiter) {
+    if(!array.length) return;
+    var result = array[0];
+    for(var i = 1; i < array.length; i++) {
+      result += delimiter + array[i];
+    }
+    return result;
   }
 
   return {
@@ -2785,10 +2750,8 @@ module.exports = function(d3_svg_line, d3_select) {
         var firstDatum = d[0],
             lastDatum = d[d.length-1];
 
-        return [
-            'M', x(accessor_date(firstDatum)), y(accessor_value(firstDatum)),
-            'L', x(accessor_date(lastDatum)), y(accessor_value(lastDatum))
-          ].join(' ');
+        return 'M ' + x(accessor_date(firstDatum)) + ' ' + y(accessor_value(firstDatum)) +
+          ' L ' + x(accessor_date(lastDatum)) + ' ' + y(accessor_value(lastDatum));
       };
     },
 
@@ -2812,7 +2775,7 @@ module.exports = function(d3_svg_line, d3_select) {
      */
     joinPath: function(path) {
       return function(data) {
-        return data.map(path()).join(' ');
+        return arrayJoin(data.map(path()), ' ');
       };
     },
 
@@ -3135,13 +3098,10 @@ function refresh(g, plot, accessor, x, y, annotationSelection, annotation) {
 
 function supstancePath(accessor, x, y) {
   return function(d) {
-    var path = [],
-        range = x.range();
+    var range = x.range();
 
-    path.push('M', range[0], y(accessor(d)));
-    path.push('L', range[range.length-1], y(accessor(d)));
-
-    return path.join(' ');
+    return 'M ' + range[0] + ' ' + y(accessor(d)) +
+      ' L ' + range[range.length-1] + ' ' + y(accessor(d));
   };
 }
 },{}],50:[function(require,module,exports){
@@ -3181,14 +3141,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_tick, plot, plotM
           xPoint = x(accessor.d(d)),
           xValue = xPoint - width/2;
 
-        return [
-          'M', xValue, high,
-          'l', width, 0,
-          'M', xPoint, high,
-          'L', xPoint, low,
-          'M', xValue, low,
-          'l', width, 0
-        ].join(' ');
+        return 'M ' + xValue + ' ' + high + ' l ' + width + ' 0 M ' + xPoint + ' ' + high +
+          ' L ' + xPoint + ' ' + low + ' M ' + xValue + ' ' + low + ' l ' + width + ' 0';
       };
     }
 
@@ -3402,12 +3356,8 @@ function refresh(g, accessor, x, y) {
 
 function trendlinePath(accessor, x, y) {
   return function(d) {
-    var path = [];
-
-    path.push('M', x(accessor.sd(d)), y(accessor.sv(d)));
-    path.push('L', x(accessor.ed(d)), y(accessor.ev(d)));
-
-    return path.join(' ');
+    return 'M ' + x(accessor.sd(d))+ ' ' + y(accessor.sv(d)) +
+      ' L ' + x(accessor.ed(d)) + ' ' + y(accessor.ev(d));
   };
 }
 
@@ -3457,12 +3407,8 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
           height = y(vol) - zero,
           xValue = x(accessor.d(d)) - width/2;
 
-        return [
-          'M', xValue, zero,
-          'l', 0, height,
-          'l', width, 0,
-          'l', 0, -height
-        ].join(' ');
+        return 'M ' + xValue + ' ' + zero + ' l 0 ' + height + ' l ' + width +
+          ' 0 l 0 ' + (-height);
       };
     }
 
@@ -3543,7 +3489,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
      * @returns {*}
      */
     function scale(x, offset) {
-      var mappedIndex = dateIndexMap[+x];
+      var mappedIndex = dateIndexMap[x instanceof Date ? x.getTime() : +x];
       offset = offset || 0;
 
       // Make sure the value has been mapped, if not, determine if it's just before, round in, or just after domain
@@ -4141,7 +4087,7 @@ module.exports = function(d3_functor) {  // Injected dependencies
         tail = d3_functor(true);
 
     function arrow(d, i) {
-      var path = [],
+      var path,
           x = fx(d, i),
           y = fy(d, i),
           w = width(d, i),
@@ -4153,32 +4099,31 @@ module.exports = function(d3_functor) {  // Injected dependencies
           pw = w/2,         // Point width
           ph = t ? h/2 : h; // Point Height
 
-      path.push('M', x, y);
+      path = 'M ' + x + ' ' + y;
 
       switch(o) {
         case 'up':
         case 'down':
-          path.push('l', -pw, neg*ph, 'l', ws, 0);
-          if(t) path.push('l', 0, neg*ph);
-          path.push('l', ws, 0);
-          if(t) path.push('l', 0, -neg*ph);
-          path.push('l', ws, 0);
+          path += ' l ' + -pw + ' ' + neg*ph + ' l ' + ws + ' ' + 0;
+          if(t) path += ' l ' + 0 + ' ' + neg*ph;
+          path += ' l ' + ws + ' ' + 0;
+          if(t) path += ' l ' + 0 + ' ' + -neg*ph;
+          path += ' l ' + ws + ' ' + 0;
           break;
 
         case 'left':
         case 'right':
-          path.push('l', neg*ph, -pw, 'l', 0, ws);
-          if(t) path.push('l', neg*ph, 0);
-          path.push('l', 0, ws);
-          if(t) path.push('l', -neg*ph, 0);
-          path.push('l', 0, ws);
+          path += ' l ' + neg*ph + ' ' + -pw + ' l ' + 0 + ' ' + ws;
+          if(t) path += ' l ' + neg*ph + ' ' + 0;
+          path += ' l ' + 0 + ' ' + ws;
+          if(t) path += ' l ' + -neg*ph + ' ' + 0;
+          path += ' l ' + 0 + ' ' + ws;
           break;
 
         default: throw "Unsupported arrow.orient() = " + orient;
       }
 
-      path.push('z');
-      return path.join(' ');
+      return path + ' z';
     }
 
     arrow.x = function(_) {
