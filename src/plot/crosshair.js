@@ -13,7 +13,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
     function crosshair(g) {
       var group = g.selectAll('g.data.top').data([change], function(d) { return d; }),
           groupEnter = group.enter(),
-          dataEnter = groupEnter.append('g').attr('class', 'data top').style('display', 'none');
+          dataEnter = groupEnter.insert('g', ':first-child').attr('class', 'data top').style('display', 'none'); // Always needs to be before the 'rect pointer-events'
 
       group.exit().remove();
 
@@ -31,7 +31,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
     crosshair.refresh = function(g) {
       var xRange = p.xScale.range(),
           yRange = p.yScale.range(),
-          group = g.selectAll('g.data'),
+          group = g.selectAll('g.data.top'),
           mouseSelection = g.selectAll('rect'),
           pathVerticalSelection = group.selectAll('path.vertical'),
           pathHorizontalSelection = group.selectAll('path.horizontal'),
@@ -45,11 +45,11 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
           width: Math.abs(xRange[xRange.length-1] - xRange[0])
         })
         .on('mouseenter', function() {
-          display(g, 'inline');
+          display(group, 'inline');
           dispatch.enter();
         })
         .on('mouseout', function() {
-          display(g, 'none');
+          display(group, 'none');
           dispatch.out();
         })
         .on('mousemove', mousemoveRefresh(pathVerticalSelection, pathHorizontalSelection,
@@ -122,8 +122,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
   };
 };
 
-function display(g, style) {
-  g.select('g.data.top').style('display', style);
+function display(top, style) {
+  top.style('display', style);
 }
 
 function horizontalPathLine(y, range) {

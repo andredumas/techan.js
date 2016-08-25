@@ -241,7 +241,7 @@ techanModule('plot/crosshair', function(specBuilder) {
 
           beforeEach(function () {
             selection = jasmine.createSpyObj('selection', ['select', 'selectAll', 'enter', 'exit', 'each',
-              'on', 'remove', 'data', 'append', 'attr', 'style', 'call']);
+              'on', 'remove', 'data', 'append', 'insert', 'attr', 'style', 'call']);
 
             selection.select.and.returnValue(selection);
             selection.selectAll.and.returnValue(selection);
@@ -252,6 +252,7 @@ techanModule('plot/crosshair', function(specBuilder) {
             selection.remove.and.returnValue(selection);
             selection.data.and.returnValue(selection);
             selection.append.and.returnValue(selection);
+            selection.insert.and.returnValue(selection);
             selection.attr.and.returnValue(selection);
             selection.call.and.returnValue(selection);
             selection.style.and.returnValue(selection);
