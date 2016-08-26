@@ -2,7 +2,7 @@ techanModule('indicator', function(specBuilder) {
   'use strict';
 
   var actualInit = function(module) {
-    return module();
+    return module(d3);
   };
 
   specBuilder.require(require('../../../../src/indicator'), function(instanceBuilder) {

@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(d3_svg_line, d3_select) {
+module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
   function dataSelection(g, dataMapper, key) {
     var selection = g.selectAll('g.data').data(dataMapper, key);
     selection.exit().remove();
@@ -32,7 +32,7 @@ module.exports = function(d3_svg_line, d3_select) {
   }
 
   function PathArea() {
-    var d3Area = d3.svg.area().interpolate('monotone');
+    var d3Area = d3_svg_area().interpolate('monotone');
 
     function area(data) {
       return d3Area(data);

@@ -11,7 +11,7 @@ module.exports = (function(d3) {
   return {
     version: require('../build/version'),
     accessor: require('./accessor')(),
-    indicator: require('./indicator')(),
+    indicator: require('./indicator')(d3),
     plot: require('./plot')(d3),
     scale: require('./scale')(d3),
     svg: require('./svg')(d3)

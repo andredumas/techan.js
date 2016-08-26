@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function() {
+module.exports = function(d3) {
   var indicatorMixin = require('./indicatormixin')(),
       accessor = require('../accessor')(),
       ema_init = require('./ema'),
@@ -21,7 +21,7 @@ module.exports = function() {
     aroon: require('./aroon')(indicatorMixin, accessor.ohlc),
     stochastic: require('./stochastic')(indicatorMixin, accessor.ohlc, ema),
     williams: require('./williams')(indicatorMixin, accessor.ohlc, ema),
-    adx: require('./adx')(indicatorMixin, accessor.ohlc, ema),
+    adx: require('./adx')(d3.max, indicatorMixin, accessor.ohlc, ema),
     bollinger: require('./bollinger')(indicatorMixin, accessor.ohlc, sma),
     vwap: vwap
    };

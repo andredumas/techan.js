@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
+module.exports = function(d3_max, indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
         period = 14;
@@ -27,7 +27,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
                 minusDM = downMove;
             }
 
-            var TR = d3.max([
+            var TR = d3_max([
                 (p.accessor.h(d) - p.accessor.l(d)),
                 Math.abs(p.accessor.h(d) - p.accessor.c(data[i-1])),Math.abs(p.accessor.l(d) - p.accessor.c(data[i-1]))
             ]);

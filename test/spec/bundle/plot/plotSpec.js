@@ -6,7 +6,7 @@ techanModule('plot/plot', function(specBuilder) {
       data = require('../_fixtures/data/ohlc').alternating.array;
 
   var actualInit = function(module) {
-    return module(d3.scale.linear, d3.select);
+    return module(d3.svg.line, d3.svg.area, d3.select);
   };
 
   specBuilder.require(require('../../../../src/plot/plot'), function(instanceBuilder) {
