@@ -67,3 +67,18 @@
 [submodule "examples/plot/tradearrow"]
 	path = examples/plot/tradearrow
 	url = https://gist.github.com/3c0eefdd77a6380b1a35.git
+[submodule "examples/indicator/williams"]
+	path = examples/indicator/williams
+	url = https://gist.github.com/c12073b8800f50dd9de03ce590073ab6.git
+[submodule "examples/indicator/stochastic"]
+	path = examples/indicator/stochastic
+	url = https://gist.github.com/ca282714b8a0580e56623053b18ce8f9.git
+[submodule "examples/indicator/adx"]
+	path = examples/indicator/adx
+	url = https://gist.github.com/509587c3348c09463b236321e8df2679.git
+[submodule "examples/indicator/aroon"]
+	path = examples/indicator/aroon
+	url = https://gist.github.com/f18938b1adeb27e0b6fd.git
+[submodule "examples/indicator/bollinger"]
+	path = examples/indicator/bollinger
+	url = https://gist.github.com/2da5cf683eb1e0589fa10418d442479c.git
