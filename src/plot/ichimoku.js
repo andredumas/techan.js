@@ -12,7 +12,7 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
         kijunsen = plot.pathLine();
 
     function ichimoku(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array),
+      var group = p.dataSelector(g),
           clipUpId = 'kumoclipup-' + randomID(),
           clipDownId = 'kumoclipdown-' + randomID();
 
@@ -31,20 +31,20 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
     }
 
     ichimoku.refresh = function(g) {
-      refresh(g, p.yScale);
+      refresh(p.dataSelector.select(g), p.yScale);
     };
 
-    function refresh(g, y) {
-      g.selectAll('.kumoclipdown path').attr('d', kumoClip.y1(y.range()[0])); // Fill the bottom of the cloud to be clipped
-      g.selectAll('.kumoclipup path').attr('d', kumoClip.y1(y.range()[1])); // Fill the top of the cloud to be clipped
-      g.selectAll('path.kumo.down').attr('d', kumo);
-      g.selectAll('path.kumo.up').attr('d', kumo);
-      g.selectAll('path.senkouspanb').attr('d', senkouSpanB);
-      g.selectAll('path.senkouspana').attr('d', senkouSpanA);
+    function refresh(selection, y) {
+      selection.select('.kumoclipdown path').attr('d', kumoClip.y1(y.range()[0])); // Fill the bottom of the cloud to be clipped
+      selection.select('.kumoclipup path').attr('d', kumoClip.y1(y.range()[1])); // Fill the top of the cloud to be clipped
+      selection.select('path.kumo.down').attr('d', kumo);
+      selection.select('path.kumo.up').attr('d', kumo);
+      selection.select('path.senkouspanb').attr('d', senkouSpanB);
+      selection.select('path.senkouspana').attr('d', senkouSpanA);
 
-      g.selectAll('path.chikouspan').attr('d', chikouSpan);
-      g.selectAll('path.kijunsen').attr('d', kijunsen);
-      g.selectAll('path.tenkansen').attr('d', tenkanSen);
+      selection.select('path.chikouspan').attr('d', chikouSpan);
+      selection.select('path.kijunsen').attr('d', kijunsen);
+      selection.select('path.tenkansen').attr('d', tenkanSen);
     }
 
     function binder() {
@@ -71,7 +71,7 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(ichimoku, p).plot(accessor_ichimoku(), binder);
+    plotMixin(ichimoku, p).plot(accessor_ichimoku(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return ichimoku;

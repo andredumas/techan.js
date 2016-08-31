@@ -1,15 +1,56 @@
 'use strict';
 
 module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
-  function dataSelection(g, dataMapper, key) {
-    var selection = g.selectAll('g.data').data(dataMapper, key);
-    selection.exit().remove();
-    return selection;
-  }
+  var DataSelector = function(mapper) {
+    var key,
+        scope,
+        classes = ['data'];
 
-  function dataEntry(dataSelection) {
-    return dataSelection.enter().append('g').attr('class', 'data');
-  }
+    function dataSelect(g) {
+      var selection = dataSelect.select(g).data(mapper, key);
+      selection.exit().remove();
+
+      return {
+        selection: selection,
+        entry: selection.enter().append('g').attr('class',  arrayJoin(classes, ' '))
+      };
+    }
+
+    dataSelect.select = function(g) {
+      return g.selectAll('g.' + arrayJoin(classes, '.'));
+    };
+
+    /**
+     * DataSelector.mapper.unity, DataSelector.mapper.array, or custom data mapper
+     * @param _
+     * @returns {*}
+     */
+    dataSelect.mapper = function(_) {
+      if(!arguments.length) return mapper;
+      mapper = _;
+      return dataSelect;
+    };
+
+    dataSelect.scope = function(_) {
+      if(!arguments.length) return scope;
+      scope = _;
+      classes = ['data', 'scope-' + scope];
+      return dataSelect;
+    };
+
+    dataSelect.key= function(_) {
+      if(!arguments.length) return key;
+      key = _;
+      return dataSelect;
+    };
+
+    return dataSelect;
+  };
+
+  DataSelector.mapper = {
+    unity: function(d) { return d; },
+    array: function(d) { return [d]; }
+  };
 
   function PathLine() {
     var d3Line = d3_svg_line().interpolate('monotone');
@@ -94,23 +135,7 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
   }
 
   return {
-    dataMapper: {
-      unity: function(d) { return d; },
-      array: function(d) { return [d]; }
-    },
-
-    dataSelection: dataSelection,
-
-    dataEntry: dataEntry,
-
-    groupSelect: function(g, dataMapper, key) {
-      var selection = dataSelection(g, dataMapper, key),
-          entry = dataEntry(selection);
-      return {
-        selection: selection,
-        entry: entry
-      };
-    },
+    dataSelector: DataSelector,
 
     appendPathsGroupBy: appendPathsGroupBy,
 
@@ -134,12 +159,12 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
 
     barWidth: barWidth,
 
-    lineWidth: function(x, max, div) {
+    scaledStrokeWidth: function(x, max, div) {
       max = max || 1;
       div = div || 1;
 
       return function() {
-        return Math.min(max, barWidth(x)/div);
+        return Math.min(max, barWidth(x)/div) + 'px';
       };
     },
 
@@ -183,7 +208,31 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
     },
 
     annotation: {
-      append: function(selection, annotations, clazz, accessor, scale) {
+      append: function(group, annotations, clazz, accessor, scale) {
+        // Append if we're in entry
+        group.entry.append('g').attr('class', 'axisannotation ' + clazz);
+
+        var annotation = group.selection.selectAll('g.axisannotation.' + clazz)
+          .selectAll('g.axisannotation.' + clazz + ' > g').data(function(d) {
+            var y = scale(accessor(d));
+            return annotations.map(function(annotation) {
+              var value = annotation.axis().scale().invert(y);
+              return [{ value: value }];
+            });
+          });
+
+        annotation.exit().remove();
+        annotation.enter().append('g').attr('class', function(d, i) { return i; });
+        annotation.each(function(d, i) {
+            // Store some meta for lookup later, could use class instance, but this 'should' be more reliable
+            this.__annotation__ = i;
+            annotations[i](d3_select(this));
+          });
+
+        return annotation;
+      },
+
+      appendDeprecated: function(selection, annotations, clazz, accessor, scale) {
         // Use this to either scale the data or initialise to null if accessor and scales are not provided
         var argumentLength = arguments.length;
 
@@ -218,7 +267,7 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
 
       refresh: function(annotations) {
         return function() {
-          annotations[this.__annotation__].refresh(d3_select(this));
+          annotations[this.__annotation__](d3_select(this));
         };
       }
     }

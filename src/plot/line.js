@@ -8,7 +8,7 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
         svgLine = plot.pathLine();
 
     function line(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array);
+      var group = p.dataSelector(g);
 
       group.entry.append('path').attr('class', 'line');
 
@@ -20,7 +20,7 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
     }
 
     line.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, svgLine, showZero);
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale, plot, svgLine, showZero);
     };
 
     function binder() {
@@ -28,17 +28,17 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(line, p).plot(accessor_value(), binder);
+    plotMixin(line, p).plot(accessor_value(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return line;
   };
 };
 
-function refresh(g, accessor, x, y, plot, svgLine, showZero) {
-  g.selectAll('path.line').attr('d', svgLine);
+function refresh(selection, accessor, x, y, plot, svgLine, showZero) {
+  selection.select('path.line').attr('d', svgLine);
 
   if(showZero) {
-    g.selectAll('path.zero').attr('d', plot.horizontalPathLine(x, accessor.z, y));
+    selection.select('path.zero').attr('d', plot.horizontalPathLine(x, accessor.z, y));
   }
 }

@@ -7,7 +7,7 @@ module.exports = function(accessor_stochastic, plot, plotMixin) {  // Injected d
         stochDownLine = plot.pathLine();
 
     function stochastic(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       group.entry.append('path').attr('class', 'overbought');
       group.entry.append('path').attr('class', 'oversold');
@@ -17,7 +17,7 @@ module.exports = function(accessor_stochastic, plot, plotMixin) {  // Injected d
     }
 
     stochastic.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, stochUpLine,
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale, plot, stochUpLine,
               stochDownLine);
     };
 
@@ -27,16 +27,16 @@ module.exports = function(accessor_stochastic, plot, plotMixin) {  // Injected d
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(stochastic, p).plot(accessor_stochastic(), binder);
+    plotMixin(stochastic, p).plot(accessor_stochastic(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return stochastic;
   };
 };
 
-function refresh(g, accessor, x, y, plot, stochUpLine, stochDownLine) {
-  g.selectAll('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
-  g.selectAll('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
-  g.selectAll('path.stochastic.up').attr('d', stochUpLine);
-  g.selectAll('path.stochastic.down').attr('d', stochDownLine);
+function refresh(selection, accessor, x, y, plot, stochUpLine, stochDownLine) {
+  selection.select('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
+  selection.select('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
+  selection.select('path.stochastic.up').attr('d', stochUpLine);
+  selection.select('path.stochastic.down').attr('d', stochDownLine);
 }

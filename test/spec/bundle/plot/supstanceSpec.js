@@ -3,319 +3,240 @@ techanModule('plot/supstance', function(specBuilder) {
 
   var techan = require('../../../../src/techan'),
       data = require('./../_fixtures/data/supstance'),
-      domFixtures = require('../_fixtures/dom'),
-      spies = {};
+      domFixtures = require('../_fixtures/dom');
 
   var actualInit = function() {
     return techan.plot.supstance;
   };
 
-  var mockEventInit = function(supstance) {
-    spies.d3_event = jasmine.createSpy('d3_event');
-    spies.d3_select = jasmine.createSpy('d3_select');
-
-    var plot = require('../../../../src/plot/plot')(d3.svg.line, d3.svg.area, spies.d3_select),
-        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, d3.functor, techan.scale.financetime);
-
-    return supstance(d3.behavior.drag, spies.d3_event, spies.d3_select, d3.dispatch, techan.accessor.value, plot, plotMixin);
-  };
-
   specBuilder.require(require('../../../../src/plot/supstance'), function(instanceBuilder) {
     instanceBuilder.instance('actual', actualInit, function(scope) {
       describe('And supstance is initialised with defaults', function () {
+        plotShouldRenderWithoutError(scope, data, domFixtures, assertDom, 1, 3);
         plotMixinShouldBeSetup(scope);
 
-        var plot,
-            g;
+        function assertDom(scope) {
+          var childElements;
 
-        beforeEach(function () {
-          plot = scope.plot;
-          plot.xScale().domain([data[0].start, data[0].end]);
-          g = domFixtures.g(data);
-        });
+          beforeEach(function() {
+            childElements = scope.childElements;
+          });
 
-        it('Then .on should be defined', function() {
-          expect(plot.on).toBeDefined();
-        });
+          describe('And on obtaining the data element', function() {
+            it('Then contains a supstance path', function() {
+              expect(childElements[0].outerHTML)
+                .toEqual('<g class="supstance"><path d="M 0 8 L 1 8"></path></g>');
+            });
 
-        it('Then on default invoke, it should render without error', function() {
-          plot(g);
-          expect(g[0][0].innerHTML).not.toContain('NaN');
-        });
+            it('Then contains axis annotation place holder', function() {
+              expect(childElements[1].outerHTML)
+                .toEqual('<g class="axisannotation y"></g>');
+            });
 
-        it('Then on refresh invoke, it should be refreshed only', function() {
-          plot(g);
-          plot.refresh(g);
-          expect(g[0][0].innerHTML).not.toContain('NaN');
-        });
+            it('Then contains an interaction path', function() {
+              expect(childElements[2].outerHTML)
+                .toEqual('<g class="interaction" style="opacity: 0; fill: none;"><path d="M 0 8 L 1 8" style="stroke-width: 16px;"></path></g>');
+            });
+          });
+        }
       });
 
       describe('And supstance is initialised with annotation', function () {
-        plotMixinShouldBeSetup(scope);
-
-        var plot,
-          g;
+        var data = [{ start: new Date(2014, 2, 5), end: new Date(2014, 2, 7), value: 8 }];
 
         beforeEach(function () {
-          plot = scope.plot;
-          plot.xScale().domain([data[0].start, data[0].end]);
-          plot.annotation(techan.plot.axisannotation());
-          g = domFixtures.g(data);
+          // Data us mutated, reset after each run, supstance mutates data on move
+          data[0] = { start: new Date(2014, 2, 5), end: new Date(2014, 2, 7), value: 8 };
+          scope.plot.annotation(techan.plot.axisannotation());
+          scope.plot.annotation()[0].axis().scale(scope.plot.yScale().domain([0, 10]).range([0, 100]));
         });
 
-        it('Then .on should be defined', function() {
-          expect(plot.on).toBeDefined();
-        });
-
-        it('Then on default invoke, it should render without error', function() {
-          plot(g);
-          expect(g[0][0].innerHTML).not.toContain('NaN');
-        });
-
-        it('Then on refresh invoke, it should be refreshed only', function() {
-          plot(g);
-          plot.refresh(g);
-          expect(g[0][0].innerHTML).not.toContain('NaN');
-        });
-      });
-    });
-
-    instanceBuilder.instance('mocked select and event', mockEventInit, function(scope) {
-      var supstance,
-          selection,
-          annotation;
-
-      beforeEach(function() {
-        supstance = scope.supstance;
-        // This is painful and not asserting anything other than successful execution. Needs improvement
-        annotation = function() {}; // Base annotation mock
-        var annotationObject = jasmine.createSpyObj('annotation', ['accessor', 'axis', 'scale', 'invert', 'refresh']);
-        annotation.axis = annotationObject.axis;
-        annotation.scale = annotationObject.scale;
-        annotation.accessor = annotationObject.accessor;
-        annotation.invert = annotationObject.invert;
-        annotation.refresh = annotationObject.refresh;
-        annotationObject.axis.and.returnValue(annotation);
-        annotationObject.scale.and.returnValue(annotation);
-        annotationObject.accessor.and.returnValue(function() {});
-        supstance.annotation(annotation);
-
-        selection = jasmine.createSpyObj('selection', ['selectAll', 'call', 'parentNode', 'attr', 'classed', 'each']);
-        selection.selectAll.and.returnValue(selection);
-        selection.parentNode.and.returnValue(selection);
-        selection.attr.and.returnValue(selection);
-        selection.classed.and.returnValue(selection);
-        spies.d3_select.and.returnValue(selection);
-      });
-
-      describe('And default plot is invoked', function() {
-        var g,
-            interactionSelection,
-            mouseenter,
-            mouseleave,
-            mousemove;
-
-        beforeEach(function() {
-          g = domFixtures.g(data);
-
-          supstance(g);
-
-          interactionSelection = g.select('g.interaction');
-          mouseenter = interactionSelection.on('mouseenter');
-          mouseleave = interactionSelection.on('mouseleave');
-          mousemove = interactionSelection.on('mousemove');
-        });
-
-        it('Then mouseenter should be defined', function() {
-          expect(mouseenter).toBeDefined();
-        });
-
-        it('Then mouseleave should be defined', function() {
-          expect(mouseleave).toBeDefined();
-        });
-
-        it('Then mousemove should be defined', function() {
-          expect(mousemove).toBeDefined();
-        });
-
-        describe('And mouse listeners set', function() {
-          var listeners;
+        plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {
+          var childElements,
+              dataSelection;
 
           beforeEach(function() {
-            listeners = jasmine.createSpyObj('listeners', ['mouseenter', 'mouseout', 'mousemove']);
-            supstance.on('mouseenter', listeners.mouseenter);
-            supstance.on('mouseout', listeners.mouseout);
-            supstance.on('mousemove', listeners.mousemove);
+            childElements = scope.childElements;
+            dataSelection = d3.selectAll(scope.dataElements);
           });
 
-          describe('And mouseenter is invoked', function() {
-            beforeEach(function() {
-              mouseenter.call(interactionSelection.node(), 213);
+          describe('And on obtaining the data element', function() {
+            it('Then contains a supstance path', function() {
+              expect(childElements[0].outerHTML)
+                .toEqual('<g class="supstance"><path d="M 0 80 L 1 80"></path></g>');
             });
 
-            it('Then should set mouseover class', function() {
-              expect(selection.classed).toHaveBeenCalledWith('mouseover', true);
+            it('Then contains axis annotation', function() {
+              expect(childElements[1].outerHTML)
+                .toEqual('<g class="axisannotation y"><g class="0"><g class="data" transform="translate(0,0)"><path d="M 80 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0"></path><text x="80" y="9" dy=".72em" style="text-anchor: middle;">8</text></g></g></g>');
             });
 
-            it('Then should dispatch the mouseenter event', function() {
-              expect(listeners.mouseenter).toHaveBeenCalledWith(213);
-            });
-          });
-
-          describe('And the mouseover class is set', function() {
-            beforeEach(function() {
-              g.select('g.data').classed('mouseover', true);
-              spies.d3_select.and.returnValue(g.select('g.data'));
+            it('Then contains an interaction path', function() {
+              expect(childElements[2].outerHTML)
+                .toEqual('<g class="interaction" style="opacity: 0; fill: none;"><path d="M 0 80 L 1 80" style="stroke-width: 16px;"></path></g>');
             });
 
-            describe('And mouseleave is invoked', function() {
+            it('Then the mouse over class should not be applied', function() {
+              expect(dataSelection.classed('mouseover')).toBe(false);
+            });
+
+            describe('And obtaining the interaction element', function() {
+              var interaction;
+
               beforeEach(function() {
-                mouseleave.call(interactionSelection.node(), 321);
+                interaction = childElements[2];
               });
 
-              it('Then the mouseover class should be cleared', function() {
-                expect(g.select('g.data').classed('mouseover')).toBe(false);
-              });
+              describe('And on mouseenter', function() {
+                var enterListener;
 
-              it('Then the mouseout event should be dispatched', function() {
-                expect(listeners.mouseout).toHaveBeenCalledWith(321);
-              });
-            });
-
-            describe('And dragging class is set', function() {
-              beforeEach(function() {
-                g.select('g.data').classed('dragging', true);
-              });
-
-              describe('And mouseleave is invoked', function() {
                 beforeEach(function() {
-                  mouseleave.call(interactionSelection.node(), 321);
+                  enterListener = jasmine.createSpy('enterListener');
+                  scope.plot.on('mouseenter', enterListener);
+
+                  var event = document.createEvent('MouseEvent');
+                  event.initMouseEvent('mouseenter');
+                  interaction.dispatchEvent(event);
                 });
 
-                it('Then the mouseover class should still be set', function() {
-                  expect(g.select('g.data').classed('mouseover')).toBe(true);
+                it('Then the mouseover class is applied to the supstance', function() {
+                  expect(dataSelection.classed('mouseover')).toBe(true);
                 });
 
-                it('Then the mouseover event should not be dispatched', function() {
-                  expect(listeners.mouseout).not.toHaveBeenCalled();
+                it('Then the mouse enter dispatcher is called', function() {
+                  expect(enterListener).toHaveBeenCalledWith(data[0]);
+                });
+
+                describe('And on mousemove with valid coordinates', function() {
+                  var moveListener;
+
+                  beforeEach(function() {
+                    moveListener = jasmine.createSpy('moveListener');
+                    scope.plot.on('mousemove', moveListener);
+
+                    var event = document.createEvent('MouseEvent');
+                    event.initMouseEvent('mousemove', false, false, window, 0, 0, 0, 0, 0);
+                    interaction.dispatchEvent(event);
+                  });
+
+                  it('Then the mouse move dispatcher is called with the right coordinates', function() {
+                    expect(moveListener).toHaveBeenCalledWith(data[0]);
+                  });
+
+                  it('Then the mouseover class is applied to the supstance', function() {
+                    expect(dataSelection.classed('mouseover')).toBe(true);
+                  });
+                });
+
+                describe('And on mouseout', function() {
+                  var outListener;
+
+                  beforeEach(function() {
+                    outListener = jasmine.createSpy('outListener');
+                    scope.plot.on('mouseout', outListener);
+
+                    var event = document.createEvent('MouseEvent');
+                    event.initMouseEvent('mouseleave');
+                    interaction.dispatchEvent(event);
+                  });
+
+                  it('Then the mouseover class is removed from the supstance', function() {
+                    expect(dataSelection.classed('mouseover')).toBe(false);
+                  });
+
+                  it('Then the mouse enter dispatcher is called', function() {
+                    expect(outListener).toHaveBeenCalledWith(data[0]);
+                  });
+                });
+              });
+
+              describe('And on drag start', function() {
+                var dragStartListener,
+                    dragInteraction;
+
+                beforeEach(function() {
+                  dragInteraction = d3.select(interaction).select('path')[0][0];
+                  dragStartListener = jasmine.createSpy('dragStartListener');
+                  scope.plot.drag(scope.g);
+                  scope.plot.on('dragstart', dragStartListener);
+
+                  var event = document.createEvent('MouseEvent');
+                  event.initMouseEvent('mousedown');
+                  dragInteraction.dispatchEvent(event);
+                });
+
+                it('Then the dragging class is added', function() {
+                  expect(dataSelection.classed('dragging')).toBe(true);
+                });
+
+                it('Then the drag start dispatcher is called', function() {
+                  expect(dragStartListener).toHaveBeenCalledWith(data[0]);
+                });
+
+                describe('And on drag', function() {
+                  var dragListener;
+
+                  beforeEach(function() {
+                    dragListener = jasmine.createSpy('dragListener');
+                    scope.plot.on('drag', dragListener);
+
+                    var event = document.createEvent('MouseEvent');
+                    event.initMouseEvent('mousemove', false, false, window, 0, 0, 0, 2, 10);
+                    window.dispatchEvent(event);
+                  });
+
+                  it('Then the dragging class is removed', function() {
+                    expect(dataSelection.classed('dragging')).toBe(true);
+                  });
+
+                  it('Then the drag dispatcher is called', function() {
+                    expect(dragListener).toHaveBeenCalledWith(data[0]);
+                  });
+
+                  it('Then data has been updated', function() {
+                    expect(data[0].value).toBe(9);
+                  });
+
+                  it('Then contains an updated supstance path', function() {
+                    expect(childElements[0].outerHTML)
+                      .toEqual('<g class="supstance"><path d="M 0 90 L 1 90"></path></g>');
+                  });
+
+                  it('Then contains an updated axis annotation', function() {
+                    expect(childElements[1].outerHTML)
+                      .toEqual('<g class="axisannotation y"><g class="0"><g class="data" transform="translate(0,0)"><path d="M 90 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0"></path><text x="90" y="9" dy=".72em" style="text-anchor: middle;">9</text></g></g></g>');
+                  });
+
+                  it('Then contains an updated interaction path', function() {
+                    expect(childElements[2].outerHTML)
+                      .toEqual('<g class="interaction" style="opacity: 0; fill: none;"><path d="M 0 90 L 1 90" style="stroke-width: 16px;"></path></g>');
+                  });
+                });
+
+                describe('And on drag end', function() {
+                  var dragEndListener;
+
+                  beforeEach(function() {
+                    dragEndListener = jasmine.createSpy('dragEndListener');
+                    scope.plot.on('dragend', dragEndListener);
+
+                    var event = document.createEvent('MouseEvent');
+                    event.initMouseEvent('mouseup');
+                    window.dispatchEvent(event);
+                  });
+
+                  it('Then the dragging class is removed', function() {
+                    expect(dataSelection.classed('dragging')).toBe(false);
+                  });
+
+                  it('Then the drag end dispatcher is called', function() {
+                    expect(dragEndListener).toHaveBeenCalledWith(data[0]);
+                  });
                 });
               });
             });
           });
-
-          describe('And mousemove is invoked', function() {
-            beforeEach(function() {
-              mousemove(123);
-            });
-
-            it('Then should dispatch the mousemove event', function() {
-              expect(listeners.mousemove).toHaveBeenCalledWith(123);
-            });
-          });
-        });
-      });
-
-      describe('And drag is initialised', function() {
-        var origin,
-            drag,
-            dragstart,
-            dragend;
-
-        beforeEach(function() {
-          spies.d3_event.and.returnValue({ x:0, y:16 });
-
-          supstance.drag(selection);
-
-          var dragBehavior = selection.call.calls.argsFor(0)[0];
-          origin = dragBehavior.origin();
-          drag = dragBehavior.on('drag');
-          dragstart = dragBehavior.on('dragstart');
-          dragend = dragBehavior.on('dragend');
-        });
-
-        it('Then drag should be defined', function() {
-          expect(drag).toBeDefined();
-        });
-
-        it('Then dragstart should be defined', function() {
-          expect(dragstart).toBeDefined();
-        });
-
-        it('Then dragend should be defined', function() {
-          expect(dragend).toBeDefined();
-        });
-
-        it('Then origin should be defined', function() {
-          expect(origin).toBeDefined();
-        });
-
-        describe('And origin is invoked', function() {
-          var result;
-
-          beforeEach(function() {
-            result = origin(data[0]);
-          });
-
-          it('Then result is the location of x:0 and y current value', function() {
-            expect(result).toEqual({x:0, y:15.54});
-          });
-        });
-
-        describe('And drag listeners set', function() {
-          var listeners;
-
-          beforeEach(function() {
-            listeners = jasmine.createSpyObj('listeners', ['drag', 'dragstart', 'dragend']);
-            supstance.on('drag', listeners.drag);
-            supstance.on('dragstart', listeners.dragstart);
-            supstance.on('dragend', listeners.dragend);
-          });
-
-          describe('And drag is invoked', function() {
-            var datum;
-
-            beforeEach(function() {
-              datum = { value:15.54 };
-              drag.call(selection, datum);
-            });
-
-            it('Then drag invoke should update the model', function() {
-              expect(datum).toEqual({ value:16 });
-            });
-
-            it('Then should dispatch the drag event', function() {
-              expect(listeners.drag).toHaveBeenCalledWith({ value: 16 });
-            });
-          });
-
-          describe('And dragstart is invoked', function() {
-            beforeEach(function() {
-              dragstart.call(selection, 321);
-            });
-
-            it('Then should set dragging class', function() {
-              expect(selection.classed).toHaveBeenCalledWith('dragging', true);
-            });
-
-            it('Then should dispatch the dragstart event', function() {
-              expect(listeners.dragstart).toHaveBeenCalledWith(321);
-            });
-          });
-
-          describe('And dragend is invoked', function() {
-            beforeEach(function() {
-              dragend.call(selection, 123);
-            });
-
-            it('Then should clear dragging class', function() {
-              expect(selection.classed).toHaveBeenCalledWith('dragging', false);
-            });
-
-            it('Then should dispatch the dragend event', function() {
-              expect(listeners.dragend).toHaveBeenCalledWith(123);
-            });
-          });
-        });
+        }, 1, 3);
       });
     });
   });

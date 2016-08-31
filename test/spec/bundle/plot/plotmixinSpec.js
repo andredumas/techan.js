@@ -4,7 +4,9 @@ techanModule('plot/plotmixin', function(specBuilder) {
   var techan = require('../../../../src/techan');
 
   var actualInit = function(module) {
-    return module(d3.scale.linear, d3.functor, techan.scale.financetime);
+    var plot = require('../../../../src/plot/plot')(d3.svg.line, d3.select);
+
+    return module(d3.scale.linear, d3.functor, techan.scale.financetime, plot.dataSelector);
   };
 
   specBuilder.require(require('../../../../src/plot/plotmixin'), function(instanceBuilder) {
@@ -21,7 +23,13 @@ techanModule('plot/plotmixin', function(specBuilder) {
       describe('And used to mixin plot with a blank object, private object and value accessor', function() {
         beforeEach(function() {
           accessor  = techan.accessor.value();
-          bucket.plotmixin(object, priv).plot(accessor);
+          bucket.plotmixin(object, priv).plot(accessor).dataSelector();
+        });
+
+        it('Then the plotmixin data mappers should be defined', function() {
+          expect(bucket.plotmixin.dataMapper).toBeDefined();
+          expect(bucket.plotmixin.dataMapper.unity).toBeDefined();
+          expect(bucket.plotmixin.dataMapper.array).toBeDefined();
         });
 
         it('Then the plot mixin method xScale should be defined', function () {
@@ -38,6 +46,10 @@ techanModule('plot/plotmixin', function(specBuilder) {
 
         it('Then the plot mixin method accessor should return the set value accessor', function () {
           expect(object.accessor()).toEqual(accessor);
+        });
+
+        it('Then the plot mixin method group should be defined', function () {
+          expect(priv.dataSelector).toBeDefined();
         });
 
         it('Then the plot mixin private member xScale should be defined', function () {

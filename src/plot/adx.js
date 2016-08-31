@@ -8,7 +8,7 @@ module.exports = function(accessor_adx, plot, plotMixin) {  // Injected dependen
         minusDiLine = plot.pathLine();
 
     function adx(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       group.entry.append('path').attr('class', 'adx');
       group.entry.append('path').attr('class', 'plusDi');
@@ -18,8 +18,7 @@ module.exports = function(accessor_adx, plot, plotMixin) {  // Injected dependen
     }
 
     adx.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, adxLine, plusDiLine,
-              minusDiLine);
+      refresh(p.dataSelector.select(g), adxLine, plusDiLine, minusDiLine);
     };
 
     function binder() {
@@ -29,15 +28,15 @@ module.exports = function(accessor_adx, plot, plotMixin) {  // Injected dependen
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(adx, p).plot(accessor_adx(), binder);
+    plotMixin(adx, p).plot(accessor_adx(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return adx;
   };
 };
 
-function refresh(g, accessor, x, y, plot, adxLine, plusDiLine, minusDiLine) {
-  g.selectAll('path.adx').attr('d', adxLine);
-  g.selectAll('path.plusDi').attr('d', plusDiLine);
-  g.selectAll('path.minusDi').attr('d', minusDiLine);
+function refresh(selection, adxLine, plusDiLine, minusDiLine) {
+  selection.select('path.adx').attr('d', adxLine);
+  selection.select('path.plusDi').attr('d', plusDiLine);
+  selection.select('path.minusDi').attr('d', minusDiLine);
 }

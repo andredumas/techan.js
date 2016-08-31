@@ -2,375 +2,268 @@ techanModule('plot/axisannotation', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      domFixtures = require('../_fixtures/dom'),
-      spies = { g: { parentNode: {} }, plot: {} },
-      axisannotation,
-      g;
+      data = [{ value: 0.5 }],
+      domFixtures = require('../_fixtures/dom');
 
   var actualInit = function() {
     return techan.plot.axisannotation;
   };
 
-  var mockInit = function(axisannotation) {
-    var plotmixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, d3.functor, techan.scale.financetime);
-    return axisannotation(d3.svg.axis, techan.accessor.value, spies.plot, plotmixin);
-  };
-
   specBuilder.require(require('../../../../src/plot/axisannotation'), function(instanceBuilder) {
     instanceBuilder.instance('actual', actualInit, function(scope) {
+
       describe('And axisannotation is initialised with defaults', function () {
-        beforeEach(function () {
-          axisannotation = scope.plot;
-          g = domFixtures.g([{ value: 50 }]);
+
+        describe('And valid data is passed', function() {
+          plotShouldRenderWithoutError(scope, data, domFixtures, assertDom, 1, 2);
+
+          function assertDom(scope) {
+            var childElements;
+
+            beforeEach(function() {
+              childElements = scope.childElements;
+            });
+
+            describe('And on obtaining the data element', function() {
+              it('Then contains a path', function() {
+                expect(childElements[0].outerHTML)
+                  .toEqual('<path d="M 0.5 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0"></path>');
+              });
+
+              it('Then contains text', function() {
+                expect(childElements[1].outerHTML)
+                  .toEqual('<text x="0.5" y="9" dy=".72em" style="text-anchor: middle;">0.5</text>');
+              });
+            });
+          }
         });
 
-        it('Then the plot mixin accessor should be defined', function () {
-          expect(axisannotation.accessor).toBeDefined();
-        });
-
-        it('Then on default invoke, it should render without error', function() {
-          axisannotation(g);
-          expect(g[0][0].innerHTML).not.toContain('NaN');
-        });
-
-        it('Then on refresh invoke, it should be refreshed only', function() {
-          axisannotation(g);
-          axisannotation.refresh(g);
-          expect(g[0][0].innerHTML).not.toContain('NaN');
-        });
-      });
-    });
-
-    instanceBuilder.instance('mocked', mockInit, function(scope) {
-      describe('And axisannotation is initialised with defaults', function () {
-        beforeEach(function () {
-          axisannotation = scope.axisannotation;
-          g = domFixtures.g([{ value: 50 }]);
-        });
-
-        describe('And selection is mocked', function() {
-          var selectSpies = {};
-
+        describe('And data on upper boundary is passed', function() {
           beforeEach(function() {
-            // Too many spies much???
-            // Convert to spies on actuals?
-            spies.plot.groupSelect = jasmine.createSpy('groupSelect');
-            spies.plot.groupSelect.and.returnValue({entry: selectSpies, selection: selectSpies});
-            spies.g.selectAll = jasmine.createSpy('selectAll');
-            spies.g.selectAll.and.returnValue(selectSpies);
-            spies.g.select = jasmine.createSpy('select');
-            spies.g.select.and.returnValue(selectSpies);
-            selectSpies.selectAll = spies.g.selectAll;
-            selectSpies.append = jasmine.createSpy('append');
-            selectSpies.append.and.returnValue(selectSpies);
-            selectSpies.attr = jasmine.createSpy('attr');
-            selectSpies.attr.and.returnValue(selectSpies);
-            selectSpies.text = jasmine.createSpy('text');
-            selectSpies.text.and.returnValue(selectSpies);
-            selectSpies.style = jasmine.createSpy('style');
-            selectSpies.call = jasmine.createSpy('call');
+            scope.plot.axis().scale().domain([0, 10]);
           });
 
-          describe('And on refresh with defaults', function() {
-            var filterInvalidValues,
-                text,
-                textAttributes;
+          plotShouldRenderWithoutError(scope, [{ value: 10 }], domFixtures, assertDom, 1, 2);
+
+          function assertDom(scope) {
+            var childElements;
 
             beforeEach(function() {
-              axisannotation.refresh(spies.g);
-              filterInvalidValues = spies.plot.groupSelect.calls.argsFor(0)[1];
-              text = selectSpies.text.calls.argsFor(0)[0];
-              textAttributes = selectSpies.call.calls.argsFor(0)[0];
+              childElements = scope.childElements;
             });
 
-            it('Then plot.groupSelect filter should be defined', function() {
-              expect(filterInvalidValues).toBeDefined();
-            });
-
-            it('Then plot.groupSelect should filter undefined objects', function() {
-              expect(filterInvalidValues([{}])).toEqual([]);
-            });
-
-            it('Then plot.groupSelect should filter null values', function() {
-              expect(filterInvalidValues([{value:null}])).toEqual([]);
-            });
-
-            it('Then plot.groupSelect should filter domain values that scale out of range greater', function() {
-              expect(filterInvalidValues([{value:2}])).toEqual([]);
-            });
-
-            it('Then plot.groupSelect should filter domain values that scale out of range less', function() {
-              expect(filterInvalidValues([{value: -0.1}])).toEqual([]);
-            });
-
-            it('Then plot.groupSelect should not filter domain values that scale inside of range', function() {
-              expect(filterInvalidValues([{value:0.5}])).toEqual([{value:0.5}]);
-            });
-
-            it('Then plot.groupSelect should not filter domain values that scale to not a number', function() {
-              expect(filterInvalidValues([{value:'abc'}])).toEqual([]);
-            });
-
-            it('Then text function should be defined', function() {
-              expect(text).toBeDefined();
-            });
-
-            it('Then text function invoke should return formatted value', function() {
-              expect(text({value:123})).toEqual('123.0');
-            });
-
-            it('Then textAttributes function should be defined', function() {
-              expect(textAttributes).toBeDefined();
-            });
-
-            describe('And axis is left and neg(ation) is left (-1)', function() {
-              var attr,
-                  styleArgs;
-
-              beforeEach(function() {
-                axisannotation.axis().orient('left');
-                textAttributes(selectSpies, axisannotation.accessor(), axisannotation.axis(), -1);
-                attr = selectSpies.attr.calls.argsFor(2)[0]; // It is the second call because it is initially invoked in earlier setup
-                styleArgs = selectSpies.style.calls.argsFor(0);
+            describe('And on obtaining the data element', function() {
+              it('Then contains a path', function() {
+                expect(childElements[0].outerHTML)
+                  .toEqual('<path d="M 1 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0"></path>');
               });
 
-              it('Then attr should have been called on the selection', function() {
-                expect(attr).toBeDefined();
-              });
-
-              it('Then textAttributes should set tick padded x coordinate', function() {
-                expect(attr.x).toBeDefined();
-                expect(attr.x).toBe(-9);
-              });
-
-              it('Then textAttributes should be a function that scales value to y coordinate', function() {
-                expect(attr.y).toBeDefined();
-                expect(attr.y({ value:1 })).toBe(1);
-              });
-
-              it('Then textAttributes should set dy coordinate', function() {
-                expect(attr.dy).toBeDefined();
-                expect(attr.dy).toBe('.32em');
-              });
-
-              it('Then textAttributes should set end text anchor style', function() {
-                expect(styleArgs).toBeDefined();
-                expect(styleArgs[0]).toBe('text-anchor');
-                expect(styleArgs[1]).toBe('end');
+              it('Then contains text', function() {
+                expect(childElements[1].outerHTML)
+                  .toEqual('<text x="1" y="9" dy=".72em" style="text-anchor: middle;">10</text>');
               });
             });
+          }
+        });
 
-            describe('And translate is 10 across and 15 down', function() {
-              var attr;
-
-              beforeEach(function() {
-                axisannotation.translate([10,15]).axis().orient('right');
-                axisannotation.refresh(spies.g);
-                attr = selectSpies.attr.calls.argsFor(2)[1]; // It is the second call because it is initially invoked in earlier setup
-              });
-
-              it('Then attr should have been called on the selection', function() {
-                expect(attr).toBeDefined();
-              });
-
-              it('Then translate should be 10,15', function() {
-                expect(attr).toBe('translate(10,15)');
-              });
-            });
-
-            describe('And axis is right', function() {
-              var attr,
-                  styleArgs;
-
-              beforeEach(function() {
-                axisannotation.axis().orient('right');
-                textAttributes(selectSpies, axisannotation.accessor(),axisannotation.axis(), 1);
-                attr = selectSpies.attr.calls.argsFor(2)[0]; // It is the second call because it is initially invoked in earlier setup
-                styleArgs = selectSpies.style.calls.argsFor(0);
-              });
-
-              it('Then attr should have been called on the selection', function() {
-                expect(attr).toBeDefined();
-              });
-
-              it('Then textAttributes should set tick padded x coordinate', function() {
-                expect(attr.x).toBeDefined();
-                expect(attr.x).toBe(9);
-              });
-
-              it('Then textAttributes should set scaled value y coordinate', function() {
-                expect(attr.y).toBeDefined();
-                expect(attr.y({ value:1 })).toBe(1);
-              });
-
-              it('Then textAttributes should set dy coordinate', function() {
-                expect(attr.dy).toBeDefined();
-                expect(attr.dy).toBe('.32em');
-              });
-
-              it('Then textAttributes should set start text anchor style', function() {
-                expect(styleArgs).toBeDefined();
-                expect(styleArgs[0]).toBe('text-anchor');
-                expect(styleArgs[1]).toBe('start');
-              });
-            });
-
-            describe('And axis is top', function() {
-              var attr,
-                  styleArgs;
-
-              beforeEach(function() {
-                axisannotation.axis().orient('top');
-                textAttributes(selectSpies, axisannotation.accessor(),axisannotation.axis(), -1);
-                attr = selectSpies.attr.calls.argsFor(2)[0]; // It is the second call because it is initially invoked in earlier setup
-                styleArgs = selectSpies.style.calls.argsFor(0);
-              });
-
-              it('Then attr should have been called on the selection', function() {
-                expect(attr).toBeDefined();
-              });
-
-              it('Then textAttributes should set tick padded y coordinate', function() {
-                expect(attr.y).toBeDefined();
-                expect(attr.y).toBe(-9);
-              });
-
-              it('Then textAttributes should set scaled value x coordinate', function() {
-                expect(attr.x).toBeDefined();
-                expect(attr.x({ value:1 })).toBe(1);
-              });
-
-              it('Then textAttributes should set dy coordinate', function() {
-                expect(attr.dy).toBeDefined();
-                expect(attr.dy).toBe('0em');
-              });
-
-              it('Then textAttributes should set middle text anchor style', function() {
-                expect(styleArgs).toBeDefined();
-                expect(styleArgs[0]).toBe('text-anchor');
-                expect(styleArgs[1]).toBe('middle');
-              });
-            });
-
-            describe('And axis is bottom', function() {
-              var attr,
-                  styleArgs;
-
-              beforeEach(function() {
-                axisannotation.axis().orient('bottom');
-                textAttributes(selectSpies, axisannotation.accessor(), axisannotation.axis(), 1);
-                attr = selectSpies.attr.calls.argsFor(2)[0]; // It is the second call because it is initially invoked in earlier setup
-                styleArgs = selectSpies.style.calls.argsFor(0);
-              });
-
-              it('Then attr should have been called on the selection', function() {
-                expect(attr).toBeDefined();
-              });
-
-              it('Then textAttributes should set tick padded y coordinate', function() {
-                expect(attr.y).toBeDefined();
-                expect(attr.y).toBe(9);
-              });
-
-              it('Then textAttributes should set scaled value x coordinate', function() {
-                expect(attr.x).toBeDefined();
-                expect(attr.x({ value:1 })).toBe(1);
-              });
-
-              it('Then textAttributes should set dy coordinate', function() {
-                expect(attr.dy).toBeDefined();
-                expect(attr.dy).toBe('.72em');
-              });
-
-              it('Then textAttributes should set middle text anchor style', function() {
-                expect(styleArgs).toBeDefined();
-                expect(styleArgs[0]).toBe('text-anchor');
-                expect(styleArgs[1]).toBe('middle');
-              });
-            });
+        describe('And data on lower (0) boundary is passed', function() {
+          beforeEach(function() {
+            scope.plot.axis().scale().domain([0, 10]);
           });
 
-          describe('And axis is left', function() {
+          plotShouldRenderWithoutError(scope, [{ value: 0 }], domFixtures, assertDom, 1, 2);
+
+          function assertDom(scope) {
+            var childElements;
+
             beforeEach(function() {
-              axisannotation.axis().orient('left');
-              axisannotation.refresh(spies.g);
+              childElements = scope.childElements;
             });
 
-            it('Then path attribute function should be passed', function() {
-              expect(selectSpies.attr.calls.argsFor(1)[1]).toBeDefined();
+            describe('And on obtaining the data element', function() {
+              it('Then contains a path', function() {
+                expect(childElements[0].outerHTML)
+                  .toEqual('<path d="M 0 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0"></path>');
+              });
+
+              it('Then contains text', function() {
+                expect(childElements[1].outerHTML)
+                  .toEqual('<text x="0" y="9" dy=".72em" style="text-anchor: middle;">0</text>');
+              });
+            });
+          }
+        });
+
+        describe('And translate is 10 across and 15 down and right axis', function() {
+          beforeEach(function() {
+            var axisannotation = scope.plot;
+            axisannotation.translate([10,15]).axis().orient('right');
+          });
+
+          plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {
+            var dataElement,
+                childElements;
+
+            beforeEach(function() {
+              dataElement = scope.dataElements[0];
+              childElements = scope.childElements;
             });
 
-            it('Then path attribute function execution should generate correct path', function() {
-              expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 0 1 l -6 -4 l 0 -3 l -50 0 l 0 14 l 50 0 l 0 -3');
+            it('Then data should be translated', function() {
+              expect(d3.select(dataElement).attr('transform')).toEqual('translate(10,15)');
             });
 
-            describe('And inner tick is negative', function() {
+            it('Then contains a path', function() {
+              expect(childElements[0].outerHTML)
+                .toEqual('<path d="M 0 0.5 l 6 -4 l 0 -3 l 50 0 l 0 14 l -50 0 l 0 -3"></path>');
+            });
+
+            it('Then contains text - anchor start', function() {
+              expect(childElements[1].outerHTML)
+                .toEqual('<text x="9" y="0.5" dy=".32em" style="text-anchor: start;">0.5</text>');
+            });
+
+          }, 1, 2);
+        });
+
+        describe('And axis is top', function() {
+          beforeEach(function() {
+            scope.plot.axis().orient('top');
+          });
+
+          plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {
+            var childElements;
+            beforeEach(function() {
+              childElements = scope.childElements;
+            });
+
+            it('Then contains a path', function() {
+              expect(childElements[0].outerHTML)
+                .toEqual('<path d="M 0.5 0 l -4 -6 l -21 0 l 0 -14 l 50 0 l 0 14 l -21 0"></path>');
+            });
+
+            it('Then contains text - anchor middle', function() {
+              expect(childElements[1].outerHTML)
+                .toEqual('<text x="0.5" y="-9" dy="0em" style="text-anchor: middle;">0.5</text>');
+            });
+
+          }, 1, 2);
+
+          describe('And inner tick is negative', function() {
+            beforeEach(function() {
+              scope.plot.axis().innerTickSize(-1);
+            });
+
+            plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {
+              var childElements;
               beforeEach(function() {
-                axisannotation.axis().innerTickSize(-1);
-                axisannotation.refresh(spies.g);
+                childElements = scope.childElements;
               });
 
-              it('Then path attribute function execution should generate correct path', function() {
-                expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 0 1 l -1 -4 l 0 -3 l -50 0 l 0 14 l 50 0 l 0 -3');
+              it('Then contains a path', function() {
+                expect(childElements[0].outerHTML)
+                  .toEqual('<path d="M 0.5 0 l -4 -1 l -21 0 l 0 -14 l 50 0 l 0 14 l -21 0"></path>');
               });
-            });
+
+              it('Then contains text - anchor middle', function() {
+                expect(childElements[1].outerHTML)
+                  .toEqual('<text x="0.5" y="-3" dy="0em" style="text-anchor: middle;">0.5</text>');
+              });
+
+            }, 1, 2);
+          });
+        });
+
+        describe('And axis is bottom', function() {
+          beforeEach(function() {
+            scope.plot.axis().orient('bottom');
           });
 
-          describe('And axis is right', function() {
+          plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {
+            var childElements;
             beforeEach(function() {
-              axisannotation.axis().orient('right');
-              axisannotation.refresh(spies.g);
+              childElements = scope.childElements;
             });
 
-            it('Then path attribute function should be passed', function() {
-              expect(selectSpies.attr.calls.argsFor(1)[1]).toBeDefined();
+            it('Then contains a path', function() {
+              expect(childElements[0].outerHTML)
+                .toEqual('<path d="M 0.5 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0"></path>');
             });
 
-            it('Then path attribute function execution should generate correct path', function() {
-              expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 0 1 l 6 -4 l 0 -3 l 50 0 l 0 14 l -50 0 l 0 -3');
+            it('Then contains text - anchor middle', function() {
+              expect(childElements[1].outerHTML)
+                .toEqual('<text x="0.5" y="9" dy=".72em" style="text-anchor: middle;">0.5</text>');
             });
+
+          }, 1, 2);
+        });
+
+        describe('And axis is left', function() {
+          beforeEach(function() {
+            scope.plot.axis().orient('left');
           });
 
-          describe('And axis is top', function() {
+          plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {
+            var childElements;
             beforeEach(function() {
-              axisannotation.axis().orient('top');
-              axisannotation.refresh(spies.g);
+              childElements = scope.childElements;
             });
 
-            it('Then path attribute function should be passed', function() {
-              expect(selectSpies.attr.calls.argsFor(1)[1]).toBeDefined();
+            it('Then contains a path', function() {
+              expect(childElements[0].outerHTML)
+                .toEqual('<path d="M 0 0.5 l -6 -4 l 0 -3 l -50 0 l 0 14 l 50 0 l 0 -3"></path>');
             });
 
-            it('Then path attribute function execution should generate correct path', function() {
-              expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 1 0 l -4 -6 l -21 0 l 0 -14 l 50 0 l 0 14 l -21 0');
+            it('Then contains text - anchor middle', function() {
+              expect(childElements[1].outerHTML)
+                .toEqual('<text x="-9" y="0.5" dy=".32em" style="text-anchor: end;">0.5</text>');
             });
 
-            describe('And inner tick is negative', function() {
+          }, 1, 2);
+
+          describe('And inner tick is negative', function() {
+            beforeEach(function() {
+              scope.plot.axis().innerTickSize(-1);
+            });
+
+            plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {
+              var childElements;
               beforeEach(function() {
-                axisannotation.axis().innerTickSize(-1);
-                axisannotation.refresh(spies.g);
+                childElements = scope.childElements;
               });
 
-              it('Then path attribute function execution should generate correct path', function() {
-                expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 1 0 l -4 -1 l -21 0 l 0 -14 l 50 0 l 0 14 l -21 0');
+              it('Then contains a path', function() {
+                expect(childElements[0].outerHTML)
+                  .toEqual('<path d="M 0 0.5 l -1 -4 l 0 -3 l -50 0 l 0 14 l 50 0 l 0 -3"></path>');
               });
-            });
+
+              it('Then contains text - anchor middle', function() {
+                expect(childElements[1].outerHTML)
+                  .toEqual('<text x="-3" y="0.5" dy=".32em" style="text-anchor: end;">0.5</text>');
+              });
+
+            }, 1, 2);
           });
+        });
 
-          describe('And axis is bottom', function() {
-            beforeEach(function() {
-              axisannotation.axis().orient('bottom');
-              axisannotation.refresh(spies.g);
-            });
+        describe('And data is undefined', function() {
+          plotShouldRenderWithoutError(scope, [], domFixtures, undefined, 0, 0);
+        });
 
-            it('Then path attribute function should be passed', function() {
-              expect(selectSpies.attr.calls.argsFor(1)[1]).toBeDefined();
-            });
+        describe('And data is null', function() {
+          plotShouldRenderWithoutError(scope, [{value:null}], domFixtures, undefined, 0, 0);
+        });
 
-            it('Then path attribute function execution should generate correct path', function() {
-              expect(selectSpies.attr.calls.argsFor(1)[1]({value:1})).toEqual('M 1 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0');
-            });
-          });
+        describe('And data is greater than scale range', function() {
+          plotShouldRenderWithoutError(scope, [{value:2}], domFixtures, undefined, 0, 0);
+        });
+
+        describe('And data is less than scale range', function() {
+          plotShouldRenderWithoutError(scope, [{value:-1}], domFixtures, undefined, 0, 0);
+        });
+
+        describe('And data is not a number', function() {
+          plotShouldRenderWithoutError(scope, [{value:'abc'}], domFixtures, undefined, 0, 0);
         });
       });
     });

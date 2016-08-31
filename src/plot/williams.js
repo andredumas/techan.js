@@ -6,13 +6,12 @@ module.exports = function(accessor_williams, plot, plotMixin) {  // Injected dep
         upLine = plot.pathLine();
 
     function williams(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
-      group.entry.append('path').attr('class', 'williams up');
+      p.dataSelector(g).entry.append('path').attr('class', 'williams up');
       williams.refresh(g);
     }
 
     williams.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, upLine);
+      p.dataSelector.select(g).select('path.williams.up').attr('d', upLine);
     };
 
     function binder() {
@@ -20,13 +19,9 @@ module.exports = function(accessor_williams, plot, plotMixin) {  // Injected dep
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(williams, p).plot(accessor_williams(), binder);
+    plotMixin(williams, p).plot(accessor_williams(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return williams;
   };
 };
-
-function refresh(g, accessor, x, y, plot, upLine) {
-  g.selectAll('path.williams.up').attr('d', upLine);
-}

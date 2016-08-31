@@ -10,7 +10,7 @@ module.exports = function(accessor_aroon, plot, plotMixin) {  // Injected depend
         downLine = plot.pathLine();
 
     function aroon(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       group.entry.append('path').attr('class', 'overbought');
       group.entry.append('path').attr('class', 'oversold');
@@ -23,7 +23,7 @@ module.exports = function(accessor_aroon, plot, plotMixin) {  // Injected depend
     }
 
     aroon.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, oscLine, oscArea,
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale, plot, oscLine, oscArea,
               middleLine, upLine, downLine);
     };
 
@@ -36,19 +36,19 @@ module.exports = function(accessor_aroon, plot, plotMixin) {  // Injected depend
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(aroon, p).plot(accessor_aroon(), binder);
+    plotMixin(aroon, p).plot(accessor_aroon(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return aroon;
   };
 };
 
-function refresh(g, accessor, x, y, plot, oscLine, oscArea, middleLine, upLine, downLine) {
-  g.selectAll('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
-  g.selectAll('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
-  g.selectAll('path.aroon.oscillator').attr('d', oscLine);
-  g.selectAll('path.aroon.oscillatorArea').attr('d', oscArea);
-  g.selectAll('path.aroon.middle').attr('d', middleLine);
-  g.selectAll('path.aroon.up').attr('d', upLine);
-  g.selectAll('path.aroon.down').attr('d', downLine);
+function refresh(selection, accessor, x, y, plot, oscLine, oscArea, middleLine, upLine, downLine) {
+  selection.select('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
+  selection.select('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
+  selection.select('path.aroon.oscillator').attr('d', oscLine);
+  selection.select('path.aroon.oscillatorArea').attr('d', oscArea);
+  selection.select('path.aroon.middle').attr('d', middleLine);
+  selection.select('path.aroon.up').attr('d', upLine);
+  selection.select('path.aroon.down').attr('d', downLine);
 }

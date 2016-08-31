@@ -6,7 +6,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
         dispatch = d3_dispatch('mouseenter', 'mouseout', 'mousemove', 'drag', 'dragstart', 'dragend');
 
     function trendline(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.unity),
+      var group = p.dataSelector(g),
           trendlineGroup = group.entry.append('g').attr('class', 'trendline');
 
       trendlineGroup.append('path').attr('class', 'body');
@@ -16,7 +16,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
       var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
         .call(plot.interaction.mousedispatch(dispatch));
 
-      interaction.append('path').attr('class', 'body').style('stroke-width', 16);
+      interaction.append('path').attr('class', 'body').style('stroke-width', '16px');
       interaction.append('circle').attr({ class: 'start', r: 8 });
       interaction.append('circle').attr({ class: 'end', r: 8 });
 
@@ -24,7 +24,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     }
 
     trendline.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale);
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale);
     };
 
     trendline.drag = function(g) {
@@ -38,6 +38,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
 
     // Mixin 'superclass' methods and variables
     plotMixin(trendline, p)
+      .dataSelector(plotMixin.dataMapper.unity)
       .plot(accessor_trendline())
       .on(dispatch);
 
@@ -52,7 +53,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     })
     .on('drag', function(d) {
       updateEnd(accessor_x, x, d3_event().x, accessor_y, y, d3_event().y, d);
-      refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
+      refresh(d3_select(this.parentNode.parentNode.parentNode), accessor, x, y);
       dispatch.drag(d);
     });
 
@@ -75,7 +76,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
       updateEnd(accessor.ed, x, d3_event().x + dragStart.end.date,
         accessor.ev, y, d3_event().y + dragStart.end.value,
         d);
-      refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
+      refresh(d3_select(this.parentNode.parentNode.parentNode), accessor, x, y);
       dispatch.drag(d);
     });
 
@@ -84,20 +85,20 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
 
   function updateEnd(accessor_x, x, xValue, accessor_y, y, yValue, d) {
     var date = x.invert(xValue);
-    if(date) accessor_x(d, date);
+    if(date !== null && date !== undefined) accessor_x(d, date);
     accessor_y(d, y.invert(yValue));
   }
 
   return Trendline;
 };
 
-function refresh(g, accessor, x, y) {
-  g.selectAll('.trendline path.body').attr('d', trendlinePath(accessor, x, y));
-  g.selectAll('.trendline circle.start').attr(trendlineEnd(accessor.sd, x, accessor.sv, y));
-  g.selectAll('.trendline circle.end').attr(trendlineEnd(accessor.ed, x, accessor.ev, y));
-  g.selectAll('.interaction path.body').attr('d', trendlinePath(accessor, x, y));
-  g.selectAll('.interaction circle.start').attr(trendlineEnd(accessor.sd, x, accessor.sv, y));
-  g.selectAll('.interaction circle.end').attr(trendlineEnd(accessor.ed, x, accessor.ev, y));
+function refresh(selection, accessor, x, y) {
+  selection.selectAll('.trendline path.body').attr('d', trendlinePath(accessor, x, y));
+  selection.selectAll('.trendline circle.start').attr(trendlineEnd(accessor.sd, x, accessor.sv, y));
+  selection.selectAll('.trendline circle.end').attr(trendlineEnd(accessor.ed, x, accessor.ev, y));
+  selection.selectAll('.interaction path.body').attr('d', trendlinePath(accessor, x, y));
+  selection.selectAll('.interaction circle.start').attr(trendlineEnd(accessor.sd, x, accessor.sv, y));
+  selection.selectAll('.interaction circle.end').attr(trendlineEnd(accessor.ed, x, accessor.ev, y));
 }
 
 function trendlinePath(accessor, x, y) {

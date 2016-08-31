@@ -8,7 +8,7 @@ module.exports = function(accessor_bollinger, plot, plotMixin) {  // Injected de
         lowerLine = plot.pathLine();
 
     function bollinger(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
       group.entry.append('path').attr('class', 'upper');
       group.entry.append('path').attr('class', 'middle');
       group.entry.append('path').attr('class', 'lower');
@@ -16,8 +16,7 @@ module.exports = function(accessor_bollinger, plot, plotMixin) {  // Injected de
     }
 
     bollinger.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, upperLine, middleLine,
-              lowerLine);
+      refresh(p.dataSelector.select(g), upperLine, middleLine, lowerLine);
     };
 
     function binder() {
@@ -27,15 +26,15 @@ module.exports = function(accessor_bollinger, plot, plotMixin) {  // Injected de
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(bollinger, p).plot(accessor_bollinger(), binder);
+    plotMixin(bollinger, p).plot(accessor_bollinger(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return bollinger;
   };
 };
 
-function refresh(g, accessor, x, y, plot, upperLine, middleLine, lowerLine) {
-  g.selectAll('path.upper').attr('d', upperLine);
-  g.selectAll('path.middle').attr('d', middleLine);
-  g.selectAll('path.lower').attr('d', lowerLine);
+function refresh(selection, upperLine, middleLine, lowerLine) {
+  selection.select('path.upper').attr('d', upperLine);
+  selection.select('path.middle').attr('d', middleLine);
+  selection.select('path.lower').attr('d', lowerLine);
 }

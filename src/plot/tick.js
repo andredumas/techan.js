@@ -7,19 +7,18 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_tick, plot, plotM
         lineWidthGenerator;
 
     function tick(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
-      group.entry.append('path').attr('class', 'tick');
+      p.dataSelector(g).entry.append('path').attr('class', 'tick');
 
       tick.refresh(g);
     }
 
     tick.refresh = function(g) {
-      g.selectAll('path.tick').attr('d', tickGenerator).style('stroke-width', lineWidthGenerator);
+      p.dataSelector.select(g).select('path.tick').attr('d', tickGenerator).style('stroke-width', lineWidthGenerator);
     };
 
     function binder() {
       tickGenerator = plot.joinPath(tickPath);
-      lineWidthGenerator = plot.lineWidth(p.xScale, 1, 2);
+      lineWidthGenerator = plot.scaledStrokeWidth(p.xScale, 1, 2);
     }
 
     function tickPath() {
@@ -40,7 +39,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_tick, plot, plotM
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(tick, p).plot(accessor_tick(), binder).width(binder);
+    plotMixin(tick, p).plot(accessor_tick(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    binder();
 
     return tick;
   };

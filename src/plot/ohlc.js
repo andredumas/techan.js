@@ -7,9 +7,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
         lineWidthGenerator;
 
     function ohlc(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
-
-      plot.appendPathsUpDownEqual(group.selection, p.accessor, 'ohlc');
+      plot.appendPathsUpDownEqual(p.dataSelector(g).selection, p.accessor, 'ohlc');
 
       ohlc.refresh(g);
     }
@@ -20,7 +18,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 
     function binder() {
       ohlcGenerator = plot.joinPath(ohlcPath);
-      lineWidthGenerator = plot.lineWidth(p.xScale, 1, 2);
+      lineWidthGenerator = plot.scaledStrokeWidth(p.xScale, 1, 2);
     }
 
     function ohlcPath() {
@@ -42,7 +40,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(ohlc, p).plot(accessor_ohlc(), binder).width(binder);
+    plotMixin(ohlc, p).plot(accessor_ohlc(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    binder();
 
     return ohlc;
   };

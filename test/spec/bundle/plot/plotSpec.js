@@ -19,6 +19,71 @@ techanModule('plot/plot', function(specBuilder) {
         x = techan.scale.financetime();
       });
 
+      describe('And I have the DataSelector', function() {
+        var DataSelector;
+
+        beforeEach(function() {
+          DataSelector = plot.dataSelector;
+        });
+
+        it('Then is defined', function() {
+          expect(DataSelector).toBeDefined();
+        });
+        it('Then mappers are defined', function() {
+          expect(DataSelector.mapper).toBeDefined();
+          expect(DataSelector.mapper.unity).toBeDefined();
+          expect(DataSelector.mapper.array).toBeDefined();
+        });
+
+        describe('And constructed with scope, data on the root element and selection made', function() {
+          var dataSelector,
+              dataSelection,
+              g;
+
+          beforeEach(function() {
+            dataSelector = DataSelector(DataSelector.mapper.unity).scope('ascope');
+            g = domFixtures.g([1, 2]);
+            spyOn(g, 'selectAll').and.callThrough();
+            dataSelection = dataSelector(g);
+          });
+
+          it('Then correct classes must be placed on the select', function() {
+            expect(g.selectAll).toHaveBeenCalledWith('g.data.scope-ascope');
+          });
+
+          it('Then have selection defined', function() {
+            expect(dataSelection.selection).toBeDefined();
+          });
+
+          it('Then have entry defined', function() {
+            expect(dataSelection.entry).toBeDefined();
+          });
+
+          it('Then selection should have 2 new elements', function() {
+            expect(dataSelection.selection[0].length).toBe(2);
+          });
+
+          it('Then a correct basic structure created', function() {
+            expect(g[0][0].outerHTML).toEqual('<g class="root"><g class="data scope-ascope"></g><g class="data scope-ascope"></g></g>');
+          });
+
+          describe('And on data removal', function() {
+            beforeEach(function() {
+              g.datum([1]);
+              dataSelection = dataSelector(g);
+            });
+
+            it('Then selection should have 1 new element', function() {
+              expect(dataSelection.selection[0].length).toBe(1);
+            });
+
+            it('Then a correct basic structure updated', function() {
+              expect(g[0][0].outerHTML).toEqual('<g class="root"><g class="data scope-ascope"></g></g>');
+            });
+          });
+        });
+      });
+
       describe('And I have a path generator that returns a path', function() {
         function pathGenerator() {
           return function(d) {
@@ -42,12 +107,12 @@ techanModule('plot/plot', function(specBuilder) {
         });
 
 
-        it('Then lineWidth should return default maximum line width', function() {
-          expect(plot.lineWidth(x)()).toBe(1);
+        it('Then scaledStrokeWidth should return default maximum line width', function() {
+          expect(plot.scaledStrokeWidth(x)()).toBe('1px');
         });
 
-        it('Then lineWidth should return passed maximum line width', function() {
-          expect(plot.lineWidth(x, 2)()).toBe(2);
+        it('Then scaledStrokeWidth should return passed maximum line width', function() {
+          expect(plot.scaledStrokeWidth(x, 2)()).toBe('2px');
         });
       });
 
@@ -65,12 +130,12 @@ techanModule('plot/plot', function(specBuilder) {
           expect(plot.barWidth(x)).toBe(1);
         });
 
-        it('Then lineWidth should return default minimum band divided by default divisor', function() {
-          expect(plot.lineWidth(x, 3)()).toBe(1);
+        it('Then scaledStrokeWidth should return default minimum band divided by default divisor', function() {
+          expect(plot.scaledStrokeWidth(x, 3)()).toBe('1px');
         });
 
-        it('Then lineWidth should return minimum band divided by divisor', function() {
-          expect(plot.lineWidth(x, 2, 2)()).toBe(0.5);
+        it('Then scaledStrokeWidth should return minimum band divided by divisor', function() {
+          expect(plot.scaledStrokeWidth(x, 2, 2)()).toBe('0.5px');
         });
       });
 

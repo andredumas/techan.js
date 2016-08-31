@@ -76,5 +76,8 @@ module.exports = {
       { date: new Date(15), value: 22.556405711 },
       { date: new Date(16), value: 22.6747651399 }
     ]
-  }
+  },
+  plot: [
+    { date: new Date(9), value: 22.220999999999997 }
+  ]
 };

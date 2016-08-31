@@ -2,7 +2,6 @@ techanModule('plot/trendline', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
-      data = require('./../_fixtures/data/trendline'),
       domFixtures = require('../_fixtures/dom'),
       spies = {};
 
@@ -22,295 +21,227 @@ techanModule('plot/trendline', function(specBuilder) {
 
   specBuilder.require(require('../../../../src/plot/trendline'), function(instanceBuilder) {
     instanceBuilder.instance('actual', actualInit, function(scope) {
-      describe('And trendline is initialised with defaults', function () {
-        plotMixinShouldBeSetup(scope);
-
-        var plot,
-            g;
-
-        beforeEach(function () {
-          plot = scope.plot;
-          plot.xScale().domain([data[0].start.date, data[0].end.date]);
-          g = domFixtures.g(data);
-        });
-
-        it('Then .on should be defined', function() {
-          expect(plot.on).toBeDefined();
-        });
-
-        it('Then on default invoke, it should render without error', function() {
-          plot(g);
-          expect(g[0][0].innerHTML).not.toContain('NaN');
-        });
-
-        it('Then on refresh invoke, it should be refreshed only', function() {
-          plot(g);
-          plot.refresh(g);
-          expect(g[0][0].innerHTML).not.toContain('NaN');
-        });
-      });
-    });
-
-    instanceBuilder.instance('mocked select and event', mockDragInit, function(scope) {
-      var trendline,
-          selection;
 
       beforeEach(function() {
-        trendline = scope.trendline;
-
-        selection = jasmine.createSpyObj('selection', ['selectAll', 'call', 'parentNode', 'attr', 'classed']);
-        selection.selectAll.and.returnValue(selection);
-        selection.parentNode.and.returnValue(selection);
-        selection.attr.and.returnValue(selection);
-        selection.classed.and.returnValue(selection);
-        spies.d3_select.and.returnValue(selection);
+        scope.plot.xScale().outerPadding(0).domain(
+            [new Date(2014, 2, 5), new Date(2014, 2, 6), new Date(2014, 2, 7), new Date(2014, 2, 8), new Date(2014, 2, 9)]
+          ).range([0, 4]);
+          scope.plot.yScale().domain([0, 9]).range([0, 90]);
       });
 
-      describe('And default plot is invoked', function() {
-        var g,
-          interactionSelection,
-          mouseenter,
-          mouseleave,
-          mousemove;
-
-        beforeEach(function () {
-          g = domFixtures.g(data);
-
-          trendline(g);
-
-          interactionSelection = g.select('g.interaction');
-          mouseenter = interactionSelection.on('mouseenter');
-          mouseleave = interactionSelection.on('mouseleave');
-          mousemove = interactionSelection.on('mousemove');
-        });
-
-        // Simple test here, they are fully tested in supstance
-        it('Then mouseenter should be defined', function () {
-          expect(mouseenter).toBeDefined();
-        });
-
-        it('Then mouseleave should be defined', function () {
-          expect(mouseleave).toBeDefined();
-        });
-
-        it('Then mousemove should be defined', function () {
-          expect(mousemove).toBeDefined();
-        });
-      });
-
-      describe('And drag is initialised with drag listeners', function() {
-        var origin,
-            drag,
-            listeners,
-            datum;
+      describe('And trendline is initialised with defaults', function () {
+        var data = [{ start: { date: new Date(2014, 2, 5), value: 3 }, end: { date: new Date(2014, 2, 7), value: 5 } }];
 
         beforeEach(function() {
-          trendline.xScale().domain([data[0].start.date, data[0].end.date, new Date(2014, 2, 8)])
-            .range([0.48, 3.52]);
-          datum = {
-            start: { date: trendline.xScale().domain()[0], value: 10 },
-            end: { date: trendline.xScale().domain()[1], value: 15 }
-          };
-
-          trendline.drag(selection);
-
-          listeners = jasmine.createSpyObj('listeners', ['drag', 'dragstart', 'dragend']);
-          trendline.on('drag', listeners.drag);
-          trendline.on('dragstart', listeners.dragstart);
-          trendline.on('dragend', listeners.dragend);
+          // Trendline mutates data on move, initialise every time
+          data[0] = { start: { date: new Date(2014, 2, 5), value: 3 }, end: { date: new Date(2014, 2, 7), value: 5 } };
         });
 
-        function assertCommonDrag() {
-          var dragstart,
-              dragend;
+        PlotRenderTester(domFixtures)
+          .scope(scope)
+          .data(data)
+          .domAssertions(assertDom)
+          .dataElementsCount(1)
+          .childElementCount(2)
+          .testRender()
+          .testMixin();
+
+        function assertDom(scope) {
+          var childElements,
+              dataSelection;
 
           beforeEach(function() {
-            var dragBehavior = selection.call.calls.argsFor(0)[0];
-            dragstart = dragBehavior.on('dragstart');
-            dragend = dragBehavior.on('dragend');
+            childElements = scope.childElements;
+            dataSelection = d3.selectAll(scope.dataElements);
           });
 
-          it('Then dragstart should be defined', function() {
-            expect(dragstart).toBeDefined();
-          });
-
-          describe('And dragstart is invoked', function() {
-            beforeEach(function() {
-              dragstart.call(selection, 321);
+          describe('And on obtaining the data element', function() {
+            it('Then contains a trendline group', function() {
+              expect(childElements[0].outerHTML)
+                .toEqual('<g class="trendline"><path class="body" d="M 0 30 L 2 50"></path><circle class="start" r="1" cx="0" cy="30"></circle><circle class="end" r="1" cx="2" cy="50"></circle></g>');
             });
 
-            it('Then should set dragging class', function() {
-              expect(selection.classed).toHaveBeenCalledWith('dragging', true);
+            it('Then contains an interaction group', function() {
+              expect(childElements[1].outerHTML)
+                .toEqual('<g class="interaction" style="opacity: 0; fill: none;"><path class="body" d="M 0 30 L 2 50" style="stroke-width: 16px;"></path><circle class="start" r="8" cx="0" cy="30"></circle><circle class="end" r="8" cx="2" cy="50"></circle></g>');
             });
 
-            it('Then should dispatch the dragstart event', function() {
-              expect(listeners.dragstart).toHaveBeenCalledWith(321);
-            });
-          });
-
-          it('Then dragend should be defined', function() {
-            expect(dragend).toBeDefined();
-          });
-
-          describe('And dragend is invoked', function() {
-            beforeEach(function() {
-              dragend.call(selection, 123);
+            it('Then the mouse over class should not be applied', function() {
+              expect(dataSelection.classed('mouseover')).toBe(false);
             });
 
-            it('Then should clear dragging class', function() {
-              expect(selection.classed).toHaveBeenCalledWith('dragging', false);
-            });
+            // TODO Drag events... sigh
+            describe('And obtaining the interaction element', function() {
+              var interaction;
 
-            it('Then should dispatch the dragend event', function() {
-              expect(listeners.dragend).toHaveBeenCalledWith(123);
+              beforeEach(function() {
+                interaction = childElements[1];
+              });
+
+              describe('And on mouseenter', function() {
+                var enterListener;
+
+                beforeEach(function() {
+                  enterListener = jasmine.createSpy('enterListener');
+                  scope.plot.on('mouseenter', enterListener);
+
+                  var event = document.createEvent('MouseEvent');
+                  event.initMouseEvent('mouseenter');
+                  interaction.dispatchEvent(event);
+                });
+
+                it('Then the mouseover class is applied to the supstance', function() {
+                  expect(dataSelection.classed('mouseover')).toBe(true);
+                });
+
+                it('Then the mouse enter dispatcher is called', function() {
+                  expect(enterListener).toHaveBeenCalledWith(data[0]);
+                });
+
+                describe('And on mousemove with valid coordinates', function() {
+                  var moveListener;
+
+                  beforeEach(function() {
+                    moveListener = jasmine.createSpy('moveListener');
+                    scope.plot.on('mousemove', moveListener);
+
+                    var event = document.createEvent('MouseEvent');
+                    event.initMouseEvent('mousemove', false, false, window, 0, 0, 0, 0, 0);
+                    interaction.dispatchEvent(event);
+                  });
+
+                  it('Then the mouse move dispatcher is called with the right coordinates', function() {
+                    expect(moveListener).toHaveBeenCalledWith(data[0]);
+                  });
+
+                  it('Then the mouseover class is applied to the supstance', function() {
+                    expect(dataSelection.classed('mouseover')).toBe(true);
+                  });
+                });
+
+                describe('And on mouseout', function() {
+                  var outListener;
+
+                  beforeEach(function() {
+                    outListener = jasmine.createSpy('outListener');
+                    scope.plot.on('mouseout', outListener);
+
+                    var event = document.createEvent('MouseEvent');
+                    event.initMouseEvent('mouseleave');
+                    interaction.dispatchEvent(event);
+                  });
+
+                  it('Then the mouseover class is removed from the supstance', function() {
+                    expect(dataSelection.classed('mouseover')).toBe(false);
+                  });
+
+                  it('Then the mouse enter dispatcher is called', function() {
+                    expect(outListener).toHaveBeenCalledWith(data[0]);
+                  });
+                });
+              });
+
+              assertDrag('And on body drag start',
+                'path', 0,
+                { start: { date: new Date(2014, 2, 6), value: 4 }, end: { date: new Date(2014, 2, 8), value: 6 } },
+                '<g class="trendline"><path class="body" d="M 1 40 L 3 60"></path><circle class="start" r="1" cx="1" cy="40"></circle><circle class="end" r="1" cx="3" cy="60"></circle></g>',
+                '<g class="interaction" style="opacity: 0; fill: none;"><path class="body" d="M 1 40 L 3 60" style="stroke-width: 16px;"></path><circle class="start" r="8" cx="1" cy="40"></circle><circle class="end" r="8" cx="3" cy="60"></circle></g>'
+              );
+
+              assertDrag('And on left end drag start',
+                'circle', 0,
+                { start: { date: new Date(2014, 2, 6), value: 4 }, end: { date: new Date(2014, 2, 7), value: 5 } },
+                '<g class="trendline"><path class="body" d="M 1 40 L 2 50"></path><circle class="start" r="1" cx="1" cy="40"></circle><circle class="end" r="1" cx="2" cy="50"></circle></g>',
+                '<g class="interaction" style="opacity: 0; fill: none;"><path class="body" d="M 1 40 L 2 50" style="stroke-width: 16px;"></path><circle class="start" r="8" cx="1" cy="40"></circle><circle class="end" r="8" cx="2" cy="50"></circle></g>'
+              );
+
+              assertDrag('And on right end drag start',
+                'circle', 1,
+                { start: { date: new Date(2014, 2, 5), value: 3 }, end: { date: new Date(2014, 2, 8), value: 6 } },
+                '<g class="trendline"><path class="body" d="M 0 30 L 3 60"></path><circle class="start" r="1" cx="0" cy="30"></circle><circle class="end" r="1" cx="3" cy="60"></circle></g>',
+                '<g class="interaction" style="opacity: 0; fill: none;"><path class="body" d="M 0 30 L 3 60" style="stroke-width: 16px;"></path><circle class="start" r="8" cx="0" cy="30"></circle><circle class="end" r="8" cx="3" cy="60"></circle></g>'
+              );
+
+              function assertDrag(describeText, element, index, expectedData, expectedTrendline, expectedInteraction) {
+                describe(describeText, function() {
+                  var dragStartListener,
+                      dragInteraction;
+
+                  beforeEach(function() {
+                    dragInteraction = d3.select(interaction).selectAll(element)[0][index];
+                    dragStartListener = jasmine.createSpy('dragStartListener');
+                    scope.plot.drag(scope.g);
+                    scope.plot.on('dragstart', dragStartListener);
+
+                    var event = document.createEvent('MouseEvent');
+                    event.initMouseEvent('mousedown');
+                    dragInteraction.dispatchEvent(event);
+                  });
+
+                  it('Then the dragging class is added', function() {
+                    expect(dataSelection.classed('dragging')).toBe(true);
+                  });
+
+                  it('Then the drag start dispatcher is called', function() {
+                    expect(dragStartListener).toHaveBeenCalledWith(data[0]);
+                  });
+
+                  describe('And on body drag', function() {
+                    var dragListener;
+
+                    beforeEach(function() {
+                      dragListener = jasmine.createSpy('dragListener');
+                      scope.plot.on('drag', dragListener);
+
+                      var event = document.createEvent('MouseEvent');
+                      event.initMouseEvent('mousemove', false, false, window, 0, 0, 0, 1, 10);
+                      window.dispatchEvent(event);
+                    });
+
+                    it('Then the dragging class is removed', function() {
+                      expect(dataSelection.classed('dragging')).toBe(true);
+                    });
+
+                    it('Then the drag dispatcher is called with updated data', function() {
+                      expect(dragListener).toHaveBeenCalledWith(expectedData);
+                    });
+
+                    it('Then contains an updated supstance path', function() {
+                      expect(childElements[0].outerHTML)
+                        .toEqual(expectedTrendline);
+                    });
+
+                    it('Then contains an updated interaction path', function() {
+                      expect(childElements[1].outerHTML)
+                        .toEqual(expectedInteraction);
+                    });
+                  });
+
+                  describe('And on body drag end', function() {
+                    var dragEndListener;
+
+                    beforeEach(function() {
+                      dragEndListener = jasmine.createSpy('dragEndListener');
+                      scope.plot.on('dragend', dragEndListener);
+
+                      var event = document.createEvent('MouseEvent');
+                      event.initMouseEvent('mouseup');
+                      window.dispatchEvent(event);
+                    });
+
+                    it('Then the dragging class is removed', function() {
+                      expect(dataSelection.classed('dragging')).toBe(false);
+                    });
+
+                    it('Then the drag end dispatcher is called', function() {
+                      expect(dragEndListener).toHaveBeenCalledWith(data[0]);
+                    });
+                  });
+                });
+              }
             });
           });
         }
-
-        describe('And the interaction circle start is obtained', function() {
-          beforeEach(function() {
-            var dragBehavior = selection.call.calls.argsFor(0)[0];
-            origin = dragBehavior.origin();
-            drag = dragBehavior.on('drag');
-          });
-
-          it('Then drag origin should be defined', function() {
-            expect(origin).toBeDefined();
-          });
-
-          it('Then origin invoke returns the correct start coordinate location', function() {
-            expect(origin(data[0])).toEqual({ x:1, y:14.81} );
-          });
-
-          it('Then drag should be defined', function() {
-            expect(drag).toBeDefined();
-          });
-
-          describe('And drag start is invoked with new coordinates', function() {
-            var expectedDatum;
-
-            beforeEach(function() {
-              spies.d3_event.and.returnValue({ x:2, y:1 });
-              expectedDatum = {
-                start: { date: trendline.xScale().domain()[1], value: 1 },
-                end: { date: trendline.xScale().domain()[1], value: 15 }
-              };
-
-              drag.call(selection, datum);
-            });
-
-            it('Then the model should be updated', function() {
-              expect(datum).toEqual(expectedDatum);
-            });
-
-            it('Then a drag event should be dispatched', function() {
-              expect(listeners.drag).toHaveBeenCalledWith(expectedDatum);
-            });
-          });
-
-          it('Then drag start of range that inverts to invalid domain should result in value being updated only', function() {
-            spies.d3_event.and.returnValue({ x:-1, y:1 });
-
-            drag.call(selection, datum);
-            expect(datum).toEqual({
-              start: { date: trendline.xScale().domain()[0], value: 1 },
-              end: { date: trendline.xScale().domain()[1], value: 15 } });
-          });
-
-          assertCommonDrag();
-        });
-
-        describe('And the interaction circle end is obtained', function() {
-          beforeEach(function() {
-            var dragBehavior = selection.call.calls.argsFor(1)[0];
-            origin = dragBehavior.origin();
-            drag = dragBehavior.on('drag');
-          });
-
-          it('Then drag should be defined', function() {
-            expect(drag).toBeDefined();
-          });
-
-          it('Then drag origin should be defined', function() {
-            expect(origin).toBeDefined();
-          });
-
-          describe('And drag end is invoked with new coordinates', function() {
-            var expectedDatum;
-
-            beforeEach(function() {
-              spies.d3_event.and.returnValue({ x:1, y:1 });
-
-              expectedDatum = {
-                start: { date: trendline.xScale().domain()[0], value: 10 },
-                end: { date: trendline.xScale().domain()[0], value: 1 }
-              };
-
-              drag.call(selection, datum);
-            });
-
-            it('Then the model should be updated', function() {
-              expect(datum).toEqual(expectedDatum);
-            });
-
-            it('Then a drag event should be dispatched', function() {
-              expect(listeners.drag).toHaveBeenCalledWith(expectedDatum);
-            });
-          });
-
-          it('Then origin invoke returns the correct start coordinate location', function() {
-            expect(origin(data[0])).toEqual({ x:2, y:15.54 });
-          });
-
-          assertCommonDrag();
-        });
-
-        describe('And the interaction body is obtained', function() {
-          beforeEach(function() {
-            var dragBehavior = selection.call.calls.argsFor(2)[0];
-            origin = dragBehavior.origin();
-            drag = dragBehavior.on('drag');
-          });
-
-          it('Then origin should be defined', function() {
-            expect(origin).toBeDefined();
-          });
-
-          it('Then origin invoke returns the correct start coordinate location', function() {
-            expect(origin(data[0])).toEqual({ x:0, y:0});
-          });
-
-          it('Then drag should be defined', function() {
-            expect(drag).toBeDefined();
-          });
-
-          describe('And drag body is invoked with new coordinates', function() {
-            var expectedDatum;
-
-            beforeEach(function() {
-              expectedDatum = {
-                start: { date: trendline.xScale().domain()[1], value: 11 },
-                end: { date: trendline.xScale().domain()[2], value: 16 }
-              };
-
-              // Must call origin first, there is state information stored for origin
-              origin(datum);
-              spies.d3_event.and.returnValue({ x:1, y:1 });
-
-              drag.call(selection, datum);
-            });
-
-            it('Then the model should move the diagonally right', function() {
-              expect(datum).toEqual(expectedDatum);
-            });
-
-            it('Then a drag event should be dispatched', function() {
-              expect(listeners.drag).toHaveBeenCalledWith(expectedDatum);
-            });
-          });
-
-          assertCommonDrag();
-        });
       });
     });
   });

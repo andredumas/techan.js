@@ -7,7 +7,7 @@ module.exports = function(accessor_atrtrailingstop, plot, plotMixin) {  // Injec
         downLine = plot.pathLine();
 
     function atrtrailingstop(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array);
+      var group = p.dataSelector(g);
 
       group.entry.append('path').attr('class', 'up');
       group.entry.append('path').attr('class', 'down');
@@ -16,7 +16,7 @@ module.exports = function(accessor_atrtrailingstop, plot, plotMixin) {  // Injec
     }
 
     atrtrailingstop.refresh = function(g) {
-      refresh(g, upLine, downLine);
+      refresh(p.dataSelector.select(g), upLine, downLine);
     };
 
     function binder() {
@@ -25,14 +25,14 @@ module.exports = function(accessor_atrtrailingstop, plot, plotMixin) {  // Injec
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(atrtrailingstop, p).plot(accessor_atrtrailingstop(), binder);
+    plotMixin(atrtrailingstop, p).plot(accessor_atrtrailingstop(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return atrtrailingstop;
   };
 };
 
-function refresh(g, upLine, downLine) {
-  g.selectAll('path.up').attr('d', upLine);
-  g.selectAll('path.down').attr('d', downLine);
+function refresh(selection, upLine, downLine) {
+  selection.select('path.up').attr('d', upLine);
+  selection.select('path.down').attr('d', downLine);
 }

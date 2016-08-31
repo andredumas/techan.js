@@ -6,7 +6,7 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
         rsiLine = plot.pathLine();
 
     function rsi(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       group.entry.append('path').attr('class', 'overbought');
       group.entry.append('path').attr('class', 'middle');
@@ -17,7 +17,7 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
     }
 
     rsi.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, rsiLine);
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale, plot, rsiLine);
     };
 
     function binder() {
@@ -25,16 +25,16 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(rsi, p).plot(accessor_rsi(), binder);
+    plotMixin(rsi, p).plot(accessor_rsi(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return rsi;
   };
 };
 
-function refresh(g, accessor, x, y, plot, rsiLine) {
-  g.selectAll('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
-  g.selectAll('path.middle').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.m, y));
-  g.selectAll('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
-  g.selectAll('path.rsi').attr('d', rsiLine);
+function refresh(selection, accessor, x, y, plot, rsiLine) {
+  selection.select('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
+  selection.select('path.middle').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.m, y));
+  selection.select('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
+  selection.select('path.rsi').attr('d', rsiLine);
 }

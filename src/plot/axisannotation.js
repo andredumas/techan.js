@@ -14,15 +14,17 @@ module.exports = function(d3_svg_axis, accessor_value, plot, plotMixin) {  // In
         translate = [0, 0];
 
     function annotation(g) {
-      g.selectAll('g.translate').data(plot.dataMapper.array).enter()
-        .append('g').attr('class', 'translate');
+      var group = p.dataSelector.mapper(filterInvalidValues(p.accessor, axis.scale()))(g);
+
+      group.entry.append('path');
+      group.entry.append('text');
 
       annotation.refresh(g);
     }
 
     annotation.refresh = function(g) {
       var fmt = format ? format : (axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat());
-      refresh(g, plot, p.accessor, axis, fmt, height, width, point, translate);
+      refresh(p.dataSelector.select(g), p.accessor, axis, fmt, height, width, point, translate);
     };
 
     annotation.axis = function(_) {
@@ -55,22 +57,18 @@ module.exports = function(d3_svg_axis, accessor_value, plot, plotMixin) {  // In
       return annotation;
     };
 
-    plotMixin(annotation, p).accessor(accessor_value());
+    plotMixin(annotation, p).accessor(accessor_value()).dataSelector();
 
     return annotation;
   };
 };
 
-function refresh(g, plot, accessor, axis, format, height, width, point, translate) {
-  var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1,
-      translateSelection = g.select('g.translate'),
-      dataGroup = plot.groupSelect(translateSelection, filterInvalidValues(accessor, axis.scale()));
-  dataGroup.entry.append('path');
-  dataGroup.entry.append('text');
+function refresh(selection, accessor, axis, format, height, width, point, translate) {
+  var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
 
-  translateSelection.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
-  dataGroup.selection.selectAll('path').attr('d', backgroundPath(accessor, axis, height, width, point, neg));
-  dataGroup.selection.selectAll('text').text(textValue(accessor, format)).call(textAttributes, accessor, axis, neg);
+  selection.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
+  selection.select('path').attr('d', backgroundPath(accessor, axis, height, width, point, neg));
+  selection.select('text').text(textValue(accessor, format)).call(textAttributes, accessor, axis, neg);
 }
 
 function filterInvalidValues(accessor, scale) {
@@ -82,9 +80,9 @@ function filterInvalidValues(accessor, scale) {
     range = start < end ? [start, end] : [end, start];
 
     return data.filter(function (d) {
-      if (!accessor(d)) return false;
+      if (accessor(d) === null || accessor(d) === undefined) return false;
       var value = scale(accessor(d));
-      return value && !isNaN(value) && range[0] <= value && value <= range[1];
+      return value !== null && !isNaN(value) && range[0] <= value && value <= range[1];
     });
   };
 }

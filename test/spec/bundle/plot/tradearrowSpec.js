@@ -14,7 +14,7 @@ techanModule('plot/tradearrow', function(specBuilder) {
     spies.d3_mouse = jasmine.createSpy('d3_mouse');
 
     var plot = require('../../../../src/plot/plot')(d3.svg.line, spies.d3_select),
-        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, d3.functor, techan.scale.financetime);
+        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, d3.functor, techan.scale.financetime, plot.dataSelector);
 
     return tradearrow(d3.select, d3.functor, spies.d3_mouse, d3.dispatch, techan.accessor.trade, plot, plotMixin, techan.svg.arrow);
   };
@@ -48,14 +48,34 @@ techanModule('plot/tradearrow', function(specBuilder) {
 
     instanceBuilder.instance('mocked mouse', mockedMouseInit, function(scope) {
       describe('And tradearrow is initialised with defaults', function () {
-        var tradearrow;
 
-        plotShouldRenderWithoutError(scope, data, domFixtures);
+        plotShouldRenderWithoutError(scope, data, domFixtures, assertDom, 1, 3);
         plotMixinShouldBeSetup(scope);
 
-        beforeEach(function() {
-          tradearrow = scope.tradearrow;
-        });
+        function assertDom(scope) {
+          var childElements;
+
+          beforeEach(function() {
+            childElements = scope.childElements;
+          });
+
+          describe('And on obtaining the data element', function() {
+            it('Then contains a buy', function() {
+              expect(childElements[0].outerHTML)
+                .toEqual('<path class="tradearrow buy" d="M 0.2549019607843137 1.1 l -6 7.5 l 4 0 l 0 7.5 l 4 0 l 0 -7.5 l 4 0 z"></path>');
+            });
+
+            it('Then contains a sell', function() {
+              expect(childElements[1].outerHTML)
+                .toEqual('<path class="tradearrow sell" d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z"></path>');
+            });
+
+            it('Then contains a equal', function() {
+              expect(childElements[2].outerHTML)
+                .toEqual('<path class="highlight" style="pointer-events: none;"></path>');
+            });
+          });
+        }
       });
 
       describe('And mouse events are obtained', function() {

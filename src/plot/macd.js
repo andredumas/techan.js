@@ -8,7 +8,7 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
         signalLine = plot.pathLine();
 
     function macd(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       group.selection.append('path').attr('class', 'difference');
       group.selection.append('path').attr('class', 'zero');
@@ -19,7 +19,7 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
     }
 
     macd.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, differenceGenerator, macdLine, signalLine);
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale, plot, differenceGenerator, macdLine, signalLine);
     };
 
     function binder() {
@@ -45,16 +45,16 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(macd, p).plot(accessor_macd(), binder).width(binder);
+    plotMixin(macd, p).plot(accessor_macd(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return macd;
   };
 };
 
-function refresh(g, accessor, x, y, plot, differenceGenerator, macdLine, signalLine) {
-  g.selectAll('path.difference').attr('d', differenceGenerator);
-  g.selectAll('path.zero').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.z, y));
-  g.selectAll('path.macd').attr('d', macdLine);
-  g.selectAll('path.signal').attr('d', signalLine);
+function refresh(selection, accessor, x, y, plot, differenceGenerator, macdLine, signalLine) {
+  selection.select('path.difference').attr('d', differenceGenerator);
+  selection.select('path.zero').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.z, y));
+  selection.select('path.macd').attr('d', macdLine);
+  selection.select('path.signal').attr('d', signalLine);
 }

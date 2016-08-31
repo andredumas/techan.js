@@ -6,7 +6,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
         volumeGenerator;
 
     function volume(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       if(p.accessor.o && p.accessor.c) plot.appendPathsUpDownEqual(group.selection, p.accessor, 'volume');
       else group.entry.append('path').attr('class', 'volume');
@@ -43,7 +43,8 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(volume, p).plot(accessor_volume(), binder).width(binder);
+    plotMixin(volume, p).plot(accessor_volume(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    binder();
 
     return volume;
   };

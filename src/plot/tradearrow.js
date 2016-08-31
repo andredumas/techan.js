@@ -9,10 +9,10 @@ module.exports = function(d3_select, d3_functor, d3_mouse, d3_dispatch, accessor
         arrowGenerator;
 
     function tradearrow(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array),
+      var group = p.dataSelector(g),
           classes = typesToClasses(g.datum());
 
-      plot.appendPathsGroupBy(group.entry, p.accessor, 'tradearrow', classes);
+      plot.appendPathsGroupBy(group.selection, p.accessor, 'tradearrow', classes);
       group.entry.append('path').attr('class', 'highlight').style({ 'pointer-events': 'none' }); // Do not want mouse events on the highlight
 
       group.selection.selectAll('path.tradearrow')
@@ -90,7 +90,7 @@ module.exports = function(d3_select, d3_functor, d3_mouse, d3_dispatch, accessor
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(tradearrow, p).plot(accessor_trade(), binder).on(dispatch);
+    plotMixin(tradearrow, p).plot(accessor_trade(), binder).on(dispatch).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return tradearrow;

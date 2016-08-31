@@ -13,43 +13,62 @@ techanModule('plot/volume', function(specBuilder) {
   specBuilder.require(require('../../../../src/plot/volume'), function(instanceBuilder) {
     instanceBuilder.instance('actual', actualInit, function(scope) {
       describe('And volume is initialised with defaults', function () {
-        var volume,
-            accessor,
-            g;
-
-        plotShouldRenderWithoutError(scope, data, domFixtures);
+        plotShouldRenderWithoutError(scope, data, domFixtures, assertDom, 1, 1);
         plotMixinShouldBeSetup(scope);
 
-        beforeEach(function () {
-          volume = scope.volume;
-          volume.xScale().domain(data.map(function(d) { return d.date; }));
-          g = domFixtures.g(data);
-        });
+        function assertDom(scope) {
+          var childElements;
 
-        it('Then on default invoke, should not render up/down classes', function() {
-          volume(g);
-          expect(g[0][0].innerHTML).not.toContain('up');
-          expect(g[0][0].innerHTML).not.toContain('down');
-        });
-
-        describe('And accessor is ohlc', function() {
           beforeEach(function() {
-            accessor = techan.accessor.ohlc();
-            volume.accessor(accessor);
+            childElements = scope.childElements;
           });
 
-          it('Then on default invoke, up/down classes should be rendered', function() {
-            volume(g);
-            volume.refresh(g);
-            expect(g[0][0].innerHTML).toContain('up');
-            expect(g[0][0].innerHTML).toContain('down');
+          describe('And on obtaining the data element', function() {
+            it('Then contains a single volume', function() {
+              expect(childElements[0].outerHTML)
+                .toEqual('<path class="volume" d="M -0.32894736842105265 0 l 0 10 l 1 0 l 0 -10 M 0 0 l 0 100 l 1 0 l 0 -100 M 0.32894736842105265 0 l 0 1 l 1 0 l 0 -1"></path>');
+            });
           });
-        });
+        }
 
         describe('And data contains invalid volume entry', function() {
           plotShouldRenderWithoutError(scope, invalidvolume, domFixtures);
           plotMixinShouldBeSetup(scope);
         });
+      });
+
+      describe('And volume is initialised with ohlc accessor', function () {
+        beforeEach(function() {
+          scope.volume.accessor(techan.accessor.ohlc());
+        });
+
+        plotShouldRenderWithoutError(scope, data, domFixtures, assertDom, 1, 3);
+        plotMixinShouldBeSetup(scope);
+
+        function assertDom(scope) {
+          var childElements;
+
+          beforeEach(function() {
+            childElements = scope.childElements;
+          });
+
+          describe('And on obtaining the data element', function() {
+            it('Then contains a up', function() {
+              expect(childElements[0].outerHTML)
+                .toEqual('<path class="volume up" d="M -0.32894736842105265 0 l 0 10 l 1 0 l 0 -10"></path>');
+            });
+
+            it('Then contains a down', function() {
+              expect(childElements[1].outerHTML)
+                .toEqual('<path class="volume down" d="M 0 0 l 0 100 l 1 0 l 0 -100"></path>');
+            });
+
+            it('Then contains a equal', function() {
+              expect(childElements[2].outerHTML)
+                .toEqual('<path class="volume equal" d="M 0.32894736842105265 0 l 0 1 l 1 0 l 0 -1"></path>');
+            });
+          });
+        }
       });
     });
   });

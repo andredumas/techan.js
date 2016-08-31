@@ -7,28 +7,27 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
         annotation = [];
 
     function supstance(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.unity);
+      var group = p.dataSelector(g);
 
       group.entry.append('g').attr('class', 'supstance')
         .append('path');
 
-      plot.annotation.append(group.entry, annotation, 'y', p.accessor, p.yScale);
+      plot.annotation.append(group, annotation, 'y', p.accessor, p.yScale);
 
       var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
         .call(plot.interaction.mousedispatch(dispatch));
 
-      interaction.append('path').style('stroke-width', 16);
+      interaction.append('path').style('stroke-width', '16px');
 
       supstance.refresh(g);
     }
 
     supstance.refresh = function(g) {
-      refresh(g, plot, p.accessor, p.xScale, p.yScale, g.selectAll('.axisannotation.y > g'), annotation);
+      refresh(p.dataSelector.select(g), plot, p.accessor, p.xScale, p.yScale, g.selectAll('.axisannotation.y > g'), annotation);
     };
 
     supstance.drag = function(g) {
-      g.selectAll('.interaction path')
-        .call(dragBody(dispatch, p.accessor, p.xScale, p.yScale, annotation));
+      g.selectAll('.interaction path').call(dragBody(dispatch, p.accessor, p.xScale, p.yScale, annotation));
     };
 
     supstance.annotation = function(_) {
@@ -39,8 +38,13 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
 
     // Mixin 'superclass' methods and variables
     plotMixin(supstance, p)
+      .dataSelector(plotMixin.dataMapper.unity)
       .plot(accessor_value())
       .on(dispatch);
+
+    // Further group configuration now that it's mixed in
+    // Supstance is composed of annotations, we need to scope the group selection
+    p.dataSelector.scope('supstance');
 
     return supstance;
   }
@@ -66,9 +70,9 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
   return Supstance;
 };
 
-function refresh(g, plot, accessor, x, y, annotationSelection, annotation) {
-  g.selectAll('.supstance path').attr('d', supstancePath(accessor, x, y));
-  g.selectAll('.interaction path').attr('d', supstancePath(accessor, x, y));
+function refresh(selection, plot, accessor, x, y, annotationSelection, annotation) {
+  selection.select('.supstance path').attr('d', supstancePath(accessor, x, y));
+  selection.select('.interaction path').attr('d', supstancePath(accessor, x, y));
   annotationSelection.each(plot.annotation.refresh(annotation));
 }
 

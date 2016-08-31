@@ -8,7 +8,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
         wickWidthGenerator;
 
     function candlestick(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       // 3x2 path's as wick and body can be styled slightly differently (stroke and fills)
       plot.appendPathsUpDownEqual(group.selection, p.accessor, ['candle', 'body']);
@@ -25,7 +25,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     function binder() {
       bodyPathGenerator = plot.joinPath(bodyPath);
       wickGenerator = plot.joinPath(wickPath);
-      wickWidthGenerator = plot.lineWidth(p.xScale, 1, 4);
+      wickWidthGenerator = plot.scaledStrokeWidth(p.xScale, 1, 4);
     }
 
     function bodyPath() {
@@ -72,7 +72,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(candlestick, p).plot(accessor_ohlc(), binder).width(binder);
+    plotMixin(candlestick, p).plot(accessor_ohlc(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    binder();
 
     return candlestick;
   };
