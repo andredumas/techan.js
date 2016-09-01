@@ -1,9 +1,9 @@
 /*
- TechanJS v0.7.0-1
+ TechanJS v0.7.0-2
  (c) 2014 - 2016 Andre Dumas | https://github.com/andredumas/techan.js
 */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.techan = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.7.0-1';
+'use strict';module.exports='0.7.0-2';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -857,7 +857,7 @@ module.exports = function() {
 },{}],18:[function(require,module,exports){
 'use strict';
 
-module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
+module.exports = function(d3_max, indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
         period = 14;
@@ -884,7 +884,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
                 minusDM = downMove;
             }
 
-            var TR = d3.max([
+            var TR = d3_max([
                 (p.accessor.h(d) - p.accessor.l(d)),
                 Math.abs(p.accessor.h(d) - p.accessor.c(data[i-1])),Math.abs(p.accessor.l(d) - p.accessor.c(data[i-1]))
             ]);
@@ -1304,7 +1304,7 @@ function average(v1, v2) {
 },{}],25:[function(require,module,exports){
 'use strict';
 
-module.exports = function() {
+module.exports = function(d3) {
   var indicatorMixin = require('./indicatormixin')(),
       accessor = require('../accessor')(),
       ema_init = require('./ema'),
@@ -1325,7 +1325,7 @@ module.exports = function() {
     aroon: require('./aroon')(indicatorMixin, accessor.ohlc),
     stochastic: require('./stochastic')(indicatorMixin, accessor.ohlc, ema),
     williams: require('./williams')(indicatorMixin, accessor.ohlc, ema),
-    adx: require('./adx')(indicatorMixin, accessor.ohlc, ema),
+    adx: require('./adx')(d3.max, indicatorMixin, accessor.ohlc, ema),
     bollinger: require('./bollinger')(indicatorMixin, accessor.ohlc, sma),
     vwap: vwap
    };
@@ -1776,7 +1776,7 @@ module.exports = function(accessor_adx, plot, plotMixin) {  // Injected dependen
         minusDiLine = plot.pathLine();
 
     function adx(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       group.entry.append('path').attr('class', 'adx');
       group.entry.append('path').attr('class', 'plusDi');
@@ -1786,8 +1786,7 @@ module.exports = function(accessor_adx, plot, plotMixin) {  // Injected dependen
     }
 
     adx.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, adxLine, plusDiLine,
-              minusDiLine);
+      refresh(p.dataSelector.select(g), adxLine, plusDiLine, minusDiLine);
     };
 
     function binder() {
@@ -1797,17 +1796,17 @@ module.exports = function(accessor_adx, plot, plotMixin) {  // Injected dependen
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(adx, p).plot(accessor_adx(), binder);
+    plotMixin(adx, p).plot(accessor_adx(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return adx;
   };
 };
 
-function refresh(g, accessor, x, y, plot, adxLine, plusDiLine, minusDiLine) {
-  g.selectAll('path.adx').attr('d', adxLine);
-  g.selectAll('path.plusDi').attr('d', plusDiLine);
-  g.selectAll('path.minusDi').attr('d', minusDiLine);
+function refresh(selection, adxLine, plusDiLine, minusDiLine) {
+  selection.select('path.adx').attr('d', adxLine);
+  selection.select('path.plusDi').attr('d', plusDiLine);
+  selection.select('path.minusDi').attr('d', minusDiLine);
 }
 
 },{}],34:[function(require,module,exports){
@@ -1823,7 +1822,7 @@ module.exports = function(accessor_aroon, plot, plotMixin) {  // Injected depend
         downLine = plot.pathLine();
 
     function aroon(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       group.entry.append('path').attr('class', 'overbought');
       group.entry.append('path').attr('class', 'oversold');
@@ -1836,7 +1835,7 @@ module.exports = function(accessor_aroon, plot, plotMixin) {  // Injected depend
     }
 
     aroon.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, oscLine, oscArea,
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale, plot, oscLine, oscArea,
               middleLine, upLine, downLine);
     };
 
@@ -1849,21 +1848,21 @@ module.exports = function(accessor_aroon, plot, plotMixin) {  // Injected depend
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(aroon, p).plot(accessor_aroon(), binder);
+    plotMixin(aroon, p).plot(accessor_aroon(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return aroon;
   };
 };
 
-function refresh(g, accessor, x, y, plot, oscLine, oscArea, middleLine, upLine, downLine) {
-  g.selectAll('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
-  g.selectAll('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
-  g.selectAll('path.aroon.oscillator').attr('d', oscLine);
-  g.selectAll('path.aroon.oscillatorArea').attr('d', oscArea);
-  g.selectAll('path.aroon.middle').attr('d', middleLine);
-  g.selectAll('path.aroon.up').attr('d', upLine);
-  g.selectAll('path.aroon.down').attr('d', downLine);
+function refresh(selection, accessor, x, y, plot, oscLine, oscArea, middleLine, upLine, downLine) {
+  selection.select('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
+  selection.select('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
+  selection.select('path.aroon.oscillator').attr('d', oscLine);
+  selection.select('path.aroon.oscillatorArea').attr('d', oscArea);
+  selection.select('path.aroon.middle').attr('d', middleLine);
+  selection.select('path.aroon.up').attr('d', upLine);
+  selection.select('path.aroon.down').attr('d', downLine);
 }
 
 },{}],35:[function(require,module,exports){
@@ -1876,7 +1875,7 @@ module.exports = function(accessor_atrtrailingstop, plot, plotMixin) {  // Injec
         downLine = plot.pathLine();
 
     function atrtrailingstop(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array);
+      var group = p.dataSelector(g);
 
       group.entry.append('path').attr('class', 'up');
       group.entry.append('path').attr('class', 'down');
@@ -1885,7 +1884,7 @@ module.exports = function(accessor_atrtrailingstop, plot, plotMixin) {  // Injec
     }
 
     atrtrailingstop.refresh = function(g) {
-      refresh(g, upLine, downLine);
+      refresh(p.dataSelector.select(g), upLine, downLine);
     };
 
     function binder() {
@@ -1894,16 +1893,16 @@ module.exports = function(accessor_atrtrailingstop, plot, plotMixin) {  // Injec
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(atrtrailingstop, p).plot(accessor_atrtrailingstop(), binder);
+    plotMixin(atrtrailingstop, p).plot(accessor_atrtrailingstop(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return atrtrailingstop;
   };
 };
 
-function refresh(g, upLine, downLine) {
-  g.selectAll('path.up').attr('d', upLine);
-  g.selectAll('path.down').attr('d', downLine);
+function refresh(selection, upLine, downLine) {
+  selection.select('path.up').attr('d', upLine);
+  selection.select('path.down').attr('d', downLine);
 }
 },{}],36:[function(require,module,exports){
 'use strict';
@@ -1922,15 +1921,17 @@ module.exports = function(d3_svg_axis, accessor_value, plot, plotMixin) {  // In
         translate = [0, 0];
 
     function annotation(g) {
-      g.selectAll('g.translate').data(plot.dataMapper.array).enter()
-        .append('g').attr('class', 'translate');
+      var group = p.dataSelector.mapper(filterInvalidValues(p.accessor, axis.scale()))(g);
+
+      group.entry.append('path');
+      group.entry.append('text');
 
       annotation.refresh(g);
     }
 
     annotation.refresh = function(g) {
       var fmt = format ? format : (axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat());
-      refresh(g, plot, p.accessor, axis, fmt, height, width, point, translate);
+      refresh(p.dataSelector.select(g), p.accessor, axis, fmt, height, width, point, translate);
     };
 
     annotation.axis = function(_) {
@@ -1963,22 +1964,18 @@ module.exports = function(d3_svg_axis, accessor_value, plot, plotMixin) {  // In
       return annotation;
     };
 
-    plotMixin(annotation, p).accessor(accessor_value());
+    plotMixin(annotation, p).accessor(accessor_value()).dataSelector();
 
     return annotation;
   };
 };
 
-function refresh(g, plot, accessor, axis, format, height, width, point, translate) {
-  var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1,
-      translateSelection = g.select('g.translate'),
-      dataGroup = plot.groupSelect(translateSelection, filterInvalidValues(accessor, axis.scale()));
-  dataGroup.entry.append('path');
-  dataGroup.entry.append('text');
+function refresh(selection, accessor, axis, format, height, width, point, translate) {
+  var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
 
-  translateSelection.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
-  dataGroup.selection.selectAll('path').attr('d', backgroundPath(accessor, axis, height, width, point, neg));
-  dataGroup.selection.selectAll('text').text(textValue(accessor, format)).call(textAttributes, accessor, axis, neg);
+  selection.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
+  selection.select('path').attr('d', backgroundPath(accessor, axis, height, width, point, neg));
+  selection.select('text').text(textValue(accessor, format)).call(textAttributes, accessor, axis, neg);
 }
 
 function filterInvalidValues(accessor, scale) {
@@ -1990,9 +1987,9 @@ function filterInvalidValues(accessor, scale) {
     range = start < end ? [start, end] : [end, start];
 
     return data.filter(function (d) {
-      if (!accessor(d)) return false;
+      if (accessor(d) === null || accessor(d) === undefined) return false;
       var value = scale(accessor(d));
-      return value && !isNaN(value) && range[0] <= value && value <= range[1];
+      return value !== null && !isNaN(value) && range[0] <= value && value <= range[1];
     });
   };
 }
@@ -2074,7 +2071,7 @@ module.exports = function(accessor_bollinger, plot, plotMixin) {  // Injected de
         lowerLine = plot.pathLine();
 
     function bollinger(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
       group.entry.append('path').attr('class', 'upper');
       group.entry.append('path').attr('class', 'middle');
       group.entry.append('path').attr('class', 'lower');
@@ -2082,8 +2079,7 @@ module.exports = function(accessor_bollinger, plot, plotMixin) {  // Injected de
     }
 
     bollinger.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, upperLine, middleLine,
-              lowerLine);
+      refresh(p.dataSelector.select(g), upperLine, middleLine, lowerLine);
     };
 
     function binder() {
@@ -2093,17 +2089,17 @@ module.exports = function(accessor_bollinger, plot, plotMixin) {  // Injected de
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(bollinger, p).plot(accessor_bollinger(), binder);
+    plotMixin(bollinger, p).plot(accessor_bollinger(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return bollinger;
   };
 };
 
-function refresh(g, accessor, x, y, plot, upperLine, middleLine, lowerLine) {
-  g.selectAll('path.upper').attr('d', upperLine);
-  g.selectAll('path.middle').attr('d', middleLine);
-  g.selectAll('path.lower').attr('d', lowerLine);
+function refresh(selection, upperLine, middleLine, lowerLine) {
+  selection.select('path.upper').attr('d', upperLine);
+  selection.select('path.middle').attr('d', middleLine);
+  selection.select('path.lower').attr('d', lowerLine);
 }
 
 },{}],38:[function(require,module,exports){
@@ -2117,7 +2113,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
         wickWidthGenerator;
 
     function candlestick(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       // 3x2 path's as wick and body can be styled slightly differently (stroke and fills)
       plot.appendPathsUpDownEqual(group.selection, p.accessor, ['candle', 'body']);
@@ -2134,7 +2130,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     function binder() {
       bodyPathGenerator = plot.joinPath(bodyPath);
       wickGenerator = plot.joinPath(wickPath);
-      wickWidthGenerator = plot.lineWidth(p.xScale, 1, 4);
+      wickWidthGenerator = plot.scaledStrokeWidth(p.xScale, 1, 4);
     }
 
     function bodyPath() {
@@ -2181,7 +2177,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(candlestick, p).plot(accessor_ohlc(), binder).width(binder);
+    plotMixin(candlestick, p).plot(accessor_ohlc(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    binder();
 
     return candlestick;
   };
@@ -2202,15 +2199,15 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
     function crosshair(g) {
       var group = g.selectAll('g.data.top').data([change], function(d) { return d; }),
           groupEnter = group.enter(),
-          dataEnter = groupEnter.insert('g', ':first-child').attr('class', 'data top').style('display', 'none'); // Always needs to be before the 'rect pointer-events'
+          dataEnter = groupEnter.insert('g', ':first-child').attr({ 'class':'data top', 'display': 'none' }); // Always needs to be before the 'rect pointer-events'
 
       group.exit().remove();
 
       dataEnter.append('path').attr('class', 'horizontal wire');
       dataEnter.append('path').attr('class', 'vertical wire');
 
-      plot.annotation.append(dataEnter, xAnnotation, 'x');
-      plot.annotation.append(dataEnter, yAnnotation, 'y');
+      plot.annotation.appendDeprecated(dataEnter, xAnnotation, 'x');
+      plot.annotation.appendDeprecated(dataEnter, yAnnotation, 'y');
 
       g.selectAll('rect').data([0]).enter().append('rect').style({ fill: 'none', 'pointer-events': 'all' });
 
@@ -2234,11 +2231,11 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
           width: Math.abs(xRange[xRange.length-1] - xRange[0])
         })
         .on('mouseenter', function() {
-          display(group, 'inline');
+          display(group, true);
           dispatch.enter();
         })
         .on('mouseout', function() {
-          display(group, 'none');
+          display(group, false);
           dispatch.out();
         })
         .on('mousemove', mousemoveRefresh(pathVerticalSelection, pathHorizontalSelection,
@@ -2311,8 +2308,8 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
   };
 };
 
-function display(top, style) {
-  top.style('display', style);
+function display(top, value) {
+  top.attr('display', value ? 'inline' : 'none');
 }
 
 function horizontalPathLine(y, range) {
@@ -2347,7 +2344,7 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
         kijunsen = plot.pathLine();
 
     function ichimoku(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array),
+      var group = p.dataSelector(g),
           clipUpId = 'kumoclipup-' + randomID(),
           clipDownId = 'kumoclipdown-' + randomID();
 
@@ -2366,20 +2363,20 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
     }
 
     ichimoku.refresh = function(g) {
-      refresh(g, p.yScale);
+      refresh(p.dataSelector.select(g), p.yScale);
     };
 
-    function refresh(g, y) {
-      g.selectAll('.kumoclipdown path').attr('d', kumoClip.y1(y.range()[0])); // Fill the bottom of the cloud to be clipped
-      g.selectAll('.kumoclipup path').attr('d', kumoClip.y1(y.range()[1])); // Fill the top of the cloud to be clipped
-      g.selectAll('path.kumo.down').attr('d', kumo);
-      g.selectAll('path.kumo.up').attr('d', kumo);
-      g.selectAll('path.senkouspanb').attr('d', senkouSpanB);
-      g.selectAll('path.senkouspana').attr('d', senkouSpanA);
+    function refresh(selection, y) {
+      selection.select('.kumoclipdown path').attr('d', kumoClip.y1(y.range()[0])); // Fill the bottom of the cloud to be clipped
+      selection.select('.kumoclipup path').attr('d', kumoClip.y1(y.range()[1])); // Fill the top of the cloud to be clipped
+      selection.select('path.kumo.down').attr('d', kumo);
+      selection.select('path.kumo.up').attr('d', kumo);
+      selection.select('path.senkouspanb').attr('d', senkouSpanB);
+      selection.select('path.senkouspana').attr('d', senkouSpanA);
 
-      g.selectAll('path.chikouspan').attr('d', chikouSpan);
-      g.selectAll('path.kijunsen').attr('d', kijunsen);
-      g.selectAll('path.tenkansen').attr('d', tenkanSen);
+      selection.select('path.chikouspan').attr('d', chikouSpan);
+      selection.select('path.kijunsen').attr('d', kijunsen);
+      selection.select('path.tenkansen').attr('d', tenkanSen);
     }
 
     function binder() {
@@ -2406,7 +2403,7 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(ichimoku, p).plot(accessor_ichimoku(), binder);
+    plotMixin(ichimoku, p).plot(accessor_ichimoku(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return ichimoku;
@@ -2428,8 +2425,8 @@ function randomID() {
 module.exports = function(d3) {
   var scale = require('../scale')(d3),
       accessor = require('../accessor')(),
-      plot = require('./plot')(d3.svg.line, d3.select),
-      plotMixin = require('./plotmixin')(d3.scale.linear, d3.functor, scale.financetime, plot.barWidth),
+      plot = require('./plot')(d3.svg.line, d3.svg.area, d3.select),
+      plotMixin = require('./plotmixin')(d3.scale.linear, d3.functor, scale.financetime, plot.dataSelector, plot.barWidth),
       line = require('./line'),
       axisannotation = require('./axisannotation')(d3.svg.axis, accessor.value, plot, plotMixin),
       svg = require('../svg')(d3);
@@ -2479,7 +2476,7 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
         svgLine = plot.pathLine();
 
     function line(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array);
+      var group = p.dataSelector(g);
 
       group.entry.append('path').attr('class', 'line');
 
@@ -2491,7 +2488,7 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
     }
 
     line.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, svgLine, showZero);
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale, plot, svgLine, showZero);
     };
 
     function binder() {
@@ -2499,18 +2496,18 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(line, p).plot(accessor_value(), binder);
+    plotMixin(line, p).plot(accessor_value(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return line;
   };
 };
 
-function refresh(g, accessor, x, y, plot, svgLine, showZero) {
-  g.selectAll('path.line').attr('d', svgLine);
+function refresh(selection, accessor, x, y, plot, svgLine, showZero) {
+  selection.select('path.line').attr('d', svgLine);
 
   if(showZero) {
-    g.selectAll('path.zero').attr('d', plot.horizontalPathLine(x, accessor.z, y));
+    selection.select('path.zero').attr('d', plot.horizontalPathLine(x, accessor.z, y));
   }
 }
 },{}],43:[function(require,module,exports){
@@ -2524,7 +2521,7 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
         signalLine = plot.pathLine();
 
     function macd(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       group.selection.append('path').attr('class', 'difference');
       group.selection.append('path').attr('class', 'zero');
@@ -2535,7 +2532,7 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
     }
 
     macd.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, differenceGenerator, macdLine, signalLine);
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale, plot, differenceGenerator, macdLine, signalLine);
     };
 
     function binder() {
@@ -2561,18 +2558,18 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(macd, p).plot(accessor_macd(), binder).width(binder);
+    plotMixin(macd, p).plot(accessor_macd(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return macd;
   };
 };
 
-function refresh(g, accessor, x, y, plot, differenceGenerator, macdLine, signalLine) {
-  g.selectAll('path.difference').attr('d', differenceGenerator);
-  g.selectAll('path.zero').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.z, y));
-  g.selectAll('path.macd').attr('d', macdLine);
-  g.selectAll('path.signal').attr('d', signalLine);
+function refresh(selection, accessor, x, y, plot, differenceGenerator, macdLine, signalLine) {
+  selection.select('path.difference').attr('d', differenceGenerator);
+  selection.select('path.zero').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.z, y));
+  selection.select('path.macd').attr('d', macdLine);
+  selection.select('path.signal').attr('d', signalLine);
 }
 },{}],44:[function(require,module,exports){
 'use strict';
@@ -2584,9 +2581,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
         lineWidthGenerator;
 
     function ohlc(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
-
-      plot.appendPathsUpDownEqual(group.selection, p.accessor, 'ohlc');
+      plot.appendPathsUpDownEqual(p.dataSelector(g).selection, p.accessor, 'ohlc');
 
       ohlc.refresh(g);
     }
@@ -2597,7 +2592,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 
     function binder() {
       ohlcGenerator = plot.joinPath(ohlcPath);
-      lineWidthGenerator = plot.lineWidth(p.xScale, 1, 2);
+      lineWidthGenerator = plot.scaledStrokeWidth(p.xScale, 1, 2);
     }
 
     function ohlcPath() {
@@ -2619,7 +2614,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(ohlc, p).plot(accessor_ohlc(), binder).width(binder);
+    plotMixin(ohlc, p).plot(accessor_ohlc(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    binder();
 
     return ohlc;
   };
@@ -2627,16 +2623,57 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 },{}],45:[function(require,module,exports){
 'use strict';
 
-module.exports = function(d3_svg_line, d3_select) {
-  function dataSelection(g, dataMapper, key) {
-    var selection = g.selectAll('g.data').data(dataMapper, key);
-    selection.exit().remove();
-    return selection;
-  }
+module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
+  var DataSelector = function(mapper) {
+    var key,
+        scope,
+        classes = ['data'];
 
-  function dataEntry(dataSelection) {
-    return dataSelection.enter().append('g').attr('class', 'data');
-  }
+    function dataSelect(g) {
+      var selection = dataSelect.select(g).data(mapper, key);
+      selection.exit().remove();
+
+      return {
+        selection: selection,
+        entry: selection.enter().append('g').attr('class',  arrayJoin(classes, ' '))
+      };
+    }
+
+    dataSelect.select = function(g) {
+      return g.selectAll('g.' + arrayJoin(classes, '.'));
+    };
+
+    /**
+     * DataSelector.mapper.unity, DataSelector.mapper.array, or custom data mapper
+     * @param _
+     * @returns {*}
+     */
+    dataSelect.mapper = function(_) {
+      if(!arguments.length) return mapper;
+      mapper = _;
+      return dataSelect;
+    };
+
+    dataSelect.scope = function(_) {
+      if(!arguments.length) return scope;
+      scope = _;
+      classes = ['data', 'scope-' + scope];
+      return dataSelect;
+    };
+
+    dataSelect.key= function(_) {
+      if(!arguments.length) return key;
+      key = _;
+      return dataSelect;
+    };
+
+    return dataSelect;
+  };
+
+  DataSelector.mapper = {
+    unity: function(d) { return d; },
+    array: function(d) { return [d]; }
+  };
 
   function PathLine() {
     var d3Line = d3_svg_line().interpolate('monotone');
@@ -2659,7 +2696,7 @@ module.exports = function(d3_svg_line, d3_select) {
   }
 
   function PathArea() {
-    var d3Area = d3.svg.area().interpolate('monotone');
+    var d3Area = d3_svg_area().interpolate('monotone');
 
     function area(data) {
       return d3Area(data);
@@ -2721,23 +2758,7 @@ module.exports = function(d3_svg_line, d3_select) {
   }
 
   return {
-    dataMapper: {
-      unity: function(d) { return d; },
-      array: function(d) { return [d]; }
-    },
-
-    dataSelection: dataSelection,
-
-    dataEntry: dataEntry,
-
-    groupSelect: function(g, dataMapper, key) {
-      var selection = dataSelection(g, dataMapper, key),
-          entry = dataEntry(selection);
-      return {
-        selection: selection,
-        entry: entry
-      };
-    },
+    dataSelector: DataSelector,
 
     appendPathsGroupBy: appendPathsGroupBy,
 
@@ -2761,12 +2782,12 @@ module.exports = function(d3_svg_line, d3_select) {
 
     barWidth: barWidth,
 
-    lineWidth: function(x, max, div) {
+    scaledStrokeWidth: function(x, max, div) {
       max = max || 1;
       div = div || 1;
 
       return function() {
-        return Math.min(max, barWidth(x)/div);
+        return Math.min(max, barWidth(x)/div) + 'px';
       };
     },
 
@@ -2810,7 +2831,31 @@ module.exports = function(d3_svg_line, d3_select) {
     },
 
     annotation: {
-      append: function(selection, annotations, clazz, accessor, scale) {
+      append: function(group, annotations, clazz, accessor, scale) {
+        // Append if we're in entry
+        group.entry.append('g').attr('class', 'axisannotation ' + clazz);
+
+        var annotation = group.selection.selectAll('g.axisannotation.' + clazz)
+          .selectAll('g.axisannotation.' + clazz + ' > g').data(function(d) {
+            var y = scale(accessor(d));
+            return annotations.map(function(annotation) {
+              var value = annotation.axis().scale().invert(y);
+              return [{ value: value }];
+            });
+          });
+
+        annotation.exit().remove();
+        annotation.enter().append('g').attr('class', function(d, i) { return i; });
+        annotation.each(function(d, i) {
+            // Store some meta for lookup later, could use class instance, but this 'should' be more reliable
+            this.__annotation__ = i;
+            annotations[i](d3_select(this));
+          });
+
+        return annotation;
+      },
+
+      appendDeprecated: function(selection, annotations, clazz, accessor, scale) {
         // Use this to either scale the data or initialise to null if accessor and scales are not provided
         var argumentLength = arguments.length;
 
@@ -2845,7 +2890,7 @@ module.exports = function(d3_svg_line, d3_select) {
 
       refresh: function(annotations) {
         return function() {
-          annotations[this.__annotation__].refresh(d3_select(this));
+          annotations[this.__annotation__](d3_select(this));
         };
       }
     }
@@ -2859,9 +2904,22 @@ module.exports = function(d3_svg_line, d3_select) {
  * Module allows optionally mixing in helper methods to plots such as xScale, yScale, accessor setters
  * and helpers for defining dispatching methods.
  */
-module.exports = function(d3_scale_linear, d3_functor, techan_scale_financetime, plot_width) {
-  return function(source, priv) {
+module.exports = function(d3_scale_linear, d3_functor, techan_scale_financetime, plot_dataselector, plot_width) {
+  var PlotMixin = function(source, priv) {
     var plotMixin = {};
+
+    /**
+     * Where mapper is DataSelector.mapper.unity or DataSelector.mapper.array. For convenience DataSelector is available
+     * at PlotMixin.mapper
+     *
+     * @param mapper
+     * @param key
+     * @returns {{}}
+     */
+    plotMixin.dataSelector = function(mapper, key) {
+      priv.dataSelector = plot_dataselector(mapper).key(key);
+      return plotMixin;
+    };
 
     plotMixin.xScale = function(binder) {
       priv.xScale = techan_scale_financetime();
@@ -2935,6 +2993,11 @@ module.exports = function(d3_scale_linear, d3_functor, techan_scale_financetime,
 
     return plotMixin;
   };
+
+  // Carry the mappers through for convenience
+  PlotMixin.dataMapper = plot_dataselector.mapper;
+
+  return PlotMixin;
 };
 },{}],47:[function(require,module,exports){
 'use strict';
@@ -2945,7 +3008,7 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
         rsiLine = plot.pathLine();
 
     function rsi(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       group.entry.append('path').attr('class', 'overbought');
       group.entry.append('path').attr('class', 'middle');
@@ -2956,7 +3019,7 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
     }
 
     rsi.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, rsiLine);
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale, plot, rsiLine);
     };
 
     function binder() {
@@ -2964,18 +3027,18 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(rsi, p).plot(accessor_rsi(), binder);
+    plotMixin(rsi, p).plot(accessor_rsi(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return rsi;
   };
 };
 
-function refresh(g, accessor, x, y, plot, rsiLine) {
-  g.selectAll('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
-  g.selectAll('path.middle').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.m, y));
-  g.selectAll('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
-  g.selectAll('path.rsi').attr('d', rsiLine);
+function refresh(selection, accessor, x, y, plot, rsiLine) {
+  selection.select('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
+  selection.select('path.middle').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.m, y));
+  selection.select('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
+  selection.select('path.rsi').attr('d', rsiLine);
 }
 },{}],48:[function(require,module,exports){
 'use strict';
@@ -2987,7 +3050,7 @@ module.exports = function(accessor_stochastic, plot, plotMixin) {  // Injected d
         stochDownLine = plot.pathLine();
 
     function stochastic(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       group.entry.append('path').attr('class', 'overbought');
       group.entry.append('path').attr('class', 'oversold');
@@ -2997,7 +3060,7 @@ module.exports = function(accessor_stochastic, plot, plotMixin) {  // Injected d
     }
 
     stochastic.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, stochUpLine,
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale, plot, stochUpLine,
               stochDownLine);
     };
 
@@ -3007,18 +3070,18 @@ module.exports = function(accessor_stochastic, plot, plotMixin) {  // Injected d
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(stochastic, p).plot(accessor_stochastic(), binder);
+    plotMixin(stochastic, p).plot(accessor_stochastic(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return stochastic;
   };
 };
 
-function refresh(g, accessor, x, y, plot, stochUpLine, stochDownLine) {
-  g.selectAll('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
-  g.selectAll('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
-  g.selectAll('path.stochastic.up').attr('d', stochUpLine);
-  g.selectAll('path.stochastic.down').attr('d', stochDownLine);
+function refresh(selection, accessor, x, y, plot, stochUpLine, stochDownLine) {
+  selection.select('path.overbought').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.ob, y));
+  selection.select('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
+  selection.select('path.stochastic.up').attr('d', stochUpLine);
+  selection.select('path.stochastic.down').attr('d', stochDownLine);
 }
 
 },{}],49:[function(require,module,exports){
@@ -3031,28 +3094,27 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
         annotation = [];
 
     function supstance(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.unity);
+      var group = p.dataSelector(g);
 
       group.entry.append('g').attr('class', 'supstance')
         .append('path');
 
-      plot.annotation.append(group.entry, annotation, 'y', p.accessor, p.yScale);
+      plot.annotation.append(group, annotation, 'y', p.accessor, p.yScale);
 
       var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
         .call(plot.interaction.mousedispatch(dispatch));
 
-      interaction.append('path').style('stroke-width', 16);
+      interaction.append('path').style('stroke-width', '16px');
 
       supstance.refresh(g);
     }
 
     supstance.refresh = function(g) {
-      refresh(g, plot, p.accessor, p.xScale, p.yScale, g.selectAll('.axisannotation.y > g'), annotation);
+      refresh(p.dataSelector.select(g), plot, p.accessor, p.xScale, p.yScale, g.selectAll('.axisannotation.y > g'), annotation);
     };
 
     supstance.drag = function(g) {
-      g.selectAll('.interaction path')
-        .call(dragBody(dispatch, p.accessor, p.xScale, p.yScale, annotation));
+      g.selectAll('.interaction path').call(dragBody(dispatch, p.accessor, p.xScale, p.yScale, annotation));
     };
 
     supstance.annotation = function(_) {
@@ -3063,8 +3125,13 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
 
     // Mixin 'superclass' methods and variables
     plotMixin(supstance, p)
+      .dataSelector(plotMixin.dataMapper.unity)
       .plot(accessor_value())
       .on(dispatch);
+
+    // Further group configuration now that it's mixed in
+    // Supstance is composed of annotations, we need to scope the group selection
+    p.dataSelector.scope('supstance');
 
     return supstance;
   }
@@ -3090,9 +3157,9 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
   return Supstance;
 };
 
-function refresh(g, plot, accessor, x, y, annotationSelection, annotation) {
-  g.selectAll('.supstance path').attr('d', supstancePath(accessor, x, y));
-  g.selectAll('.interaction path').attr('d', supstancePath(accessor, x, y));
+function refresh(selection, plot, accessor, x, y, annotationSelection, annotation) {
+  selection.select('.supstance path').attr('d', supstancePath(accessor, x, y));
+  selection.select('.interaction path').attr('d', supstancePath(accessor, x, y));
   annotationSelection.each(plot.annotation.refresh(annotation));
 }
 
@@ -3114,19 +3181,18 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_tick, plot, plotM
         lineWidthGenerator;
 
     function tick(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
-      group.entry.append('path').attr('class', 'tick');
+      p.dataSelector(g).entry.append('path').attr('class', 'tick');
 
       tick.refresh(g);
     }
 
     tick.refresh = function(g) {
-      g.selectAll('path.tick').attr('d', tickGenerator).style('stroke-width', lineWidthGenerator);
+      p.dataSelector.select(g).select('path.tick').attr('d', tickGenerator).style('stroke-width', lineWidthGenerator);
     };
 
     function binder() {
       tickGenerator = plot.joinPath(tickPath);
-      lineWidthGenerator = plot.lineWidth(p.xScale, 1, 2);
+      lineWidthGenerator = plot.scaledStrokeWidth(p.xScale, 1, 2);
     }
 
     function tickPath() {
@@ -3147,7 +3213,8 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_tick, plot, plotM
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(tick, p).plot(accessor_tick(), binder).width(binder);
+    plotMixin(tick, p).plot(accessor_tick(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    binder();
 
     return tick;
   };
@@ -3164,10 +3231,10 @@ module.exports = function(d3_select, d3_functor, d3_mouse, d3_dispatch, accessor
         arrowGenerator;
 
     function tradearrow(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array),
+      var group = p.dataSelector(g),
           classes = typesToClasses(g.datum());
 
-      plot.appendPathsGroupBy(group.entry, p.accessor, 'tradearrow', classes);
+      plot.appendPathsGroupBy(group.selection, p.accessor, 'tradearrow', classes);
       group.entry.append('path').attr('class', 'highlight').style({ 'pointer-events': 'none' }); // Do not want mouse events on the highlight
 
       group.selection.selectAll('path.tradearrow')
@@ -3245,7 +3312,7 @@ module.exports = function(d3_select, d3_functor, d3_mouse, d3_dispatch, accessor
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(tradearrow, p).plot(accessor_trade(), binder).on(dispatch);
+    plotMixin(tradearrow, p).plot(accessor_trade(), binder).on(dispatch).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return tradearrow;
@@ -3260,7 +3327,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
         dispatch = d3_dispatch('mouseenter', 'mouseout', 'mousemove', 'drag', 'dragstart', 'dragend');
 
     function trendline(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.unity),
+      var group = p.dataSelector(g),
           trendlineGroup = group.entry.append('g').attr('class', 'trendline');
 
       trendlineGroup.append('path').attr('class', 'body');
@@ -3270,7 +3337,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
       var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
         .call(plot.interaction.mousedispatch(dispatch));
 
-      interaction.append('path').attr('class', 'body').style('stroke-width', 16);
+      interaction.append('path').attr('class', 'body').style('stroke-width', '16px');
       interaction.append('circle').attr({ class: 'start', r: 8 });
       interaction.append('circle').attr({ class: 'end', r: 8 });
 
@@ -3278,7 +3345,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     }
 
     trendline.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale);
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale);
     };
 
     trendline.drag = function(g) {
@@ -3292,6 +3359,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
 
     // Mixin 'superclass' methods and variables
     plotMixin(trendline, p)
+      .dataSelector(plotMixin.dataMapper.unity)
       .plot(accessor_trendline())
       .on(dispatch);
 
@@ -3306,7 +3374,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     })
     .on('drag', function(d) {
       updateEnd(accessor_x, x, d3_event().x, accessor_y, y, d3_event().y, d);
-      refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
+      refresh(d3_select(this.parentNode.parentNode.parentNode), accessor, x, y);
       dispatch.drag(d);
     });
 
@@ -3329,7 +3397,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
       updateEnd(accessor.ed, x, d3_event().x + dragStart.end.date,
         accessor.ev, y, d3_event().y + dragStart.end.value,
         d);
-      refresh(d3_select(this.parentNode.parentNode), accessor, x, y);
+      refresh(d3_select(this.parentNode.parentNode.parentNode), accessor, x, y);
       dispatch.drag(d);
     });
 
@@ -3338,20 +3406,20 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
 
   function updateEnd(accessor_x, x, xValue, accessor_y, y, yValue, d) {
     var date = x.invert(xValue);
-    if(date) accessor_x(d, date);
+    if(date !== null && date !== undefined) accessor_x(d, date);
     accessor_y(d, y.invert(yValue));
   }
 
   return Trendline;
 };
 
-function refresh(g, accessor, x, y) {
-  g.selectAll('.trendline path.body').attr('d', trendlinePath(accessor, x, y));
-  g.selectAll('.trendline circle.start').attr(trendlineEnd(accessor.sd, x, accessor.sv, y));
-  g.selectAll('.trendline circle.end').attr(trendlineEnd(accessor.ed, x, accessor.ev, y));
-  g.selectAll('.interaction path.body').attr('d', trendlinePath(accessor, x, y));
-  g.selectAll('.interaction circle.start').attr(trendlineEnd(accessor.sd, x, accessor.sv, y));
-  g.selectAll('.interaction circle.end').attr(trendlineEnd(accessor.ed, x, accessor.ev, y));
+function refresh(selection, accessor, x, y) {
+  selection.selectAll('.trendline path.body').attr('d', trendlinePath(accessor, x, y));
+  selection.selectAll('.trendline circle.start').attr(trendlineEnd(accessor.sd, x, accessor.sv, y));
+  selection.selectAll('.trendline circle.end').attr(trendlineEnd(accessor.ed, x, accessor.ev, y));
+  selection.selectAll('.interaction path.body').attr('d', trendlinePath(accessor, x, y));
+  selection.selectAll('.interaction circle.start').attr(trendlineEnd(accessor.sd, x, accessor.sv, y));
+  selection.selectAll('.interaction circle.end').attr(trendlineEnd(accessor.ed, x, accessor.ev, y));
 }
 
 function trendlinePath(accessor, x, y) {
@@ -3376,7 +3444,7 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
         volumeGenerator;
 
     function volume(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
+      var group = p.dataSelector(g);
 
       if(p.accessor.o && p.accessor.c) plot.appendPathsUpDownEqual(group.selection, p.accessor, 'volume');
       else group.entry.append('path').attr('class', 'volume');
@@ -3413,7 +3481,8 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(volume, p).plot(accessor_volume(), binder).width(binder);
+    plotMixin(volume, p).plot(accessor_volume(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    binder();
 
     return volume;
   };
@@ -3427,13 +3496,12 @@ module.exports = function(accessor_williams, plot, plotMixin) {  // Injected dep
         upLine = plot.pathLine();
 
     function williams(g) {
-      var group = plot.groupSelect(g, plot.dataMapper.array, p.accessor.d);
-      group.entry.append('path').attr('class', 'williams up');
+      p.dataSelector(g).entry.append('path').attr('class', 'williams up');
       williams.refresh(g);
     }
 
     williams.refresh = function(g) {
-      refresh(g, p.accessor, p.xScale, p.yScale, plot, upLine);
+      p.dataSelector.select(g).select('path.williams.up').attr('d', upLine);
     };
 
     function binder() {
@@ -3441,17 +3509,12 @@ module.exports = function(accessor_williams, plot, plotMixin) {  // Injected dep
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(williams, p).plot(accessor_williams(), binder);
+    plotMixin(williams, p).plot(accessor_williams(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
     binder();
 
     return williams;
   };
 };
-
-function refresh(g, accessor, x, y, plot, upLine) {
-  g.selectAll('path.williams.up').attr('d', upLine);
-}
-
 },{}],55:[function(require,module,exports){
 'use strict';
 
@@ -4187,7 +4250,7 @@ module.exports = (function(d3) {
   return {
     version: require('../build/version'),
     accessor: require('./accessor')(),
-    indicator: require('./indicator')(),
+    indicator: require('./indicator')(d3),
     plot: require('./plot')(d3),
     scale: require('./scale')(d3),
     svg: require('./svg')(d3)
