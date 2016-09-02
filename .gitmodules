@@ -82,3 +82,6 @@
 [submodule "examples/indicator/bollinger"]
 	path = examples/indicator/bollinger
 	url = https://gist.github.com/2da5cf683eb1e0589fa10418d442479c.git
+[submodule "examples/scale/zoom-d3-scale"]
+	path = examples/scale/zoom-d3-scale
+	url = https://gist.github.com/94e0a802f9160ce8a4eb8b80d9ad0a0e.git
