@@ -36,7 +36,7 @@ module.exports = function(accessor_aroon, plot, plotMixin) {  // Injected depend
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(aroon, p).plot(accessor_aroon(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(aroon, p).plot(accessor_aroon(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return aroon;

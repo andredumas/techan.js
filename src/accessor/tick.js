@@ -10,7 +10,6 @@ module.exports = function() {
     bind();
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;

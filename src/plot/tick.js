@@ -39,7 +39,7 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_tick, plot, plotM
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(tick, p).plot(accessor_tick(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(tick, p).plot(accessor_tick(), binder).width(binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return tick;

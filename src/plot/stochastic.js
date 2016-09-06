@@ -27,7 +27,7 @@ module.exports = function(accessor_stochastic, plot, plotMixin) {  // Injected d
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(stochastic, p).plot(accessor_stochastic(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(stochastic, p).plot(accessor_stochastic(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return stochastic;

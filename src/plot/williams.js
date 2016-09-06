@@ -19,7 +19,7 @@ module.exports = function(accessor_williams, plot, plotMixin) {  // Injected dep
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(williams, p).plot(accessor_williams(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(williams, p).plot(accessor_williams(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return williams;

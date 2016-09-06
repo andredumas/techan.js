@@ -45,7 +45,7 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(macd, p).plot(accessor_macd(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(macd, p).plot(accessor_macd(), binder).width(binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return macd;

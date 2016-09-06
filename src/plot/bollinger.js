@@ -26,7 +26,7 @@ module.exports = function(accessor_bollinger, plot, plotMixin) {  // Injected de
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(bollinger, p).plot(accessor_bollinger(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(bollinger, p).plot(accessor_bollinger(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return bollinger;

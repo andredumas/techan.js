@@ -47,7 +47,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.sd = startDate;
     accessor.sv = startValue;
     accessor.ed = endDate;

@@ -25,7 +25,7 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(rsi, p).plot(accessor_rsi(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(rsi, p).plot(accessor_rsi(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return rsi;

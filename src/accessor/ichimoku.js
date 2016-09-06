@@ -16,7 +16,6 @@ module.exports = function() {
     return accessor.ts(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -72,7 +71,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.ts = tenkanSen;
     accessor.ks = kijunSen;
