@@ -111,7 +111,7 @@ module.exports = function(grunt) {
       server: {
         options: {
           base: '../',
-          open: 'http://localhost:8000/'
+          open: 'http://localhost:8000/src/test/html/bigChart.html'
         }
       }
     }
