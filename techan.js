@@ -1,9 +1,9 @@
 /*
- TechanJS v0.7.0-2
+ TechanJS v0.7.0-3
  (c) 2014 - 2016 Andre Dumas | https://github.com/andredumas/techan.js
 */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.techan = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.7.0-2';
+'use strict';module.exports='0.7.0-3';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -17,7 +17,6 @@ module.exports = function() {
     return accessor.r(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -43,7 +42,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.adx = adx;
     accessor.plusDi = plusDi;
@@ -72,7 +70,6 @@ module.exports = function() {
     return accessor.r(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -115,7 +112,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.up = up;
     accessor.down = down;
@@ -141,7 +137,6 @@ module.exports = function() {
     return accessor.up(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -161,7 +156,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.up = up;
     accessor.dn = down;
@@ -184,7 +178,6 @@ module.exports = function() {
     return accessor.r(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -210,7 +203,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.middle = middle;
     accessor.upper = upper;
@@ -222,6 +214,60 @@ module.exports = function() {
   return bind();
 };
 },{}],6:[function(require,module,exports){
+'use strict';
+
+module.exports = function() {
+  /**
+   * Supports getter and setter. Watch out if used in d3 and the second parameter is an index!!
+   * This approach needs further thought.
+   * @param d Underlying data object to get or set the value
+   * @param _ If passed turns into a setter. This is the value to set
+   * @returns {*}
+   */
+  var x = function(d, _) {
+        if(arguments.length < 2) return d.x;
+        d.x = _;
+        return accessor;
+      },
+        /**
+         * Supports getter and setter. Watch out if used in d3 and the second parameter is an index!!
+         * This approach needs further thought.
+         * @param d Underlying data object to get or set the value
+         * @param _ If passed turns into a setter. This is the value to set
+         * @returns {*}
+         */
+      y = function(d, _) {
+        if(arguments.length < 2) return d.y;
+        d.y = _;
+        return accessor;
+      };
+
+  function accessor(d) {
+    return accessor.xv(d);
+  }
+
+  accessor.x = function(_) {
+    if (!arguments.length) return x;
+    x = _;
+    return bind();
+  };
+
+  accessor.y = function(_) {
+    if (!arguments.length) return y;
+    y = _;
+    return bind();
+  };
+
+  function bind() {
+    accessor.xv = x;
+    accessor.yv = y;
+
+    return accessor;
+  }
+
+  return bind();
+};
+},{}],7:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -240,7 +286,6 @@ module.exports = function() {
     return accessor.ts(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -296,7 +341,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.ts = tenkanSen;
     accessor.ks = kijunSen;
@@ -312,14 +356,14 @@ module.exports = function() {
 
   return bind();
 };
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
-// TODO Could these be singletons? Generally will be accessing the same data and data structures at the same time
-// TODO Provide IDs for all accessors. Default to date, but at least provide an option
+// Provide IDs for all accessors. Default to date, but at least provide an option
 module.exports = function() {
   return {
     atrtrailingstop: require('./atrtrailingstop'),
+    crosshair: require('./crosshair'),
     ichimoku: require('./ichimoku'),
     macd: require('./macd'),
     ohlc: require('./ohlc'),
@@ -337,7 +381,7 @@ module.exports = function() {
   };
 };
 
-},{"./adx":2,"./aroon":3,"./atrtrailingstop":4,"./bollinger":5,"./ichimoku":6,"./macd":8,"./ohlc":9,"./rsi":10,"./stochastic":11,"./tick":12,"./trade":13,"./trendline":14,"./value":15,"./volume":16,"./williams":17}],8:[function(require,module,exports){
+},{"./adx":2,"./aroon":3,"./atrtrailingstop":4,"./bollinger":5,"./crosshair":6,"./ichimoku":7,"./macd":9,"./ohlc":10,"./rsi":11,"./stochastic":12,"./tick":13,"./trade":14,"./trendline":15,"./value":16,"./volume":17,"./williams":18}],9:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -351,7 +395,6 @@ module.exports = function() {
     return accessor.m(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -377,7 +420,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.m = macd;
     accessor.s = signal;
@@ -389,7 +431,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -404,7 +446,6 @@ module.exports = function() {
     return accessor.c(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -442,7 +483,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.o = open;
     accessor.h = high;
@@ -455,7 +495,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -469,7 +509,6 @@ module.exports = function() {
     return accessor.r(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -501,7 +540,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.r = rsi;
     accessor.ob = overbought;
@@ -513,7 +551,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -528,7 +566,6 @@ module.exports = function() {
     return accessor.r(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -565,7 +602,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.k = stochasticK;
     accessor.sd = stochasticD;
@@ -578,7 +614,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -591,7 +627,6 @@ module.exports = function() {
     bind();
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -627,7 +662,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -639,7 +674,6 @@ module.exports = function() {
     return accessor.p(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -663,7 +697,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.t = type;
     accessor.p = price;
@@ -673,7 +706,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -723,7 +756,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.sd = startDate;
     accessor.sv = startValue;
     accessor.ed = endDate;
@@ -734,7 +766,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -756,7 +788,6 @@ module.exports = function() {
     return accessor.v(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -776,7 +807,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.v = value;
     accessor.z = zero;
@@ -786,7 +816,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -797,7 +827,6 @@ module.exports = function() {
     return accessor.v(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -811,7 +840,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.v = volume;
 
@@ -820,7 +848,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -831,7 +859,6 @@ module.exports = function() {
     return accessor.r(d);
   }
 
-  // TODO use d3.rebind to obtain this from 'super class'
   accessor.date = function(_) {
     if (!arguments.length) return date;
     date = _;
@@ -845,7 +872,6 @@ module.exports = function() {
   };
 
   function bind() {
-    // TODO These methods will need to know if the variables are functions or values and execute as such
     accessor.d = date;
     accessor.w = williams;
 
@@ -854,7 +880,7 @@ module.exports = function() {
 
   return bind();
 };
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_max, indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
@@ -930,7 +956,7 @@ function datum(date, adx, plusDi, minusDi) {
   }
 }
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
@@ -1003,7 +1029,7 @@ function datum(date, up,down,oscillator, middle, overbought, oversold) {
   else return { date: date, up: null,down:null,oscillator:null, middle: null, overbought: null, oversold: null };
 }
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, indicator_sma) {  // Injected dependencies
@@ -1059,7 +1085,7 @@ function datum(date, atr) {
   if(atr) return { date: date, value: atr };
   else return { date: date, value: null };
 }
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, indicator_atr) {  // Injected dependencies
@@ -1112,7 +1138,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_atr) {  // In
     return indicator;
   };
 };
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, indicator_sma) {  // Injected dependencies
@@ -1167,7 +1193,7 @@ function datum(date, middleBand, upperBand, lowerBand) {
   else return { date: date, middleBand: null, upperBand: null, lowerBand: null};
 }
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injected dependencies
@@ -1219,7 +1245,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injec
     return indicator;
   };
 };
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
@@ -1301,7 +1327,7 @@ function senkouSpanA(tenkanSen, kijunSen) {
 function average(v1, v2) {
   return (v1+v2)/2;
 }
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -1339,7 +1365,7 @@ function wilder_alpha_init(period) {
   return 1/period;
 }
 
-},{"../accessor":7,"./adx":18,"./aroon":19,"./atr":20,"./atrtrailingstop":21,"./bollinger":22,"./ema":23,"./ichimoku":24,"./indicatormixin":26,"./macd":27,"./rsi":28,"./sma":29,"./stochastic":30,"./vwap":31,"./williams":32}],26:[function(require,module,exports){
+},{"../accessor":8,"./adx":19,"./aroon":20,"./atr":21,"./atrtrailingstop":22,"./bollinger":23,"./ema":24,"./ichimoku":25,"./indicatormixin":27,"./macd":28,"./rsi":29,"./sma":30,"./stochastic":31,"./vwap":32,"./williams":33}],27:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -1374,7 +1400,7 @@ module.exports = function() {
     return indicatorMixin;
   };
 };
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
@@ -1435,7 +1461,7 @@ function datum(date, macd, signal, difference, zero) {
   else return { date: date, macd: null, signal: null, difference: null, zero: null };
 }
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // Injected dependencies
@@ -1498,7 +1524,7 @@ function datum(date, rsi, middle, overbought, oversold) {
   if(rsi) return { date: date, rsi: rsi, middle: middle, overbought: overbought, oversold: oversold };
   else return { date: date, rsi: null, middle: null, overbought: null, oversold: null };
 }
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
@@ -1557,7 +1583,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
     return indicator;
   };
 };
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
@@ -1648,7 +1674,7 @@ function datum(date, stochasticK,stochasticD, middle, overbought, oversold) {
   else return { date: date, stochasticK: null,stochasticD:null, middle: middle, overbought: overbought, oversold: oversold };
 }
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
@@ -1693,7 +1719,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
   };
 };
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
@@ -1765,7 +1791,7 @@ function datum(date, williams, middle, overbought, oversold) {
   else return { date: date, williams: null, middle: null, overbought: null, oversold: null };
 }
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_adx, plot, plotMixin) {  // Injected dependencies
@@ -1796,7 +1822,7 @@ module.exports = function(accessor_adx, plot, plotMixin) {  // Injected dependen
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(adx, p).plot(accessor_adx(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(adx, p).plot(accessor_adx(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return adx;
@@ -1809,7 +1835,7 @@ function refresh(selection, adxLine, plusDiLine, minusDiLine) {
   selection.select('path.minusDi').attr('d', minusDiLine);
 }
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_aroon, plot, plotMixin) {  // Injected dependencies
@@ -1848,7 +1874,7 @@ module.exports = function(accessor_aroon, plot, plotMixin) {  // Injected depend
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(aroon, p).plot(accessor_aroon(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(aroon, p).plot(accessor_aroon(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return aroon;
@@ -1865,7 +1891,7 @@ function refresh(selection, accessor, x, y, plot, oscLine, oscArea, middleLine, 
   selection.select('path.aroon.down').attr('d', downLine);
 }
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_atrtrailingstop, plot, plotMixin) {  // Injected dependencies
@@ -1904,7 +1930,7 @@ function refresh(selection, upLine, downLine) {
   selection.select('path.up').attr('d', upLine);
   selection.select('path.down').attr('d', downLine);
 }
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2060,7 +2086,7 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
     }
   };
 }
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_bollinger, plot, plotMixin) {  // Injected dependencies
@@ -2089,7 +2115,7 @@ module.exports = function(accessor_bollinger, plot, plotMixin) {  // Injected de
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(bollinger, p).plot(accessor_bollinger(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(bollinger, p).plot(accessor_bollinger(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return bollinger;
@@ -2102,7 +2128,7 @@ function refresh(selection, upperLine, middleLine, lowerLine) {
   selection.select('path.lower').attr('d', lowerLine);
 }
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
@@ -2177,39 +2203,36 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(candlestick, p).plot(accessor_ohlc(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(candlestick, p).plot(accessor_ohlc(), binder).width(binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return candlestick;
   };
 };
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 'use strict';
 
-module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plotMixin) { // Injected dependencies
+module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, accessor_crosshair, plot, plotMixin) { // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
-        dispatch = d3_dispatch('enter', 'out', 'move'),
-        xAnnotation = [],
-        yAnnotation = [],
+        dispatcher = d3_dispatch('enter', 'out', 'move'),
+        verticalPathGenerator,
+        horizontalPathGenerator,
+        xAnnotationComposer = plot.plotComposer().scope('composed-annotation').plotScale(function(plot) { return plot.axis().scale(); }),
+        yAnnotationComposer = plot.plotComposer().scope('composed-annotation').plotScale(function(plot) { return plot.axis().scale(); }),
         verticalWireRange,
-        horizontalWireRange,
-        change = 0; // Track changes to this object, to know when to redraw
+        horizontalWireRange;
 
     function crosshair(g) {
-      var group = g.selectAll('g.data.top').data([change], function(d) { return d; }),
-          groupEnter = group.enter(),
-          dataEnter = groupEnter.insert('g', ':first-child').attr({ 'class':'data top', 'display': 'none' }); // Always needs to be before the 'rect pointer-events'
+      var group = p.dataSelector(g);
 
-      group.exit().remove();
+      group.entry.append('path').attr('class', 'horizontal wire');
+      group.entry.append('path').attr('class', 'vertical wire');
 
-      dataEnter.append('path').attr('class', 'horizontal wire');
-      dataEnter.append('path').attr('class', 'vertical wire');
+      group.entry.append('g').attr('class', 'axisannotation x').call(xAnnotationComposer);
+      group.entry.append('g').attr('class', 'axisannotation y').call(yAnnotationComposer);
 
-      plot.annotation.appendDeprecated(dataEnter, xAnnotation, 'x');
-      plot.annotation.appendDeprecated(dataEnter, yAnnotation, 'y');
-
-      g.selectAll('rect').data([0]).enter().append('rect').style({ fill: 'none', 'pointer-events': 'all' });
+      g.selectAll('rect').data([undefined]).enter().append('rect').style({ fill: 'none', 'pointer-events': 'all' });
 
       crosshair.refresh(g);
     }
@@ -2217,119 +2240,151 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, plot, plot
     crosshair.refresh = function(g) {
       var xRange = p.xScale.range(),
           yRange = p.yScale.range(),
-          group = g.selectAll('g.data.top'),
-          mouseSelection = g.selectAll('rect'),
-          pathVerticalSelection = group.selectAll('path.vertical'),
-          pathHorizontalSelection = group.selectAll('path.horizontal'),
-          xAnnotationSelection = group.selectAll('g.axisannotation.x > g'),
-          yAnnotationSelection = group.selectAll('g.axisannotation.y > g');
+          group = p.dataSelector.select(g),
+          pathVerticalSelection = group.select('path.vertical'),
+          pathHorizontalSelection = group.select('path.horizontal'),
+          xAnnotationSelection = group.select('g.axisannotation.x'),
+          yAnnotationSelection = group.select('g.axisannotation.y');
 
-      mouseSelection.attr({
+      g.selectAll('rect').attr({
           x: Math.min.apply(null, xRange),
           y: Math.min.apply(null, yRange),
           height: Math.abs(yRange[yRange.length-1] - yRange[0]),
           width: Math.abs(xRange[xRange.length-1] - xRange[0])
         })
         .on('mouseenter', function() {
-          display(group, true);
-          dispatch.enter();
+          dispatcher.enter();
         })
         .on('mouseout', function() {
-          display(group, false);
-          dispatch.out();
+          dispatcher.out();
+          // Redraw with null values to ensure when we enter again, there is nothing cached when redisplayed
+          delete group.node().__coord__;
+          initialiseWire(group.datum()); // Mutating data, don't need to manually pass down
+          refresh(group, pathVerticalSelection, pathHorizontalSelection, xAnnotationSelection, yAnnotationSelection);
         })
-        .on('mousemove', mousemoveRefresh(pathVerticalSelection, pathHorizontalSelection,
+        .on('mousemove', mousemoveRefresh(group, pathVerticalSelection, pathHorizontalSelection,
           xAnnotationSelection, yAnnotationSelection)
         );
 
-      refresh(pathVerticalSelection, pathHorizontalSelection, xAnnotationSelection, yAnnotationSelection);
+      refresh(group, pathVerticalSelection, pathHorizontalSelection, xAnnotationSelection, yAnnotationSelection);
     };
 
-    function mousemoveRefresh(pathVerticalSelection, pathHorizontalSelection,
+    function mousemoveRefresh(selection, pathVerticalSelection, pathHorizontalSelection,
                               xAnnotationSelection, yAnnotationSelection) {
       return function() {
-        var coords = d3_mouse(this),
-            x = p.xScale.invert(coords[0]),
-            y = p.yScale.invert(coords[1]);
-
-        refresh(pathVerticalSelection.datum(x),
-          pathHorizontalSelection.datum(y),
-          xAnnotationSelection.each(plot.annotation.update(xAnnotation, coords[0])),
-          yAnnotationSelection.each(plot.annotation.update(yAnnotation, coords[1]))
-        );
-
-        dispatch.move([x, y]);
+        // Cache coordinates past this mouse move
+        selection.node().__coord__ = d3_mouse(this);
+        refresh(selection, pathVerticalSelection, pathHorizontalSelection, xAnnotationSelection, yAnnotationSelection);
       };
     }
 
-    function refresh(xPath, yPath, xAnnotationSelection, yAnnotationSelection) {
-      var x = p.xScale,
-          y = p.yScale;
+    function refresh(selection, xPath, yPath, xAnnotationSelection, yAnnotationSelection) {
+      var coords = selection.node().__coord__;
 
-      xPath.attr('d', verticalPathLine(x, verticalWireRange || y.range()));
-      yPath.attr('d', horizontalPathLine(y, horizontalWireRange || x.range()));
-      xAnnotationSelection.each(plot.annotation.refresh(xAnnotation));
-      yAnnotationSelection.each(plot.annotation.refresh(yAnnotation));
+      if(coords !== undefined) {
+        var d = selection.datum(),
+            xNew = p.xScale.invert(coords[0]),
+            yNew = p.yScale.invert(coords[1]),
+            dispatch = xNew !== null && yNew !== null && (p.accessor.xv(d) !== xNew || p.accessor.yv(d) !== yNew);
+
+        p.accessor.xv(d, xNew);
+        p.accessor.yv(d, yNew);
+        if(dispatch) dispatcher.move(d);
+      }
+
+      // Just before draw, convert the coords to
+      xPath.attr('d', verticalPathGenerator);
+      yPath.attr('d', horizontalPathGenerator);
+      xAnnotationSelection.call(xAnnotationComposer.refresh);
+      yAnnotationSelection.call(yAnnotationComposer.refresh);
+      selection.attr('display', displayAttr);
     }
 
     crosshair.xAnnotation = function(_) {
-      if(!arguments.length) return xAnnotation;
-      xAnnotation = _ instanceof Array ? _ : [_];
-      change++; // Annotations have changed, increment to trigger a redraw
-      return crosshair;
+      if(!arguments.length) return xAnnotationComposer.plots();
+      xAnnotationComposer.plots(_ instanceof Array ? _ : [_]);
+      return binder();
     };
 
     crosshair.yAnnotation = function(_) {
-      if(!arguments.length) return yAnnotation;
-      yAnnotation = _ instanceof Array ? _ : [_];
-      change++; // Annotations have changed, increment to trigger a redraw
-      return crosshair;
+      if(!arguments.length) return yAnnotationComposer.plots();
+      yAnnotationComposer.plots(_ instanceof Array ? _ : [_]);
+      return binder();
     };
 
     crosshair.verticalWireRange = function(_) {
       if(!arguments.length) return verticalWireRange;
       verticalWireRange = _;
-      return crosshair;
+      return binder();
     };
 
     crosshair.horizontalWireRange = function(_) {
       if(!arguments.length) return horizontalWireRange;
       horizontalWireRange = _;
-      return crosshair;
+      return binder();
     };
 
-    // Mixin scale management and event listening
-    plotMixin(crosshair, p)
-      .xScale()
-      .yScale()
-      .on(dispatch);
+    function binder() {
+      verticalPathGenerator = verticalPathLine();
+      horizontalPathGenerator = horizontalPathLine();
+      xAnnotationComposer.accessor(p.accessor.xv).scale(p.xScale);
+      yAnnotationComposer.accessor(p.accessor.yv).scale(p.yScale);
+      return crosshair;
+    }
 
-    return crosshair;
+    function horizontalPathLine() {
+      var range = horizontalWireRange || p.xScale.range();
+
+      return function(d) {
+        if(p.accessor.yv(d) === null) return null;
+        var value = p.yScale(p.accessor.yv(d));
+        if(isNaN(value)) return null;
+        return 'M ' + range[0] + ' ' + value + ' L ' + range[range.length-1] + ' ' + value;
+      };
+    }
+
+    function verticalPathLine() {
+      var range = verticalWireRange || p.yScale.range();
+
+      return function(d) {
+        if(p.accessor.xv(d) === null) return null;
+        var value = p.xScale(p.accessor.xv(d)),
+            sr = p.xScale.range();
+        if(value < Math.min(sr[0], sr[sr.length-1]) || value > Math.max(sr[0], sr[sr.length-1])) return null;
+        return 'M ' + value + ' ' + range[0] + ' L ' + value + ' ' + range[range.length-1];
+      };
+    }
+
+    function initialiseWire(d) {
+      d = d || {};
+      p.accessor.xv(d, null);
+      p.accessor.yv(d, null);
+      return d;
+    }
+
+    function isEmpty(d) {
+      return d === undefined || p.accessor.xv(d) === null || p.accessor.yv(d) === null;
+    }
+
+    function displayAttr(d) {
+      return isEmpty(d) ? 'none' : null;
+    }
+
+    // Mixin scale management and event listening
+    plotMixin(crosshair, p).plot(accessor_crosshair(), binder)
+      .dataSelector(function(d) {
+        // Has the user set data? If not, put empty data ready for mouse over
+        if(isEmpty(d)) return [ initialiseWire() ];
+        else return [d];
+      })
+      .on(dispatcher);
+
+    p.dataSelector.scope('crosshair');
+
+    return binder();
   };
 };
-
-function display(top, value) {
-  top.attr('display', value ? 'inline' : 'none');
-}
-
-function horizontalPathLine(y, range) {
-  return function(d) {
-    if(d === null) return null;
-    var value = y(d);
-    return 'M ' + range[0] + ' ' + value + ' L ' + range[range.length-1] + ' ' + value;
-  };
-}
-
-function verticalPathLine(x, range) {
-  return function(d) {
-    if(d === null) return null;
-    var value = x(d),
-        sr = x.range();
-    if(value < Math.min(sr[0], sr[sr.length-1]) || value > Math.max(sr[0], sr[sr.length-1])) return null;
-    return 'M ' + value + ' ' + range[0] + ' L ' + value + ' ' + range[range.length-1];
-  };
-}
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  // Injected dependencies
@@ -2419,7 +2474,7 @@ function negate(accessor) {
 function randomID() {
   return Math.random().toString(36).substr(2, 9);
 }
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -2437,7 +2492,7 @@ module.exports = function(d3) {
     atrtrailingstop: require('./atrtrailingstop')(accessor.atrtrailingstop, plot, plotMixin),
     axisannotation: axisannotation,
     candlestick: require('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
-    crosshair: require('./crosshair')(d3.select, d3_event, d3.mouse, d3.dispatch, plot, plotMixin),
+    crosshair: require('./crosshair')(d3.select, d3_event, d3.mouse, d3.dispatch, accessor.crosshair, plot, plotMixin),
     ema: line(accessor.value, plot, plotMixin),
     ichimoku: require('./ichimoku')(d3.svg.area, accessor.ichimoku, plot, plotMixin),
     ohlc: require('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
@@ -2465,7 +2520,7 @@ function d3_event() {
   return d3.event;
 }
 
-},{"../accessor":7,"../scale":56,"../svg":59,"./adx":33,"./aroon":34,"./atrtrailingstop":35,"./axisannotation":36,"./bollinger":37,"./candlestick":38,"./crosshair":39,"./ichimoku":40,"./line":42,"./macd":43,"./ohlc":44,"./plot":45,"./plotmixin":46,"./rsi":47,"./stochastic":48,"./supstance":49,"./tick":50,"./tradearrow":51,"./trendline":52,"./volume":53,"./williams":54}],42:[function(require,module,exports){
+},{"../accessor":8,"../scale":57,"../svg":60,"./adx":34,"./aroon":35,"./atrtrailingstop":36,"./axisannotation":37,"./bollinger":38,"./candlestick":39,"./crosshair":40,"./ichimoku":41,"./line":43,"./macd":44,"./ohlc":45,"./plot":46,"./plotmixin":47,"./rsi":48,"./stochastic":49,"./supstance":50,"./tick":51,"./tradearrow":52,"./trendline":53,"./volume":54,"./williams":55}],43:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
@@ -2510,7 +2565,7 @@ function refresh(selection, accessor, x, y, plot, svgLine, showZero) {
     selection.select('path.zero').attr('d', plot.horizontalPathLine(x, accessor.z, y));
   }
 }
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_macd, plot, plotMixin) {  // Injected dependencies
@@ -2558,7 +2613,7 @@ module.exports = function(accessor_macd, plot, plotMixin) {  // Injected depende
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(macd, p).plot(accessor_macd(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(macd, p).plot(accessor_macd(), binder).width(binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return macd;
@@ -2571,7 +2626,7 @@ function refresh(selection, accessor, x, y, plot, differenceGenerator, macdLine,
   selection.select('path.macd').attr('d', macdLine);
   selection.select('path.signal').attr('d', signalLine);
 }
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotMixin) {  // Injected dependencies
@@ -2614,13 +2669,13 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(ohlc, p).plot(accessor_ohlc(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(ohlc, p).plot(accessor_ohlc(), binder).width(binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return ohlc;
   };
 };
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
@@ -2757,6 +2812,102 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
     return result;
   }
 
+
+  /**
+   * Helper class assists the composition of multiple techan plots. Handles:
+   * - Automatic transfer of data down to descendants
+   * - Automatic scaling of a value to the child ( value (parent) -> percent conversion for example)
+   * - Plots must be of the same type, ie. Axis Annotation, Supstance)
+   *
+   * @returns {plotComposer} An instance
+   * @constructor
+   */
+  function PlotComposer() {
+    var dataSelector = DataSelector(),
+        plots = [],
+        plotScale = function(plot) { return plot.scale(); },
+        scale,
+        accessor;
+
+    function plotComposer(g) {
+      var group = dataSelector.mapper(function() {
+        return plots.map(function() { return []; });
+      })(g);
+
+      group.selection.each(function(d, i) {
+        plots[i](d3_select(this));
+      });
+
+      plotComposer.refresh(g);
+    }
+
+    plotComposer.refresh = function(g) {
+      dataSelector.select(g).data(function(d) {
+          var value = accessor(d);
+          if(value === null || value === undefined) return plots.map(function() { return []; });
+          var y = scale(value);
+          return plots.map(function(plot) {
+            var annotationValue = plotScale(plot) === scale ? value : plotScale(plot).invert(y);
+            return [ { value: annotationValue} ];
+          });
+        }).each(function(d, i) {
+          plots[i](d3_select(this));
+        });
+    };
+
+    plotComposer.plots = function(_) {
+      if(!arguments.length) return plots;
+      plots = _;
+      return plotComposer;
+    };
+
+    /**
+     * The scale of the parent
+     * @param _
+     * @returns {*}
+     */
+    plotComposer.scale = function(_) {
+      if(!arguments.length) return scale;
+      scale = _;
+      return plotComposer;
+    };
+
+    /**
+     * How do get a value from the root datum
+     * @param _ A function taking d and returning a value
+     * @returns {*}
+     */
+    plotComposer.accessor = function(_) {
+      if(!arguments.length) return accessor;
+      accessor = _;
+      return plotComposer;
+    };
+
+    /**
+     * A string id that distinguishes this composed plot from another.
+     * @param _
+     * @returns {*}
+     */
+    plotComposer.scope = function(_) {
+      if(!arguments.length) return dataSelector.scope();
+      dataSelector.scope(_);
+      return plotComposer;
+    };
+
+    /**
+     * A function to obtain the scale of the child plots
+     * @param _
+     * @returns {*}
+     */
+    plotComposer.plotScale = function(_) {
+      if(!arguments.length) return plotScale;
+      plotScale = _;
+      return plotComposer;
+    };
+
+    return plotComposer;
+  }
+
   return {
     dataSelector: DataSelector,
 
@@ -2830,74 +2981,10 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
       }
     },
 
-    annotation: {
-      append: function(group, annotations, clazz, accessor, scale) {
-        // Append if we're in entry
-        group.entry.append('g').attr('class', 'axisannotation ' + clazz);
-
-        var annotation = group.selection.selectAll('g.axisannotation.' + clazz)
-          .selectAll('g.axisannotation.' + clazz + ' > g').data(function(d) {
-            var y = scale(accessor(d));
-            return annotations.map(function(annotation) {
-              var value = annotation.axis().scale().invert(y);
-              return [{ value: value }];
-            });
-          });
-
-        annotation.exit().remove();
-        annotation.enter().append('g').attr('class', function(d, i) { return i; });
-        annotation.each(function(d, i) {
-            // Store some meta for lookup later, could use class instance, but this 'should' be more reliable
-            this.__annotation__ = i;
-            annotations[i](d3_select(this));
-          });
-
-        return annotation;
-      },
-
-      appendDeprecated: function(selection, annotations, clazz, accessor, scale) {
-        // Use this to either scale the data or initialise to null if accessor and scales are not provided
-        var argumentLength = arguments.length;
-
-        var annotationSelection = selection.append('g').attr('class', 'axisannotation ' + clazz)
-          .selectAll('g').data(function(d) {
-            // Transform the data to values for each annotation, only if we have accessor and scale
-            var y = argumentLength > 3 ? scale(accessor(d)) : null;
-
-            return annotations.map(function(annotation) {
-              var value = argumentLength > 3 ? annotation.axis().scale().invert(y) : null;
-              // Only ever 1 data point per annotation
-              return [{ value: value }];
-            });
-          }
-        );
-
-        annotationSelection.enter().append('g').attr('class', function(d, i) { return i; })
-          .each(function(d, i) {
-            // Store some meta for lookup later, could use class instance, but this 'should' be more reliable
-            this.__annotation__ = i;
-            annotations[i](d3_select(this));
-          });
-      },
-
-      update: function(annotations, value) {
-        return function(d) {
-          var annotation = annotations[this.__annotation__];
-          // As in append, should only ever be 1 in the array
-          d[0].value = annotation.axis().scale().invert(value);
-        };
-      },
-
-      refresh: function(annotations) {
-        return function() {
-          annotations[this.__annotation__](d3_select(this));
-        };
-      }
-    }
+    plotComposer: PlotComposer
   };
 };
-
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2999,7 +3086,7 @@ module.exports = function(d3_scale_linear, d3_functor, techan_scale_financetime,
 
   return PlotMixin;
 };
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependencies
@@ -3027,7 +3114,7 @@ module.exports = function(accessor_rsi, plot, plotMixin) {  // Injected dependen
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(rsi, p).plot(accessor_rsi(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(rsi, p).plot(accessor_rsi(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return rsi;
@@ -3040,7 +3127,7 @@ function refresh(selection, accessor, x, y, plot, rsiLine) {
   selection.select('path.oversold').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.os, y));
   selection.select('path.rsi').attr('d', rsiLine);
 }
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_stochastic, plot, plotMixin) {  // Injected dependencies
@@ -3070,7 +3157,7 @@ module.exports = function(accessor_stochastic, plot, plotMixin) {  // Injected d
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(stochastic, p).plot(accessor_stochastic(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(stochastic, p).plot(accessor_stochastic(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return stochastic;
@@ -3084,14 +3171,14 @@ function refresh(selection, accessor, x, y, plot, stochUpLine, stochDownLine) {
   selection.select('path.stochastic.down').attr('d', stochDownLine);
 }
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, accessor_value, plot, plotMixin) {  // Injected dependencies
   function Supstance() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
         dispatch = d3_dispatch('mouseenter', 'mouseout', 'mousemove', 'drag', 'dragstart', 'dragend'),
-        annotation = [];
+        annotationComposer = plot.plotComposer().scope('composed-annotation').plotScale(function(plot) { return plot.axis().scale(); });
 
     function supstance(g) {
       var group = p.dataSelector(g);
@@ -3099,7 +3186,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
       group.entry.append('g').attr('class', 'supstance')
         .append('path');
 
-      plot.annotation.append(group, annotation, 'y', p.accessor, p.yScale);
+      group.entry.append('g').attr('class', 'axisannotation y').call(annotationComposer);
 
       var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
         .call(plot.interaction.mousedispatch(dispatch));
@@ -3110,44 +3197,47 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     }
 
     supstance.refresh = function(g) {
-      refresh(p.dataSelector.select(g), plot, p.accessor, p.xScale, p.yScale, g.selectAll('.axisannotation.y > g'), annotation);
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale, annotationComposer);
     };
 
     supstance.drag = function(g) {
-      g.selectAll('.interaction path').call(dragBody(dispatch, p.accessor, p.xScale, p.yScale, annotation));
+      g.selectAll('.interaction path').call(dragBody(dispatch, p.accessor, p.xScale, p.yScale, annotationComposer));
     };
 
     supstance.annotation = function(_) {
-      if(!arguments.length) return annotation;
-      annotation = _ instanceof Array ? _ : [_];
+      if(!arguments.length) return annotationComposer.plots();
+      annotationComposer.plots(_ instanceof Array ? _ : [_]);
       return supstance;
     };
+
+    function binder() {
+      annotationComposer.accessor(p.accessor.v).scale(p.yScale);
+      return supstance;
+    }
 
     // Mixin 'superclass' methods and variables
     plotMixin(supstance, p)
       .dataSelector(plotMixin.dataMapper.unity)
-      .plot(accessor_value())
+      .plot(accessor_value(), binder)
       .on(dispatch);
 
     // Further group configuration now that it's mixed in
     // Supstance is composed of annotations, we need to scope the group selection
     p.dataSelector.scope('supstance');
 
-    return supstance;
+    return binder();
   }
 
-  function dragBody(dispatch, accessor, x, y, annotation) {
+  function dragBody(dispatch, accessor, x, y, annotationComposer) {
     var drag = d3_behavior_drag().origin(function(d) {
       return { x: 0, y: y(accessor(d)) };
     })
     .on('drag', function(d) {
       var value = y.invert(d3_event().y),
-          g = d3_select(this.parentNode.parentNode), // Go up to the selected items parent only (not the list of items)
-          annotationSelection = g.selectAll('.axisannotation.y > g');
+          g = d3_select(this.parentNode.parentNode); // Go up to the selected items parent only (not the list of items)
 
       accessor.v(d, value);
-      annotationSelection.each(plot.annotation.update(annotation, d3_event().y));
-      refresh(g, plot, accessor, x, y, annotationSelection, annotation);
+      refresh(g, accessor, x, y, annotationComposer);
       dispatch.drag(d);
     });
 
@@ -3157,10 +3247,10 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
   return Supstance;
 };
 
-function refresh(selection, plot, accessor, x, y, annotationSelection, annotation) {
+function refresh(selection, accessor, x, y, annotationComposer) {
   selection.select('.supstance path').attr('d', supstancePath(accessor, x, y));
   selection.select('.interaction path').attr('d', supstancePath(accessor, x, y));
-  annotationSelection.each(plot.annotation.refresh(annotation));
+  selection.select('.axisannotation.y').call(annotationComposer.refresh);
 }
 
 function supstancePath(accessor, x, y) {
@@ -3171,7 +3261,7 @@ function supstancePath(accessor, x, y) {
       ' L ' + range[range.length-1] + ' ' + y(accessor(d));
   };
 }
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_scale_linear, d3_extent, accessor_tick, plot, plotMixin) {  // Injected dependencies
@@ -3213,13 +3303,13 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_tick, plot, plotM
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(tick, p).plot(accessor_tick(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(tick, p).plot(accessor_tick(), binder).width(binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return tick;
   };
 };
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_select, d3_functor, d3_mouse, d3_dispatch, accessor_trade, plot, plotMixin, svg_arrow) {  // Injected dependencies
@@ -3318,7 +3408,7 @@ module.exports = function(d3_select, d3_functor, d3_mouse, d3_dispatch, accessor
     return tradearrow;
   };
 };
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, accessor_trendline, plot, plotMixin) {  // Injected dependencies
@@ -3435,7 +3525,7 @@ function trendlineEnd(accessor_x, x, accessor_y, y) {
     cy: function(d) { return y(accessor_y(d)); }
   };
 }
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_volume, plot, plotMixin) {  // Injected dependencies
@@ -3481,13 +3571,13 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(volume, p).plot(accessor_volume(), binder).width(binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(volume, p).plot(accessor_volume(), binder).width(binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return volume;
   };
 };
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_williams, plot, plotMixin) {  // Injected dependencies
@@ -3509,13 +3599,13 @@ module.exports = function(accessor_williams, plot, plotMixin) {  // Injected dep
     }
 
     // Mixin 'superclass' methods and variables
-    plotMixin(williams, p).plot(accessor_williams(), binder).dataSelector(plotMixin.dataMapper.array, p.accessor.d);
+    plotMixin(williams, p).plot(accessor_williams(), binder).dataSelector(plotMixin.dataMapper.array);
     binder();
 
     return williams;
   };
 };
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 'use strict';
 
 /*
@@ -3907,7 +3997,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
   return techan_scale_financetime;
 };
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -4082,7 +4172,7 @@ function mapReduceFilter(data, map) {
     .filter(function(d) { return d !== null; }); // Remove nulls
 }
 
-},{"../accessor":7,"../util":61,"./financetime":55,"./zoomable":57}],57:[function(require,module,exports){
+},{"../accessor":8,"../util":62,"./financetime":56,"./zoomable":58}],58:[function(require,module,exports){
 'use strict';
 
 /**
@@ -4137,7 +4227,7 @@ module.exports = function() {
 
   return zoomable;
 };
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3_functor) {  // Injected dependencies
@@ -4228,7 +4318,7 @@ module.exports = function(d3_functor) {  // Injected dependencies
     return arrow;
   };
 };
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 'use strict';
 
 module.exports = function(d3) {
@@ -4236,7 +4326,7 @@ module.exports = function(d3) {
     arrow: require('./arrow')(d3.functor)
   };
 };
-},{"./arrow":58}],60:[function(require,module,exports){
+},{"./arrow":59}],61:[function(require,module,exports){
 'use strict';
 
 var _d3;
@@ -4256,7 +4346,7 @@ module.exports = (function(d3) {
     svg: require('./svg')(d3)
   };
 })(_d3);
-},{"../build/version":1,"./accessor":7,"./indicator":25,"./plot":41,"./scale":56,"./svg":59,"d3":"d3"}],61:[function(require,module,exports){
+},{"../build/version":1,"./accessor":8,"./indicator":26,"./plot":42,"./scale":57,"./svg":60,"d3":"d3"}],62:[function(require,module,exports){
 'use strict';
 
 module.exports = function() {
@@ -4288,5 +4378,5 @@ function doRebind(target, source, method, postSetCallback) {
     return value === source ? target : value;
   };
 }
-},{}]},{},[60])(60)
+},{}]},{},[61])(61)
 });
