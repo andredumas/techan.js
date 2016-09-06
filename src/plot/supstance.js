@@ -4,7 +4,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
   function Supstance() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
         dispatch = d3_dispatch('mouseenter', 'mouseout', 'mousemove', 'drag', 'dragstart', 'dragend'),
-        annotation = [];
+        annotationComposer = plot.plotComposer().scope('composed-annotation').plotScale(function(plot) { return plot.axis().scale(); });
 
     function supstance(g) {
       var group = p.dataSelector(g);
@@ -12,7 +12,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
       group.entry.append('g').attr('class', 'supstance')
         .append('path');
 
-      plot.annotation.append(group, annotation, 'y', p.accessor, p.yScale);
+      group.entry.append('g').attr('class', 'axisannotation y').call(annotationComposer);
 
       var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
         .call(plot.interaction.mousedispatch(dispatch));
@@ -23,44 +23,47 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     }
 
     supstance.refresh = function(g) {
-      refresh(p.dataSelector.select(g), plot, p.accessor, p.xScale, p.yScale, g.selectAll('.axisannotation.y > g'), annotation);
+      refresh(p.dataSelector.select(g), p.accessor, p.xScale, p.yScale, annotationComposer);
     };
 
     supstance.drag = function(g) {
-      g.selectAll('.interaction path').call(dragBody(dispatch, p.accessor, p.xScale, p.yScale, annotation));
+      g.selectAll('.interaction path').call(dragBody(dispatch, p.accessor, p.xScale, p.yScale, annotationComposer));
     };
 
     supstance.annotation = function(_) {
-      if(!arguments.length) return annotation;
-      annotation = _ instanceof Array ? _ : [_];
+      if(!arguments.length) return annotationComposer.plots();
+      annotationComposer.plots(_ instanceof Array ? _ : [_]);
       return supstance;
     };
+
+    function binder() {
+      annotationComposer.accessor(p.accessor.v).scale(p.yScale);
+      return supstance;
+    }
 
     // Mixin 'superclass' methods and variables
     plotMixin(supstance, p)
       .dataSelector(plotMixin.dataMapper.unity)
-      .plot(accessor_value())
+      .plot(accessor_value(), binder)
       .on(dispatch);
 
     // Further group configuration now that it's mixed in
     // Supstance is composed of annotations, we need to scope the group selection
     p.dataSelector.scope('supstance');
 
-    return supstance;
+    return binder();
   }
 
-  function dragBody(dispatch, accessor, x, y, annotation) {
+  function dragBody(dispatch, accessor, x, y, annotationComposer) {
     var drag = d3_behavior_drag().origin(function(d) {
       return { x: 0, y: y(accessor(d)) };
     })
     .on('drag', function(d) {
       var value = y.invert(d3_event().y),
-          g = d3_select(this.parentNode.parentNode), // Go up to the selected items parent only (not the list of items)
-          annotationSelection = g.selectAll('.axisannotation.y > g');
+          g = d3_select(this.parentNode.parentNode); // Go up to the selected items parent only (not the list of items)
 
       accessor.v(d, value);
-      annotationSelection.each(plot.annotation.update(annotation, d3_event().y));
-      refresh(g, plot, accessor, x, y, annotationSelection, annotation);
+      refresh(g, accessor, x, y, annotationComposer);
       dispatch.drag(d);
     });
 
@@ -70,10 +73,10 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
   return Supstance;
 };
 
-function refresh(selection, plot, accessor, x, y, annotationSelection, annotation) {
+function refresh(selection, accessor, x, y, annotationComposer) {
   selection.select('.supstance path').attr('d', supstancePath(accessor, x, y));
   selection.select('.interaction path').attr('d', supstancePath(accessor, x, y));
-  annotationSelection.each(plot.annotation.refresh(annotation));
+  selection.select('.axisannotation.y').call(annotationComposer.refresh);
 }
 
 function supstancePath(accessor, x, y) {

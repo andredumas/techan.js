@@ -303,46 +303,6 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
       }
     },
 
-    plotComposer: PlotComposer,
-
-    annotation: {
-      append: function(group, annotations, clazz, accessor, scale) {
-        // Append if we're in entry
-        group.entry.append('g').attr('class', 'axisannotation ' + clazz);
-
-        var annotation = group.selection.selectAll('g.axisannotation.' + clazz)
-          .selectAll('g.axisannotation.' + clazz + ' > g').data(function(d) {
-            var y = scale(accessor(d));
-            return annotations.map(function(annotation) {
-              var value = annotation.axis().scale().invert(y);
-              return [{ value: value }];
-            });
-          });
-
-        annotation.exit().remove();
-        annotation.enter().append('g').attr('class', function(d, i) { return i; });
-        annotation.each(function(d, i) {
-            // Store some meta for lookup later, could use class instance, but this 'should' be more reliable
-            this.__annotation__ = i;
-            annotations[i](d3_select(this));
-          });
-
-        return annotation;
-      },
-
-      update: function(annotations, coord, scale, value) {
-        return function(d) {
-          var annotation = annotations[this.__annotation__];
-          // As in append, should only ever be 1 in the array
-          d[0].value = annotation.axis().scale() === scale && value !== undefined ? value : annotation.axis().scale().invert(coord);
-        };
-      },
-
-      refresh: function(annotations) {
-        return function() {
-          annotations[this.__annotation__](d3_select(this));
-        };
-      }
-    }
+    plotComposer: PlotComposer
   };
 };

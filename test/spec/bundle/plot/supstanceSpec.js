@@ -68,7 +68,7 @@ techanModule('plot/supstance', function(specBuilder) {
 
             it('Then contains axis annotation', function() {
               expect(childElements[1].outerHTML)
-                .toEqual('<g class="axisannotation y"><g class="0"><g class="data" transform="translate(0,0)"><path d="M 80 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0"></path><text x="80" y="9" dy=".72em" style="text-anchor: middle;">8</text></g></g></g>');
+                .toEqual('<g class="axisannotation y"><g class="data scope-composed-annotation"><g class="data" transform="translate(0,0)"><path d="M 80 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0"></path><text x="80" y="9" dy=".72em" style="text-anchor: middle;">8</text></g></g></g>');
             });
 
             it('Then contains an interaction path', function() {
@@ -204,7 +204,7 @@ techanModule('plot/supstance', function(specBuilder) {
 
                   it('Then contains an updated axis annotation', function() {
                     expect(childElements[1].outerHTML)
-                      .toEqual('<g class="axisannotation y"><g class="0"><g class="data" transform="translate(0,0)"><path d="M 90 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0"></path><text x="90" y="9" dy=".72em" style="text-anchor: middle;">9</text></g></g></g>');
+                      .toEqual('<g class="axisannotation y"><g class="data scope-composed-annotation"><g class="data" transform="translate(0,0)"><path d="M 90 0 l -4 6 l -21 0 l 0 14 l 50 0 l 0 -14 l -21 0"></path><text x="90" y="9" dy=".72em" style="text-anchor: middle;">9</text></g></g></g>');
                   });
 
                   it('Then contains an updated interaction path', function() {
