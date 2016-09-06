@@ -5,6 +5,7 @@
 module.exports = function() {
   return {
     atrtrailingstop: require('./atrtrailingstop'),
+    crosshair: require('./crosshair'),
     ichimoku: require('./ichimoku'),
     macd: require('./macd'),
     ohlc: require('./ohlc'),

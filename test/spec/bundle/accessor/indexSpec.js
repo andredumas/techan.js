@@ -11,6 +11,10 @@ techanModule('accessor', function(specBuilder) {
         expect(scope.accessor.atrtrailingstop).toBeDefined();
       });
 
+      it('Then accessor.crosshair should be defined', function() {
+        expect(scope.accessor.crosshair).toBeDefined();
+      });
+
       it('Then accessor.ichimoku should be defined', function() {
         expect(scope.accessor.ichimoku).toBeDefined();
       });

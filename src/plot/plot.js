@@ -134,6 +134,102 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
     return result;
   }
 
+
+  /**
+   * Helper class assists the composition of multiple techan plots. Handles:
+   * - Automatic transfer of data down to descendants
+   * - Automatic scaling of a value to the child ( value (parent) -> percent conversion for example)
+   * - Plots must be of the same type, ie. Axis Annotation, Supstance)
+   *
+   * @returns {plotComposer} An instance
+   * @constructor
+   */
+  function PlotComposer() {
+    var dataSelector = DataSelector(),
+        plots = [],
+        plotScale = function(plot) { return plot.scale(); },
+        scale,
+        accessor;
+
+    function plotComposer(g) {
+      var group = dataSelector.mapper(function() {
+        return plots.map(function() { return []; });
+      })(g);
+
+      group.selection.each(function(d, i) {
+        plots[i](d3_select(this));
+      });
+
+      plotComposer.refresh(g);
+    }
+
+    plotComposer.refresh = function(g) {
+      dataSelector.select(g).data(function(d) {
+          var value = accessor(d);
+          if(value === null || value === undefined) return plots.map(function() { return []; });
+          var y = scale(value);
+          return plots.map(function(plot) {
+            var annotationValue = plotScale(plot) === scale ? value : plotScale(plot).invert(y);
+            return [ { value: annotationValue} ];
+          });
+        }).each(function(d, i) {
+          plots[i](d3_select(this));
+        });
+    };
+
+    plotComposer.plots = function(_) {
+      if(!arguments.length) return plots;
+      plots = _;
+      return plotComposer;
+    };
+
+    /**
+     * The scale of the parent
+     * @param _
+     * @returns {*}
+     */
+    plotComposer.scale = function(_) {
+      if(!arguments.length) return scale;
+      scale = _;
+      return plotComposer;
+    };
+
+    /**
+     * How do get a value from the root datum
+     * @param _ A function taking d and returning a value
+     * @returns {*}
+     */
+    plotComposer.accessor = function(_) {
+      if(!arguments.length) return accessor;
+      accessor = _;
+      return plotComposer;
+    };
+
+    /**
+     * A string id that distinguishes this composed plot from another.
+     * @param _
+     * @returns {*}
+     */
+    plotComposer.scope = function(_) {
+      if(!arguments.length) return dataSelector.scope();
+      dataSelector.scope(_);
+      return plotComposer;
+    };
+
+    /**
+     * A function to obtain the scale of the child plots
+     * @param _
+     * @returns {*}
+     */
+    plotComposer.plotScale = function(_) {
+      if(!arguments.length) return plotScale;
+      plotScale = _;
+      return plotComposer;
+    };
+
+    return plotComposer;
+  }
+
   return {
     dataSelector: DataSelector,
 
@@ -207,6 +303,8 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
       }
     },
 
+    plotComposer: PlotComposer,
+
     annotation: {
       append: function(group, annotations, clazz, accessor, scale) {
         // Append if we're in entry
@@ -232,36 +330,11 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
         return annotation;
       },
 
-      appendDeprecated: function(selection, annotations, clazz, accessor, scale) {
-        // Use this to either scale the data or initialise to null if accessor and scales are not provided
-        var argumentLength = arguments.length;
-
-        var annotationSelection = selection.append('g').attr('class', 'axisannotation ' + clazz)
-          .selectAll('g').data(function(d) {
-            // Transform the data to values for each annotation, only if we have accessor and scale
-            var y = argumentLength > 3 ? scale(accessor(d)) : null;
-
-            return annotations.map(function(annotation) {
-              var value = argumentLength > 3 ? annotation.axis().scale().invert(y) : null;
-              // Only ever 1 data point per annotation
-              return [{ value: value }];
-            });
-          }
-        );
-
-        annotationSelection.enter().append('g').attr('class', function(d, i) { return i; })
-          .each(function(d, i) {
-            // Store some meta for lookup later, could use class instance, but this 'should' be more reliable
-            this.__annotation__ = i;
-            annotations[i](d3_select(this));
-          });
-      },
-
-      update: function(annotations, value) {
+      update: function(annotations, coord, scale, value) {
         return function(d) {
           var annotation = annotations[this.__annotation__];
           // As in append, should only ever be 1 in the array
-          d[0].value = annotation.axis().scale().invert(value);
+          d[0].value = annotation.axis().scale() === scale && value !== undefined ? value : annotation.axis().scale().invert(coord);
         };
       },
 
