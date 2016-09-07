@@ -46,13 +46,13 @@ Download the latest release [https://github.com/andredumas/techan.js/releases/la
 ### npm
 
 ```
-npm install --save andredumas/techan.js
+npm install --save techan
 ```
 
 ### Bower Dependency
 
 ```
-bower install --save andredumas/techan.js
+bower install --save techan
 ```
 
 ### Build From Source
@@ -89,10 +89,10 @@ stable version of techanjs located at [http://techanjs.org/techan.min.js](http:/
 HEAD of master will contain unstable features under development. They may not always be compatible with all
 the examples. I will attempt to keep the release tags functional together with correctly referenced examples.
 
-### Docker (Experimental)
+### Docker
 
-Run techan.js in a consistent environment using Docker. This is experimental and for now is only used to assist debugging
-environment build issues.
+Run techan.js in a consistent environment using Docker. To see the examples, all submodules are required (recursive 
+clone or update, init) locally.
 
 **NOTE:** On build the project is copied into the docker image and as such any changes made will not be refreshed into a
 running container.

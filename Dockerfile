@@ -1,4 +1,4 @@
-FROM node:4.2-onbuild
+FROM node:6-onbuild
 MAINTAINER André Dumas
 
 # Reconfigure timezone
