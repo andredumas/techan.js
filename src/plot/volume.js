@@ -8,18 +8,23 @@ module.exports = function(accessor_volume, plot, plotMixin) {  // Injected depen
     function volume(g) {
       var group = p.dataSelector(g);
 
-      if(p.accessor.o && p.accessor.c) plot.appendPathsUpDownEqual(group.selection, p.accessor, 'volume');
+      if(isOhlcAccessor()) plot.appendPathsUpDownEqual(group.selection, p.accessor, 'volume');
       else group.entry.append('path').attr('class', 'volume');
 
       volume.refresh(g);
     }
 
     volume.refresh = function(g) {
-      g.selectAll('path.volume').attr('d', volumeGenerator);
+      if(isOhlcAccessor()) g.selectAll('path.volume').attr('d', volumeGenerator);
+      else p.dataSelector.select(g).select('path.volume').attr('d', volumeGenerator);
     };
 
     function binder() {
       volumeGenerator = plot.joinPath(volumePath);
+    }
+
+    function isOhlcAccessor() {
+      return p.accessor.o && p.accessor.c;
     }
 
     function volumePath() {
