@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, accessor_value, plot, plotMixin) {  // Injected dependencies
+module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, accessor_supstance, plot, plotMixin) {  // Injected dependencies
   function Supstance() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
         dispatch = d3_dispatch('mouseenter', 'mouseout', 'mousemove', 'drag', 'dragstart', 'dragend'),
@@ -44,7 +44,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     // Mixin 'superclass' methods and variables
     plotMixin(supstance, p)
       .dataSelector(plotMixin.dataMapper.unity)
-      .plot(accessor_value(), binder)
+      .plot(accessor_supstance(), binder)
       .on(dispatch);
 
     // Further group configuration now that it's mixed in
@@ -81,9 +81,20 @@ function refresh(selection, accessor, x, y, annotationComposer) {
 
 function supstancePath(accessor, x, y) {
   return function(d) {
-    var range = x.range();
+    var range;
+
+    if(isSupstanceAccessor(accessor)) {
+      range = [accessor.s(d), accessor.e(d)];
+      range[0] = range[0] !== undefined ? x(range[0]) : x.range()[0];
+      range[1] = range[1] !== undefined ? x(range[1]) : x.range()[1];
+    }
+    else range = x.range();
 
     return 'M ' + range[0] + ' ' + y(accessor(d)) +
       ' L ' + range[range.length-1] + ' ' + y(accessor(d));
   };
+}
+
+function isSupstanceAccessor(accessor) {
+  return accessor.s !== undefined && accessor.e !== undefined;
 }

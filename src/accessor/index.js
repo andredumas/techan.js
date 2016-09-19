@@ -17,6 +17,7 @@ module.exports = function() {
     adx: require('./adx'),
     aroon: require('./aroon'),
     stochastic: require('./stochastic'),
+    supstance: require('./supstance'),
     williams: require('./williams'),
     bollinger: require('./bollinger')
   };
