@@ -9,7 +9,7 @@ module.exports = function() {
 
       source.period = function(_) {
         if (!arguments.length) return priv.period;
-        priv.period = _;
+        priv.period = +_;
         return source;
       };
 
