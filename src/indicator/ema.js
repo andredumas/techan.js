@@ -31,14 +31,8 @@ module.exports = function(indicatorMixin, accessor_ohlc, alpha_init) {  // Injec
     }
 
     indicator.average = function(value) {
-      if(initialCount < p.period) return (initialTotal += value)/++initialCount;
-      else {
-        if(initialCount === p.period) {
-          previous = initialTotal/initialCount++;
-        }
-
-        return (previous = previous + alpha*(value-previous));
-      }
+      if(initialCount < p.period) return (previous = (initialTotal += value)/++initialCount);
+      else return (previous = previous + alpha*(value-previous));
     };
 
     // Mixin 'superclass' methods and variables
