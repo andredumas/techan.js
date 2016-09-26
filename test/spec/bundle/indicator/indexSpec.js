@@ -19,6 +19,10 @@ techanModule('indicator', function(specBuilder) {
         expect(scope.indicator.ema).toBeDefined();
       });
 
+      it('Then indicator.heikinashi should be defined', function() {
+        expect(scope.indicator.heikinashi).toBeDefined();
+      });
+
       it('Then indicator.ichimoku should be defined', function() {
         expect(scope.indicator.ichimoku).toBeDefined();
       });

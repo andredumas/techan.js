@@ -13,6 +13,7 @@ module.exports = function(d3) {
     atr: atr,
     atrtrailingstop: require('./atrtrailingstop')(indicatorMixin, accessor.ohlc, atr),
     ema: ema,
+    heikinashi: require('./heikinashi')(indicatorMixin, accessor.ohlc, d3.min, d3.max),
     ichimoku: require('./ichimoku')(indicatorMixin, accessor.ohlc),
     macd: require('./macd')(indicatorMixin, accessor.ohlc, ema),
     rsi: require('./rsi')(indicatorMixin, accessor.ohlc, ema),

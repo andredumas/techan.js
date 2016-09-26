@@ -85,3 +85,6 @@
 [submodule "examples/scale/zoom-d3-scale"]
 	path = examples/scale/zoom-d3-scale
 	url = https://gist.github.com/94e0a802f9160ce8a4eb8b80d9ad0a0e.git
+[submodule "examples/indicator/heikinashi"]
+	path = examples/indicator/heikinashi
+	url = https://gist.github.com/b0162d7d7a37dac058a78ee96d186a85.git

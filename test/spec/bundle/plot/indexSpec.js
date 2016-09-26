@@ -47,6 +47,10 @@ techanModule('plot', function(specBuilder) {
         expect(bucket.plot.ema).toBeDefined();
       });
 
+      it('Then plot.heikinashi should be defined', function() {
+        expect(bucket.plot.heikinashi).toBeDefined();
+      });
+
       it('Then plot.ichimoku should be defined', function() {
         expect(bucket.plot.ichimoku).toBeDefined();
       });
