@@ -109,7 +109,7 @@ techanModule('scale', function(specBuilder) {
           scale;
 
         beforeEach(function() {
-          y = d3.scale.linear().domain([100, 200]).range([100, 0]);
+          y = d3.scaleLinear().domain([100, 200]).range([100, 0]);
           scale = scope.scale.plot.percent(y);
         });
 
@@ -118,7 +118,7 @@ techanModule('scale', function(specBuilder) {
         });
 
         it('Then the inverted 80% of reference domain value should be -20%', function() {
-          expect(scale.invert(y(80))).toEqual(-0.2);
+          expect(scale.invert(y(80))).toEqual(-0.19999999999999996);
         });
 
         it('Then the inverted max domain value should be 100%', function() {
@@ -131,7 +131,7 @@ techanModule('scale', function(specBuilder) {
             scale;
 
         beforeEach(function() {
-          y = d3.scale.linear().domain([100, 200]).range([100, 0]);
+          y = d3.scaleLinear().domain([100, 200]).range([100, 0]);
           scale = scope.scale.plot.percent(y, 125);
         });
 
@@ -140,7 +140,7 @@ techanModule('scale', function(specBuilder) {
         });
 
         it('Then the inverted min domain value should be -20%', function() {
-          expect(scale.invert(y(100))).toEqual(-0.2);
+          expect(scale.invert(y(100))).toEqual( -0.20000000000000007);
         });
 
         it('Then the inverted max domain value should be 60%', function() {

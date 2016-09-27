@@ -6,7 +6,7 @@ techanModule('plot/plot', function(specBuilder) {
       data = require('../_fixtures/data/ohlc').alternating.array;
 
   var actualInit = function(module) {
-    return module(d3.svg.line, d3.svg.area, d3.select);
+    return module(d3.line, d3.area, d3.select);
   };
 
   specBuilder.require(require('../../../../src/plot/plot'), function(instanceBuilder) {
@@ -60,11 +60,11 @@ techanModule('plot/plot', function(specBuilder) {
           });
 
           it('Then selection should have 2 new elements', function() {
-            expect(dataSelection.selection[0].length).toBe(2);
+            expect(dataSelection.selection.nodes().length).toBe(2);
           });
 
           it('Then a correct basic structure created', function() {
-            expect(g[0][0].outerHTML).toEqual('<g class="root"><g class="data scope-ascope"></g><g class="data scope-ascope"></g></g>');
+            expect(g.node().outerHTML).toEqual('<g class="root"><g class="data scope-ascope"></g><g class="data scope-ascope"></g></g>');
           });
 
           describe('And on data removal', function() {
@@ -74,11 +74,11 @@ techanModule('plot/plot', function(specBuilder) {
             });
 
             it('Then selection should have 1 new element', function() {
-              expect(dataSelection.selection[0].length).toBe(1);
+              expect(dataSelection.selection.nodes().length).toBe(1);
             });
 
             it('Then a correct basic structure updated', function() {
-              expect(g[0][0].outerHTML).toEqual('<g class="root"><g class="data scope-ascope"></g></g>');
+              expect(g.node().outerHTML).toEqual('<g class="root"><g class="data scope-ascope"></g></g>');
             });
           });
         });
@@ -146,7 +146,7 @@ techanModule('plot/plot', function(specBuilder) {
         beforeEach(function() {
           g = domFixtures.g([data]);
           plot.appendPathsUpDownEqual(g, techan.accessor.ohlc(), "grouping-test");
-          parent = g[0][0];
+          parent = g.node();
         });
 
         it('Then 3 nodes should be appended', function() {
@@ -172,7 +172,7 @@ techanModule('plot/plot', function(specBuilder) {
         var x;
 
         beforeEach(function() {
-          x = d3.time.scale();
+          x = d3.scaleTime();
         });
 
         it('Then barWidth should return the default width', function() {

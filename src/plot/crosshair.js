@@ -20,7 +20,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, accessor_c
       group.entry.append('g').attr('class', 'axisannotation x').call(xAnnotationComposer);
       group.entry.append('g').attr('class', 'axisannotation y').call(yAnnotationComposer);
 
-      g.selectAll('rect').data([undefined]).enter().append('rect').style({ fill: 'none', 'pointer-events': 'all' });
+      g.selectAll('rect').data([undefined]).enter().append('rect').style('fill', 'none').style('pointer-events', 'all');
 
       crosshair.refresh(g);
     }
@@ -34,17 +34,16 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, accessor_c
           xAnnotationSelection = group.select('g.axisannotation.x'),
           yAnnotationSelection = group.select('g.axisannotation.y');
 
-      g.selectAll('rect').attr({
-          x: Math.min.apply(null, xRange),
-          y: Math.min.apply(null, yRange),
-          height: Math.abs(yRange[yRange.length-1] - yRange[0]),
-          width: Math.abs(xRange[xRange.length-1] - xRange[0])
-        })
+      g.selectAll('rect')
+        .attr('x', Math.min.apply(null, xRange))
+        .attr('y', Math.min.apply(null, yRange))
+        .attr('height', Math.abs(yRange[yRange.length-1] - yRange[0]))
+        .attr('width', Math.abs(xRange[xRange.length-1] - xRange[0]))
         .on('mouseenter', function() {
-          dispatcher.enter();
+          dispatcher.call('enter', this);
         })
         .on('mouseout', function() {
-          dispatcher.out();
+          dispatcher.call('out', this);
           // Redraw with null values to ensure when we enter again, there is nothing cached when redisplayed
           delete group.node().__coord__;
           initialiseWire(group.datum()); // Mutating data, don't need to manually pass down
@@ -77,7 +76,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, accessor_c
 
         p.accessor.xv(d, xNew);
         p.accessor.yv(d, yNew);
-        if(dispatch) dispatcher.move(d);
+        if(dispatch) dispatcher.call('move', selection.node(), d);
       }
 
       // Just before draw, convert the coords to

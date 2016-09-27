@@ -4,7 +4,7 @@ techanModule('svg/arrow', function(specBuilder) {
   var techan = require('../../../../src/techan');
 
   var actualInit = function(module) {
-    return module(d3.functor);
+    return techan.svg.arrow;
   };
 
   specBuilder.require(require('../../../../src/svg/arrow'), function(instanceBuilder) {

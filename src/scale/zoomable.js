@@ -10,8 +10,8 @@
  * NOTE: This is not a complete scale, it will throw errors if it is used for anything else but zooming
  */
 module.exports = function() {
-  function zoomable(linear, zoomed, domainLimit) {
-    var clamp = true;
+  function zoomable(linear, zoomed, domainLimit, clamp) {
+    clamp = clamp !== undefined ? clamp : true;
 
     /**
      * Delegates the scale call to the underlying linear scale
@@ -25,7 +25,7 @@ module.exports = function() {
     scale.domain = function(_) {
       if(!arguments.length) return linear.domain();
 
-      if(clamp) linear.domain([Math.max(domainLimit[0], _[0]), Math.min(domainLimit[1], _[1])]);
+      if(clamp) linear.domain([Math.max(domainLimit.domain[0], _[0]), Math.min(domainLimit.domain[1], _[1])]);
       else linear.domain(_);
 
       if(zoomed) zoomed(); // Callback to that we have been zoomed
@@ -38,7 +38,7 @@ module.exports = function() {
     };
 
     scale.copy = function() {
-      return zoomable(linear.copy(), zoomed, domainLimit);
+      return zoomable(linear.copy(), zoomed, domainLimit, clamp);
     };
 
     scale.clamp = function(_) {

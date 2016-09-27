@@ -1,4 +1,4 @@
-techanModule('plot/ema', function(specBuilder) {
+techanModule('plot/atr', function(specBuilder) {
   'use strict';
 
   var techan = require('../../../../src/techan'),
@@ -26,7 +26,7 @@ techanModule('plot/ema', function(specBuilder) {
           describe('And on obtaining the data element', function() {
             it('Then contains a line', function() {
               expect(childElements[0].outerHTML)
-                .toEqual('<path class="line" d="M0.17105263157894737,1C0.1764057562277824,1.0162734989324584,0.43049624568520695,2.0528228532792427,0.5,2S0.8264317417506766,0.511471257616915,0.8289473684210527,0.5"></path>');
+                .toEqual('<path class="line" d="M0.17105263157894737,1C0.2807017543859649,1.5,0.39035087719298245,2,0.5,2C0.6096491228070176,2,0.7192982456140351,1.25,0.8289473684210527,0.5"></path>');
             });
           });
         }

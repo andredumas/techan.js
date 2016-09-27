@@ -5,8 +5,8 @@
  generally contains data points on days where a market is open but no points when closed, such as weekday
  and weekends respectively. When plot, is done so without weekend gaps.
  */
-module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, scale_widen, zoomable) {  // Injected dependencies
-  function financetime(tickMethods, genericFormat, index, domain, padding, outerPadding, zoomLimit, closestTicks) {
+module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, scale_widen, techan_scale_zoomable) {  // Injected dependencies
+  function financetime(tickMethods, genericFormat, index, domain, padding, outerPadding, zoomLimit, closestTicks, zoomable) {
     var dateIndexMap,
         tickState = { tickFormat: tickMethods.daily[tickMethods.daily.length-1][2] },
         band = 3;
@@ -15,8 +15,9 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     domain = domain || [new Date(0), new Date(1)];
     padding = padding === undefined ? 0.2 : padding;
     outerPadding = outerPadding === undefined ? 0.65 : outerPadding;
-    zoomLimit = zoomLimit || index.domain();
+    zoomLimit = zoomLimit || { domain: index.domain() }; // Wrap in object to carry onto zoomable
     closestTicks = closestTicks || false;
+    zoomable = zoomable || techan_scale_zoomable(index, zoomed, zoomLimit);
 
     /**
      * Scales the value to domain. If the value is not within the domain, will currently brutally round the data:
@@ -108,12 +109,12 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
       zoomed();
       // Apply outerPadding and widen the outer edges by pulling the domain in to ensure start and end bands are fully visible
       index.domain(index.range().map(scale_widen(outerPadding, band)).map(index.invert));
-      zoomLimit = index.domain(); // Capture the zoom limit after the domain has been applied
+      zoomLimit.domain = index.domain(); // Capture the zoom limit after the domain has been applied
       return zoomed();
     }
 
     scale.copy = function() {
-      return financetime(tickMethods, genericFormat, index.copy(), domain, padding, outerPadding, zoomLimit, closestTicks);
+      return financetime(tickMethods, genericFormat, index.copy(), domain, padding, outerPadding, zoomLimit, closestTicks, zoomable);
     };
 
     /**
@@ -141,7 +142,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     };
 
     scale.zoomable = function() {
-      return zoomable(index, zoomed, zoomLimit);
+      return zoomable;
     };
 
     /*
@@ -176,7 +177,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
         steps = method[1];
       }
 
-      var intervalRange = interval.range(visibleDomain[0], +visibleDomain[visibleDomain.length-1]+1, steps);
+      var intervalRange = interval.every(steps).range(visibleDomain[0], +visibleDomain[visibleDomain.length-1]+1);
 
       return intervalRange                                // Interval, possibly contains values not in domain
         .map(domainTicks(visibleDomain, closestTicks))    // Line up interval ticks with domain, possibly adding duplicates
@@ -296,86 +297,86 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
         864e5   // 1-day
       ];
 
-  var dayFormat = d3_time.format('%b %e'),
-      yearFormat = d3_time.format.multi([
-        ['%b %Y', function(d) { return d.getMonth(); }],
-        ['%Y', function() { return true; }]
+  var dayFormat = d3_time.timeFormat('%b %e'),
+      yearFormat = d3_v3_multi_shim([
+        [d3_time.timeFormat('%b %Y'), function(d) { return d.getMonth(); }],
+        [d3_time.timeFormat('%Y'), function() { return true; }]
       ]),
-      intradayFormat = d3_time.format.multi([
-        [":%S", function(d) { return d.getSeconds(); }],
-        ["%I:%M", function(d) { return d.getMinutes(); }],
-        ["%I %p", function () { return true; }]
+      intradayFormat = d3_v3_multi_shim([
+        [d3_time.timeFormat(':%S'), function(d) { return d.getSeconds(); }],
+        [d3_time.timeFormat('%I:%M'), function(d) { return d.getMinutes(); }],
+        [d3_time.timeFormat('%I %p'), function () { return true; }]
       ]),
-      genericFormat = [d3_time.second, 1, d3_time.format.multi([
-          [":%S", function(d) { return d.getSeconds(); }],
-          ["%I:%M", function(d) { return d.getMinutes(); }],
-          ["%I %p", function(d) { return d.getHours(); }],
-          ['%b %e', function() { return true; }]
+      genericFormat = [d3_time.timeSecond, 1, d3_v3_multi_shim([
+          [d3_time.timeFormat(':%S'), function(d) { return d.getSeconds(); }],
+          [d3_time.timeFormat('%I:%M'), function(d) { return d.getMinutes(); }],
+          [d3_time.timeFormat('%I %p'), function(d) { return d.getHours(); }],
+          [d3_time.timeFormat('%b %e'), function() { return true; }]
         ])
       ];
 
-  var dayFormatUtc = d3_time.format.utc('%b %e'),
-      yearFormatUtc = d3_time.format.utc.multi([
-        ['%b %Y', function(d) { return d.getUTCMonth(); }],
-        ['%Y', function() { return true; }]
+  var dayFormatUtc = d3_time.utcFormat('%b %e'),
+      yearFormatUtc = d3_v3_multi_shim([
+        [d3_time.utcFormat('%b %Y'), function(d) { return d.getUTCMonth(); }],
+        [d3_time.utcFormat('%Y'), function() { return true; }]
       ]),
-      intradayFormatUtc = d3_time.format.utc.multi([
-        [":%S", function(d) { return d.getUTCSeconds(); }],
-        ["%I:%M", function(d) { return d.getUTCMinutes(); }],
-        ["%I %p", function () { return true; }]
+      intradayFormatUtc = d3_v3_multi_shim([
+        [d3_time.utcFormat(':%S'), function(d) { return d.getUTCSeconds(); }],
+        [d3_time.utcFormat('%I:%M'), function(d) { return d.getUTCMinutes(); }],
+        [d3_time.utcFormat('%I %p'), function () { return true; }]
       ]),
-      genericFormatUtc = [d3_time.second, 1, d3_time.format.utc.multi([
-          [":%S", function(d) { return d.getUTCSeconds(); }],
-          ["%I:%M", function(d) { return d.getUTCMinutes(); }],
-          ["%I %p", function(d) { return d.getUTCHours(); }],
-          ['%b %e', function() { return true; }]
+      genericFormatUtc = [d3_time.timeSecond, 1, d3_v3_multi_shim([
+          [d3_time.utcFormat(':%S'), function(d) { return d.getUTCSeconds(); }],
+          [d3_time.utcFormat('%I:%M'), function(d) { return d.getUTCMinutes(); }],
+          [d3_time.utcFormat('%I %p'), function(d) { return d.getUTCHours(); }],
+          [d3_time.utcFormat('%b %e'), function() { return true; }]
         ])
       ];
 
   var dailyTickMethod = [
-      [d3_time.day, 1, dayFormat],
-      [d3_time.monday, 1, dayFormat],
-      [d3_time.month, 1, yearFormat],
-      [d3_time.month, 3, yearFormat],
-      [d3_time.year, 1, yearFormat]
+      [d3_time.timeDay, 1, dayFormat],
+      [d3_time.timeMonday, 1, dayFormat],
+      [d3_time.timeMonth, 1, yearFormat],
+      [d3_time.timeMonth, 3, yearFormat],
+      [d3_time.timeYear, 1, yearFormat]
     ],
     intradayTickMethod = [
-      [d3_time.second, 1, intradayFormat],
-      [d3_time.second, 5, intradayFormat],
-      [d3_time.second, 15, intradayFormat],
-      [d3_time.second, 30, intradayFormat],
-      [d3_time.minute, 1, intradayFormat],
-      [d3_time.minute, 5, intradayFormat],
-      [d3_time.minute, 15, intradayFormat],
-      [d3_time.minute, 30, intradayFormat],
-      [d3_time.hour, 1, intradayFormat],
-      [d3_time.hour, 3, intradayFormat],
-      [d3_time.hour, 6, intradayFormat],
-      [d3_time.hour, 12, intradayFormat],
-      [d3_time.day, 1, dayFormat]
+      [d3_time.timeSecond, 1, intradayFormat],
+      [d3_time.timeSecond, 5, intradayFormat],
+      [d3_time.timeSecond, 15, intradayFormat],
+      [d3_time.timeSecond, 30, intradayFormat],
+      [d3_time.timeMinute, 1, intradayFormat],
+      [d3_time.timeMinute, 5, intradayFormat],
+      [d3_time.timeMinute, 15, intradayFormat],
+      [d3_time.timeMinute, 30, intradayFormat],
+      [d3_time.timeHour, 1, intradayFormat],
+      [d3_time.timeHour, 3, intradayFormat],
+      [d3_time.timeHour, 6, intradayFormat],
+      [d3_time.timeHour, 12, intradayFormat],
+      [d3_time.timeDay, 1, dayFormat]
     ];
 
   var dailyTickMethodUtc = [
-      [d3_time.day.utc, 1, dayFormatUtc],
-      [d3_time.monday.utc, 1, dayFormatUtc],
-      [d3_time.month.utc, 1, yearFormatUtc],
-      [d3_time.month.utc, 3, yearFormatUtc],
-      [d3_time.year.utc, 1, yearFormatUtc]
+      [d3_time.utcDay, 1, dayFormatUtc],
+      [d3_time.utcMonday, 1, dayFormatUtc],
+      [d3_time.utcMonth, 1, yearFormatUtc],
+      [d3_time.utcMonth, 3, yearFormatUtc],
+      [d3_time.utcYear, 1, yearFormatUtc]
     ],
     intradayTickMethodUtc = [
-      [d3_time.second.utc, 1, intradayFormatUtc],
-      [d3_time.second.utc, 5, intradayFormatUtc],
-      [d3_time.second.utc, 15, intradayFormatUtc],
-      [d3_time.second.utc, 30, intradayFormatUtc],
-      [d3_time.minute.utc, 1, intradayFormatUtc],
-      [d3_time.minute.utc, 5, intradayFormatUtc],
-      [d3_time.minute.utc, 15, intradayFormatUtc],
-      [d3_time.minute.utc, 30, intradayFormatUtc],
-      [d3_time.hour.utc, 1, intradayFormatUtc],
-      [d3_time.hour.utc, 3, intradayFormatUtc],
-      [d3_time.hour.utc, 6, intradayFormatUtc],
-      [d3_time.hour.utc, 12, intradayFormatUtc],
-      [d3_time.day.utc, 1, dayFormatUtc]
+      [d3_time.utcSecond, 1, intradayFormatUtc],
+      [d3_time.utcSecond, 5, intradayFormatUtc],
+      [d3_time.utcSecond, 15, intradayFormatUtc],
+      [d3_time.utcSecond, 30, intradayFormatUtc],
+      [d3_time.utcMinute, 1, intradayFormatUtc],
+      [d3_time.utcMinute, 5, intradayFormatUtc],
+      [d3_time.utcMinute, 15, intradayFormatUtc],
+      [d3_time.utcMinute, 30, intradayFormatUtc],
+      [d3_time.utcHour, 1, intradayFormatUtc],
+      [d3_time.utcHour, 3, intradayFormatUtc],
+      [d3_time.utcHour, 6, intradayFormatUtc],
+      [d3_time.utcHour, 12, intradayFormatUtc],
+      [d3_time.utcDay, 1, dayFormatUtc]
     ];
 
   function techan_scale_financetime() {
@@ -388,3 +389,11 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
 
   return techan_scale_financetime;
 };
+
+function d3_v3_multi_shim(multi) {
+  return function(d) {
+    for(var i = 0; i < multi.length; i++) {
+      if(multi[i][1](d)) return multi[i][0](d);
+    }
+  };
+}

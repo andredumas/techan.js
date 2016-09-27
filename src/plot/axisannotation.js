@@ -3,15 +3,16 @@
 /**
  * TODO Refactor this to techan.plot.annotation.axis()?
  */
-module.exports = function(d3_svg_axis, accessor_value, plot, plotMixin) {  // Injected dependencies
+module.exports = function(d3_svg_axis, d3_scale_linear, accessor_value, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
     var p = {},
-        axis = d3_svg_axis(),
+        axis = d3_svg_axis(d3_scale_linear()),
         format,
         point = 4,
         height = 14,
         width = 50,
-        translate = [0, 0];
+        translate = [0, 0],
+        orient = 'bottom';
 
     function annotation(g) {
       var group = p.dataSelector.mapper(filterInvalidValues(p.accessor, axis.scale()))(g);
@@ -24,12 +25,18 @@ module.exports = function(d3_svg_axis, accessor_value, plot, plotMixin) {  // In
 
     annotation.refresh = function(g) {
       var fmt = format ? format : (axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat());
-      refresh(p.dataSelector.select(g), p.accessor, axis, fmt, height, width, point, translate);
+      refresh(p.dataSelector.select(g), p.accessor, axis, orient, fmt, height, width, point, translate);
     };
 
     annotation.axis = function(_) {
       if(!arguments.length) return axis;
       axis = _;
+      return annotation;
+    };
+
+    annotation.orient = function(_) {
+      if(!arguments.length) return orient;
+      orient = _;
       return annotation;
     };
 
@@ -63,12 +70,12 @@ module.exports = function(d3_svg_axis, accessor_value, plot, plotMixin) {  // In
   };
 };
 
-function refresh(selection, accessor, axis, format, height, width, point, translate) {
-  var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
+function refresh(selection, accessor, axis, orient, format, height, width, point, translate) {
+  var neg = orient === 'left' || orient === 'top' ? -1 : 1;
 
   selection.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
-  selection.select('path').attr('d', backgroundPath(accessor, axis, height, width, point, neg));
-  selection.select('text').text(textValue(accessor, format)).call(textAttributes, accessor, axis, neg);
+  selection.select('path').attr('d', backgroundPath(accessor, axis, orient, height, width, point, neg));
+  selection.select('text').text(textValue(accessor, format)).call(textAttributes, accessor, axis, orient, neg);
 }
 
 function filterInvalidValues(accessor, scale) {
@@ -87,25 +94,23 @@ function filterInvalidValues(accessor, scale) {
   };
 }
 
-function textAttributes(text, accessor, axis, neg) {
+function textAttributes(text, accessor, axis, orient, neg) {
   var scale = axis.scale();
 
-  switch(axis.orient()) {
+  switch(orient) {
     case 'left':
     case 'right':
-      text.attr({
-        x: neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()),
-        y: textPosition(accessor, scale),
-        dy: '.32em'
-      }).style('text-anchor', neg < 0 ? 'end' : 'start');
+      text.attr('x', neg*(Math.max(axis.tickSizeInner(), 0) + axis.tickPadding()))
+          .attr('y', textPosition(accessor, scale))
+          .attr('dy', '.32em')
+          .style('text-anchor', neg < 0 ? 'end' : 'start');
       break;
     case 'top':
     case 'bottom':
-      text.attr({
-        x: textPosition(accessor, scale),
-        y: neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()),
-        dy: neg < 0 ? '0em' : '.72em'
-      }).style('text-anchor', 'middle');
+      text.attr('x', textPosition(accessor, scale))
+          .attr('y', neg*(Math.max(axis.tickSizeInner(), 0) + axis.tickPadding()))
+          .attr('dy', neg < 0 ? '0em' : '.72em')
+          .style('text-anchor', 'middle');
       break;
   }
 }
@@ -122,13 +127,13 @@ function textValue(accessor, format) {
   };
 }
 
-function backgroundPath(accessor, axis, height, width, point, neg) {
+function backgroundPath(accessor, axis, orient, height, width, point, neg) {
   return function(d) {
     var scale = axis.scale(),
         value = scale(accessor(d)),
         pt = point;
 
-    switch(axis.orient()) {
+    switch(orient) {
       case 'left':
       case 'right':
         var h = 0;
@@ -136,7 +141,7 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
         if(height/2 < point) pt = height/2;
         else h = height/2-point;
 
-        return 'M 0 ' + value + ' l ' + (neg*Math.max(axis.innerTickSize(), 1)) + ' ' + (-pt) +
+        return 'M 0 ' + value + ' l ' + (neg*Math.max(axis.tickSizeInner(), 1)) + ' ' + (-pt) +
           ' l 0 ' + (-h) + ' l ' + (neg*width) + ' 0 l 0 ' + height +
           ' l ' + (neg*-width) + ' 0 l 0 ' + (-h);
       case 'top':
@@ -146,10 +151,10 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
         if(width/2 < point) pt = width/2;
         else w = width/2-point;
 
-        return 'M ' + value + ' 0 l ' + (-pt) + ' ' + (neg*Math.max(axis.innerTickSize(), 1)) +
+        return 'M ' + value + ' 0 l ' + (-pt) + ' ' + (neg*Math.max(axis.tickSizeInner(), 1)) +
           ' l ' + (-w) + ' 0 l 0 ' + (neg*height) + ' l ' + width + ' 0 l 0 ' + (neg*-height) +
           ' l ' + (-w) + ' 0';
-      default: throw "Unsupported axis.orient() = " + axis.orient();
+      default: throw "Unsupported orient value: axisannotation.orient(" + orient + "). Set to one of: 'top', 'bottom', 'left', 'right'";
     }
   };
 }

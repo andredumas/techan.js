@@ -13,8 +13,8 @@ techanModule('plot/trendline', function(specBuilder) {
     spies.d3_event = jasmine.createSpy('d3_event');
     spies.d3_select = jasmine.createSpy('d3_select');
 
-    var plot = require('../../../../src/plot/plot')(d3.svg.line, d3.svg.area, spies.d3_select),
-        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, d3.functor, techan.scale.financetime);
+    var plot = require('../../../../src/plot/plot')(d3.line, d3.area, spies.d3_select),
+        plotMixin = require('../../../../src/plot/plotmixin')(d3.scaleLinear, d3.functor, techan.scale.financetime);
 
     return trendline(d3.behavior.drag, spies.d3_event, spies.d3_select, d3.dispatch, techan.accessor.trendline, plot, plotMixin);
   };
@@ -90,7 +90,7 @@ techanModule('plot/trendline', function(specBuilder) {
                   interaction.dispatchEvent(event);
                 });
 
-                it('Then the mouseover class is applied to the supstance', function() {
+                it('Then the mouseover class is applied to the trendline', function() {
                   expect(dataSelection.classed('mouseover')).toBe(true);
                 });
 
@@ -114,7 +114,7 @@ techanModule('plot/trendline', function(specBuilder) {
                     expect(moveListener).toHaveBeenCalledWith(data[0]);
                   });
 
-                  it('Then the mouseover class is applied to the supstance', function() {
+                  it('Then the mouseover class is applied to the trendline', function() {
                     expect(dataSelection.classed('mouseover')).toBe(true);
                   });
                 });
@@ -131,7 +131,7 @@ techanModule('plot/trendline', function(specBuilder) {
                     interaction.dispatchEvent(event);
                   });
 
-                  it('Then the mouseover class is removed from the supstance', function() {
+                  it('Then the mouseover class is removed from the trendline', function() {
                     expect(dataSelection.classed('mouseover')).toBe(false);
                   });
 
@@ -145,21 +145,21 @@ techanModule('plot/trendline', function(specBuilder) {
                 'path', 0,
                 { start: { date: new Date(2014, 2, 6), value: 4 }, end: { date: new Date(2014, 2, 8), value: 6 } },
                 '<g class="trendline"><path class="body" d="M 1 40 L 3 60"></path><circle class="start" r="1" cx="1" cy="40"></circle><circle class="end" r="1" cx="3" cy="60"></circle></g>',
-                '<g class="interaction" style="opacity: 0; fill: none;"><path class="body" d="M 1 40 L 3 60" style="stroke-width: 16px;"></path><circle class="start" r="8" cx="1" cy="40"></circle><circle class="end" r="8" cx="3" cy="60"></circle></g>'
+                '<g class="interaction" style="opacity: 0; fill: none;"><path class="body" d="M 1 40 L 3 60" style="stroke-width: 16px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><circle class="start" r="8" cx="1" cy="40" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="end" r="8" cx="3" cy="60" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle></g>'
               );
 
               assertDrag('And on left end drag start',
                 'circle', 0,
                 { start: { date: new Date(2014, 2, 6), value: 4 }, end: { date: new Date(2014, 2, 7), value: 5 } },
                 '<g class="trendline"><path class="body" d="M 1 40 L 2 50"></path><circle class="start" r="1" cx="1" cy="40"></circle><circle class="end" r="1" cx="2" cy="50"></circle></g>',
-                '<g class="interaction" style="opacity: 0; fill: none;"><path class="body" d="M 1 40 L 2 50" style="stroke-width: 16px;"></path><circle class="start" r="8" cx="1" cy="40"></circle><circle class="end" r="8" cx="2" cy="50"></circle></g>'
+                '<g class="interaction" style="opacity: 0; fill: none;"><path class="body" d="M 1 40 L 2 50" style="stroke-width: 16px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><circle class="start" r="8" cx="1" cy="40" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="end" r="8" cx="2" cy="50" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle></g>'
               );
 
               assertDrag('And on right end drag start',
                 'circle', 1,
                 { start: { date: new Date(2014, 2, 5), value: 3 }, end: { date: new Date(2014, 2, 8), value: 6 } },
                 '<g class="trendline"><path class="body" d="M 0 30 L 3 60"></path><circle class="start" r="1" cx="0" cy="30"></circle><circle class="end" r="1" cx="3" cy="60"></circle></g>',
-                '<g class="interaction" style="opacity: 0; fill: none;"><path class="body" d="M 0 30 L 3 60" style="stroke-width: 16px;"></path><circle class="start" r="8" cx="0" cy="30"></circle><circle class="end" r="8" cx="3" cy="60"></circle></g>'
+                '<g class="interaction" style="opacity: 0; fill: none;"><path class="body" d="M 0 30 L 3 60" style="stroke-width: 16px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><circle class="start" r="8" cx="0" cy="30" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="end" r="8" cx="3" cy="60" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle></g>'
               );
 
               function assertDrag(describeText, element, index, expectedData, expectedTrendline, expectedInteraction) {
@@ -168,13 +168,13 @@ techanModule('plot/trendline', function(specBuilder) {
                       dragInteraction;
 
                   beforeEach(function() {
-                    dragInteraction = d3.select(interaction).selectAll(element)[0][index];
+                    dragInteraction = d3.select(interaction).selectAll(element).nodes()[index];
                     dragStartListener = jasmine.createSpy('dragStartListener');
                     scope.plot.drag(scope.g);
                     scope.plot.on('dragstart', dragStartListener);
 
                     var event = document.createEvent('MouseEvent');
-                    event.initMouseEvent('mousedown');
+                    event.initMouseEvent('mousedown', false, false, window);
                     dragInteraction.dispatchEvent(event);
                   });
 
@@ -206,7 +206,7 @@ techanModule('plot/trendline', function(specBuilder) {
                       expect(dragListener).toHaveBeenCalledWith(expectedData);
                     });
 
-                    it('Then contains an updated supstance path', function() {
+                    it('Then contains an updated trendline path', function() {
                       expect(childElements[0].outerHTML)
                         .toEqual(expectedTrendline);
                     });
@@ -225,7 +225,7 @@ techanModule('plot/trendline', function(specBuilder) {
                       scope.plot.on('dragend', dragEndListener);
 
                       var event = document.createEvent('MouseEvent');
-                      event.initMouseEvent('mouseup');
+                      event.initMouseEvent('mouseup', false, false, window);
                       window.dispatchEvent(event);
                     });
 

@@ -215,7 +215,7 @@ module.exports = function(grunt) {
       main: {
         options: {
           patterns: [
-            { match: /http:\/\/d3js\.org\/d3\.v3\.min\.js/g, replacement: '/bower_components/d3/d3.js' },
+            { match: /http:\/\/d3js\.org\/d3.*.js/g, replacement: '/bower_components/d3/d3.js' },
             { match: /http:\/\/techanjs\.org\/techan\.min\.js/g, replacement: '/<%= watchify.dev.dest %>' },
             // Append the livereload script to the end of the example files
             { match: /^<\/script>/m, replacement: '</script>\n<script src="//localhost:35729/livereload.js"></script>' }

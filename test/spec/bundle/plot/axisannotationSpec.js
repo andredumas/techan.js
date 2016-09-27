@@ -97,7 +97,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
         describe('And translate is 10 across and 15 down and right axis', function() {
           beforeEach(function() {
             var axisannotation = scope.plot;
-            axisannotation.translate([10,15]).axis().orient('right');
+            axisannotation.translate([10,15]).orient('right');
           });
 
           plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {
@@ -128,7 +128,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
 
         describe('And axis is top', function() {
           beforeEach(function() {
-            scope.plot.axis().orient('top');
+            scope.plot.orient('top');
           });
 
           plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {
@@ -151,7 +151,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
 
           describe('And inner tick is negative', function() {
             beforeEach(function() {
-              scope.plot.axis().innerTickSize(-1);
+              scope.plot.axis().tickSizeInner(-1);
             });
 
             plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {
@@ -176,7 +176,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
 
         describe('And axis is bottom', function() {
           beforeEach(function() {
-            scope.plot.axis().orient('bottom');
+            scope.plot.orient('bottom');
           });
 
           plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {
@@ -200,7 +200,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
 
         describe('And axis is left', function() {
           beforeEach(function() {
-            scope.plot.axis().orient('left');
+            scope.plot.orient('left');
           });
 
           plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {
@@ -223,7 +223,7 @@ techanModule('plot/axisannotation', function(specBuilder) {
 
           describe('And inner tick is negative', function() {
             beforeEach(function() {
-              scope.plot.axis().innerTickSize(-1);
+              scope.plot.axis().tickSizeInner(-1);
             });
 
             plotShouldRenderWithoutError(scope, data, domFixtures, function(scope) {

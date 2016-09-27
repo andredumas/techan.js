@@ -17,8 +17,8 @@ techanModule('scale/zoomable', function(specBuilder) {
 
         beforeEach(function() {
           zoomedCallback = jasmine.createSpy('zoomedCallback');
-          linear = d3.scale.linear().domain([0,10]);
-          zoomable = scope.zoomable(linear, zoomedCallback, linear.domain());
+          linear = d3.scaleLinear().domain([0,10]);
+          zoomable = scope.zoomable(linear, zoomedCallback, { domain: linear.domain() });
         });
 
         it('Then the default scale function should behave like the underlying linear scale', function() {
@@ -68,16 +68,15 @@ techanModule('scale/zoomable', function(specBuilder) {
         });
 
         describe('And a zoom applied', function() {
-          var zoom = null;
+          var transform;
 
           beforeEach(function() {
-            zoom = d3.behavior.zoom();
-            zoom.x(zoomable);
+            transform = d3.zoomTransform(this);
           });
 
           describe('And translated to the left', function() {
             beforeEach(function() {
-              zoom.translate([-11, 0]);
+              zoomable.domain(transform.translate(-11, 0).rescaleX(zoomable).domain());
             });
 
             it('Then scale of first index should return scaled min range', function() {
@@ -95,7 +94,7 @@ techanModule('scale/zoomable', function(specBuilder) {
 
           describe('And scaled by 2', function() {
             beforeEach(function() {
-              zoom.scale(2).translate([-1,0]);
+              zoomable.domain(transform.translate(-1, 0).scale(2).rescaleX(zoomable).domain());
             });
 
             it('Then scale of first index should return min range', function() {

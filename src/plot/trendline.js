@@ -10,15 +10,15 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
           trendlineGroup = group.entry.append('g').attr('class', 'trendline');
 
       trendlineGroup.append('path').attr('class', 'body');
-      trendlineGroup.append('circle').attr({ class: 'start', r: 1 });
-      trendlineGroup.append('circle').attr({ class: 'end', r: 1 });
+      trendlineGroup.append('circle').attr('class', 'start').attr('r', 1);
+      trendlineGroup.append('circle').attr('class', 'end').attr('r', 1);
 
-      var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
+      var interaction = group.entry.append('g').attr('class', 'interaction').style('opacity', 0).style('fill', 'none')
         .call(plot.interaction.mousedispatch(dispatch));
 
       interaction.append('path').attr('class', 'body').style('stroke-width', '16px');
-      interaction.append('circle').attr({ class: 'start', r: 8 });
-      interaction.append('circle').attr({ class: 'end', r: 8 });
+      interaction.append('circle').attr('class', 'start').attr('r', 8);
+      interaction.append('circle').attr('class', 'end').attr('r', 8);
 
       trendline.refresh(g);
     }
@@ -48,13 +48,13 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
   function dragEnd(dispatch, accessor, accessor_x, x, accessor_y, y) {
     var drag = d3_behavior_drag();
 
-    drag.origin(function(d) {
+    drag.subject(function(d) {
       return { x: x(accessor_x(d)), y: y(accessor_y(d)) };
     })
     .on('drag', function(d) {
       updateEnd(accessor_x, x, d3_event().x, accessor_y, y, d3_event().y, d);
       refresh(d3_select(this.parentNode.parentNode.parentNode), accessor, x, y);
-      dispatch.drag(d);
+      dispatch.call('drag', this, d);
     });
 
     return plot.interaction.dragStartEndDispatch(drag, dispatch);
@@ -64,7 +64,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     var dragStart = {}, // State information, grabs the start coords of the line
         drag = d3_behavior_drag();
 
-    drag.origin(function(d) {
+    drag.subject(function(d) {
       dragStart.start = { date: x(accessor.sd(d)), value: y(accessor.sv(d)) };
       dragStart.end = { date: x(accessor.ed(d)), value: y(accessor.ev(d)) };
       return { x: 0, y: 0 };
@@ -77,7 +77,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
         accessor.ev, y, d3_event().y + dragStart.end.value,
         d);
       refresh(d3_select(this.parentNode.parentNode.parentNode), accessor, x, y);
-      dispatch.drag(d);
+      dispatch.call('drag', this, d);
     });
 
     return plot.interaction.dragStartEndDispatch(drag, dispatch);
@@ -93,12 +93,9 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
 };
 
 function refresh(selection, accessor, x, y) {
-  selection.selectAll('.trendline path.body').attr('d', trendlinePath(accessor, x, y));
-  selection.selectAll('.trendline circle.start').attr(trendlineEnd(accessor.sd, x, accessor.sv, y));
-  selection.selectAll('.trendline circle.end').attr(trendlineEnd(accessor.ed, x, accessor.ev, y));
-  selection.selectAll('.interaction path.body').attr('d', trendlinePath(accessor, x, y));
-  selection.selectAll('.interaction circle.start').attr(trendlineEnd(accessor.sd, x, accessor.sv, y));
-  selection.selectAll('.interaction circle.end').attr(trendlineEnd(accessor.ed, x, accessor.ev, y));
+  selection.selectAll('path.body').attr('d', trendlinePath(accessor, x, y));
+  selection.selectAll('circle.start').attr('cx', trendlineEndCX(accessor.sd, x)).attr('cy', trendlineEndCY(accessor.sv, y));
+  selection.selectAll('circle.end').attr('cx', trendlineEndCX(accessor.ed, x)).attr('cy', trendlineEndCY(accessor.ev, y));
 }
 
 function trendlinePath(accessor, x, y) {
@@ -108,9 +105,10 @@ function trendlinePath(accessor, x, y) {
   };
 }
 
-function trendlineEnd(accessor_x, x, accessor_y, y) {
-  return {
-    cx: function(d) { return x(accessor_x(d)); },
-    cy: function(d) { return y(accessor_y(d)); }
-  };
+function trendlineEndCX(accessor_x, x) {
+  return function(d) { return x(accessor_x(d)); };
+}
+
+function trendlineEndCY(accessor_y, y) {
+  return function(d) { return y(accessor_y(d)); };
 }

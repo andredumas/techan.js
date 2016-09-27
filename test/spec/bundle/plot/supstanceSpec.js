@@ -165,13 +165,13 @@ techanModule('plot/supstance', function(specBuilder) {
                   dragInteraction;
 
               beforeEach(function() {
-                dragInteraction = d3.select(interaction).select('path')[0][0];
+                dragInteraction = d3.select(interaction).select('path').nodes()[0];
                 dragStartListener = jasmine.createSpy('dragStartListener');
                 scope.plot.drag(scope.g);
                 scope.plot.on('dragstart', dragStartListener);
 
                 var event = document.createEvent('MouseEvent');
-                event.initMouseEvent('mousedown');
+                event.initMouseEvent('mousedown', false, false, window);
                 dragInteraction.dispatchEvent(event);
               });
 
@@ -219,7 +219,7 @@ techanModule('plot/supstance', function(specBuilder) {
 
                 it('Then contains an updated interaction path', function() {
                   expect(childElements[2].outerHTML)
-                    .toEqual('<g class="interaction" style="opacity: 0; fill: none;"><path d="M 0 90 L 1 90" style="stroke-width: 16px;"></path></g>');
+                    .toEqual('<g class="interaction" style="opacity: 0; fill: none;"><path d="M 0 90 L 1 90" style="stroke-width: 16px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path></g>');
                 });
               });
 
@@ -231,7 +231,7 @@ techanModule('plot/supstance', function(specBuilder) {
                   scope.plot.on('dragend', dragEndListener);
 
                   var event = document.createEvent('MouseEvent');
-                  event.initMouseEvent('mouseup');
+                  event.initMouseEvent('mouseup', false, false, window);
                   window.dispatchEvent(event);
                 });
 

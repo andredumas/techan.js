@@ -202,7 +202,7 @@ techanModule('scale/financetime', function(specBuilder) {
         });
 
         it('Then ticks with specified interval and step count returns that number', function() {
-          expect(financetime.ticks(d3.time.day, 2)).toEqual([
+          expect(financetime.ticks(d3.timeDay, 2)).toEqual([
             new Date(2012,4,21),
             new Date(2012,4,23),
             new Date(2012,4,25),
@@ -218,7 +218,7 @@ techanModule('scale/financetime', function(specBuilder) {
           });
 
           it('Then ticks with specified interval and step count returns that number', function() {
-            expect(financetime.ticks(d3.time.day, 2)).toEqual([
+            expect(financetime.ticks(d3.timeDay, 2)).toEqual([
               new Date(2012,4,18),
               new Date(2012,4,21),
               new Date(2012,4,23),
@@ -392,15 +392,13 @@ techanModule('scale/financetime', function(specBuilder) {
             var baselineScale;
 
             beforeEach(function() {
-              var zoom = d3.behavior.zoom();
-              zoom.x(zoomable);
-              baselineScale = d3.scale.linear()
+              var transform = d3.zoomTransform(this);
+              baselineScale = d3.scaleLinear()
                 .domain([-0.52, 9.52]) // Adjusted index domain taking to account the extra padding
                 .range(financetime.range());
 
-              d3.behavior.zoom().x(baselineScale)
-                  .scale(1.5).translate([-10, 0]);
-              zoom.scale(1.5).translate([-10, 0]);
+              baselineScale.domain(transform.translate(-10, 0).scale(1.5).rescaleX(baselineScale).domain());
+              zoomable.domain(transform.translate(-10, 0).scale(1.5).rescaleX(zoomable).domain());
             });
 
             it('Then baseline scale range should return the range set', function() {
@@ -412,7 +410,7 @@ techanModule('scale/financetime', function(specBuilder) {
             });
 
             it('Then baseline scale of first index should return min zoomed range', function() {
-              expect(baselineScale(0)).toEqual(140);
+              expect(baselineScale(0)).toEqual(140.00000000000003);
             });
 
             it('Then scale of first index should return min range', function() {
@@ -455,7 +453,7 @@ techanModule('scale/financetime', function(specBuilder) {
             });
 
             it('Then ticks with specified interval and step count returns that number', function() {
-              expect(financetime.ticks(d3.time.day, 2)).toEqual([
+              expect(financetime.ticks(d3.timeDay, 2)).toEqual([
                 new Date(2012,4,21),
                 new Date(2012,4,23),
                 new Date(2012,4,25),
@@ -469,7 +467,7 @@ techanModule('scale/financetime', function(specBuilder) {
               });
 
               it('Then ticks with specified interval and step count returns that number', function() {
-                expect(financetime.ticks(d3.time.day, 2)).toEqual([
+                expect(financetime.ticks(d3.timeDay, 2)).toEqual([
                   new Date(2012,4,18),
                   new Date(2012,4,21),
                   new Date(2012,4,23),
@@ -606,14 +604,12 @@ techanModule('scale/financetime', function(specBuilder) {
         describe('(SCRATCHPAD) And domain and range is initialised with symmetric data', function() {
           var index,
               time,
-              zoomIndex,
-              zoomTime;
+              transform;
 
           beforeEach(function() {
-            index = d3.scale.linear().domain([0, timeData.length-1]).range([0, 1000]);
-            time = d3.time.scale().domain([timeData[0], timeData[timeData.length-1]]).range([0, 1000]);
-            zoomIndex = d3.behavior.zoom().x(index);
-            zoomTime = d3.behavior.zoom().x(time);
+            index = d3.scaleLinear().domain([0, timeData.length-1]).range([0, 1000]);
+            time = d3.scaleTime().domain([timeData[0], timeData[timeData.length-1]]).range([0, 1000]);
+            transform = d3.zoomTransform(this);
           });
 
           it('Should have domain set correctly', function() {
@@ -628,8 +624,8 @@ techanModule('scale/financetime', function(specBuilder) {
           describe('And zoom applied to translate both scales to left', function() {
             beforeEach(function() {
               // Move across to get symmetrical number on the domain
-              zoomIndex.translate([-111.11111111111111, 0]);
-              zoomTime.translate([-111.11111111111111, 0]);
+              index.domain(transform.translate(-111.11111111111111, 0).rescaleX(index).domain());
+              time.domain(transform.translate(-111.11111111111111, 0).rescaleX(time).domain());
             });
 
             it('Should move proportionately resulting in round number domain', function() {
@@ -645,12 +641,12 @@ techanModule('scale/financetime', function(specBuilder) {
             var indexToTime;
 
             beforeEach(function() {
-              indexToTime = d3.scale.linear()
+              indexToTime = d3.scaleLinear()
                 .domain(index.domain())
                 .range(time.domain().map(function(d) { return d.getTime(); }));
 
               // Move across to get symmetrical number on the domain
-              zoomIndex.translate([-111.11111111111111, 0]);
+              index.domain(transform.translate(-111.11111111111111, 0).rescaleX(index).domain());
             });
 
             it('Should move proportionately resulting in round number domain', function() {

@@ -56,7 +56,7 @@ techanModule('plot/crosshair', function(specBuilder) {
               var root;
 
               beforeEach(function() {
-                root = g.selectAll('g.root > *')[0];
+                root = g.selectAll('g.root > *').nodes();
               });
 
               it('Then there are 2 elements', function() {
@@ -250,7 +250,7 @@ techanModule('plot/crosshair', function(specBuilder) {
 
                 var event = document.createEvent('MouseEvent');
                 event.initMouseEvent('mousemove', false, false, window, 0, 0, 0, xRange, yRange);
-                scope.g.selectAll('g.root > *')[0][1].dispatchEvent(event);
+                scope.g.selectAll('g.root > *').nodes()[1].dispatchEvent(event);
               });
 
               it('Then contains x annotation is populated', function() {

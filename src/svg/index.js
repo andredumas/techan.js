@@ -2,6 +2,6 @@
 
 module.exports = function(d3) {
   return {
-    arrow: require('./arrow')(d3.functor)
+    arrow: require('./arrow')(require('../util')().functor)
   };
 };

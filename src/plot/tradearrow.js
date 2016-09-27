@@ -13,19 +13,19 @@ module.exports = function(d3_select, d3_functor, d3_mouse, d3_dispatch, accessor
           classes = typesToClasses(g.datum());
 
       plot.appendPathsGroupBy(group.selection, p.accessor, 'tradearrow', classes);
-      group.entry.append('path').attr('class', 'highlight').style({ 'pointer-events': 'none' }); // Do not want mouse events on the highlight
+      group.entry.append('path').attr('class', 'highlight').style('pointer-events', 'none'); // Do not want mouse events on the highlight
 
       group.selection.selectAll('path.tradearrow')
         .on('mouseenter', function(data) {
           var nearest = findNearest(data, d3_mouse(this)[0]);
           // Watch out here, not using generator as this is single element, not grouped
           // Done purely to get this node correctly classed and technically only 1 node can be selected for the moment
-          d3_select(this.parentNode).select('path.highlight').datum(nearest.d).attr('d', svgArrow).classed(classes);
-          dispatch.mouseenter(nearest.d, nearest.i);
+          d3_select(this.parentNode).select('path.highlight').datum(nearest.d).attr('d', svgArrow).call(classed, classes);
+          dispatch.call('mouseenter', this, nearest.d, nearest.i);
         }).on('mouseout', function(data) {
           d3_select(this.parentNode).selectAll('path.highlight').datum([]).attr('d', null).attr('class', 'highlight');
           var nearest = findNearest(data, d3_mouse(this)[0]);
-          dispatch.mouseout(nearest.d, nearest.i);
+          dispatch.call('mouseout', this, nearest.d, nearest.i);
         });
 
       tradearrow.refresh(g);
@@ -96,3 +96,10 @@ module.exports = function(d3_select, d3_functor, d3_mouse, d3_dispatch, accessor
     return tradearrow;
   };
 };
+
+// d3 v4 no longer takes classed(Object), shim to convert Object and add classes to the selection
+function classed(selection, classes) {
+  Object.keys(classes).forEach(function(clazz) {
+    selection.classed(clazz, classes[clazz]);
+  });
+}

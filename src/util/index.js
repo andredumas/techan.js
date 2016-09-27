@@ -8,6 +8,11 @@ module.exports = function() {
       var newArgs = Array.prototype.slice.call(arguments, 0);
       newArgs.splice(2, 0, undefined);
       return rebindCallback.apply(this, newArgs);
+    },
+
+    // https://github.com/d3/d3/blob/v3.5.17/src/core/functor.js
+    functor: function(v) {
+      return typeof v === "function" ? v : function() { return v; };
     }
   };
 };

@@ -4,9 +4,9 @@ techanModule('plot/plotmixin', function(specBuilder) {
   var techan = require('../../../../src/techan');
 
   var actualInit = function(module) {
-    var plot = require('../../../../src/plot/plot')(d3.svg.line, d3.select);
+    var plot = require('../../../../src/plot/plot')(d3.line, d3.select);
 
-    return module(d3.scale.linear, d3.functor, techan.scale.financetime, plot.dataSelector);
+    return module(d3.scaleLinear, d3.functor, techan.scale.financetime, plot.dataSelector);
   };
 
   specBuilder.require(require('../../../../src/plot/plotmixin'), function(instanceBuilder) {

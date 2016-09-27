@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  // Injected dependencies
+module.exports = function(d3_svg_area, d3_line_interpolate, accessor_ichimoku, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
         kumoClip = kumoClipArea(),
@@ -16,10 +16,10 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
           clipUpId = 'kumoclipup-' + randomID(),
           clipDownId = 'kumoclipdown-' + randomID();
 
-      group.entry.append('clipPath').attr({ id: clipDownId, class: 'kumoclipdown' }).append('path');
-      group.entry.append('clipPath').attr({ id: clipUpId, class: 'kumoclipup' }).append('path');
-      group.entry.append('path').attr({ class: 'kumo down', 'clip-path': 'url(#' + clipDownId + ')' });
-      group.entry.append('path').attr({ class: 'kumo up', 'clip-path':'url(#' + clipUpId + ')' });
+      group.entry.append('clipPath').attr('id', clipDownId).attr('class', 'kumoclipdown').append('path');
+      group.entry.append('clipPath').attr('id', clipUpId).attr('class', 'kumoclipup').append('path');
+      group.entry.append('path').attr('class', 'kumo down').attr('clip-path', 'url(#' + clipDownId + ')');
+      group.entry.append('path').attr('class', 'kumo up').attr('clip-path', 'url(#' + clipUpId + ')');
       group.entry.append('path').attr('class', 'senkouspanb');
       group.entry.append('path').attr('class', 'senkouspana');
 
@@ -56,14 +56,14 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
     }
 
     function kumoClipArea() {
-      return d3_svg_area().interpolate('monotone')
+      return d3_svg_area().curve(d3_line_interpolate)
         .defined(function(d) { return p.accessor.sb(d) !== null; })
         .x(function(d) { return p.xScale(p.accessor.d(d), p.accessor.pks(d)); } )
         .y0(function(d) { return p.yScale(p.accessor.sb(d)); } );
     }
 
     function kumoPathArea() {
-      return d3_svg_area().interpolate('monotone')
+      return d3_svg_area().curve(d3_line_interpolate)
         .defined(function(d) { return p.accessor.sa(d) !== null && p.accessor.sb(d) !== null; })
         .x(function(d) { return p.xScale(p.accessor.d(d), p.accessor.pks(d)); } )
         .y0(function(d) { return p.yScale(p.accessor.sa(d)); } )

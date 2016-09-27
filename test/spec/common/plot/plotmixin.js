@@ -51,12 +51,12 @@ function PlotRenderTester(domFixtures) {
 
       beforeEach(function() {
         plot(g);
-        dataElements = domScope.dataElements = g.selectAll('g.root > g.data')[0];
-        childElements = domScope.childElements = g.selectAll('g.root > g.data > *')[0];
+        dataElements = domScope.dataElements = g.selectAll('g.root > g.data').nodes();
+        childElements = domScope.childElements = g.selectAll('g.root > g.data > *').nodes();
       });
 
       it('Then it should render without error', function() {
-        expect(g[0][0].innerHTML).not.toContain('NaN');
+        expect(g.node().innerHTML).not.toContain('NaN');
       });
 
       if(dataElementsCount !== undefined) {
@@ -79,7 +79,7 @@ function PlotRenderTester(domFixtures) {
         });
 
         it('Then it should be refreshed without error', function() {
-          expect(g[0][0].innerHTML).not.toContain('NaN');
+          expect(g.node().innerHTML).not.toContain('NaN');
         });
 
         if(dataElementsCount !== undefined) {

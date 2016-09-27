@@ -14,7 +14,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
 
       group.entry.append('g').attr('class', 'axisannotation y').call(annotationComposer);
 
-      var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
+      var interaction = group.entry.append('g').attr('class', 'interaction').style('opacity', 0).style('fill', 'none' )
         .call(plot.interaction.mousedispatch(dispatch));
 
       interaction.append('path').style('stroke-width', '16px');
@@ -55,7 +55,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
   }
 
   function dragBody(dispatch, accessor, x, y, annotationComposer) {
-    var drag = d3_behavior_drag().origin(function(d) {
+    var drag = d3_behavior_drag().subject(function(d) {
       return { x: 0, y: y(accessor(d)) };
     })
     .on('drag', function(d) {
@@ -64,7 +64,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
 
       accessor.v(d, value);
       refresh(g, accessor, x, y, annotationComposer);
-      dispatch.drag(d);
+      dispatch.call('drag', this, d);
     });
 
     return plot.interaction.dragStartEndDispatch(drag, dispatch);

@@ -13,8 +13,8 @@ techanModule('plot/tradearrow', function(specBuilder) {
   var mockedMouseInit = function(tradearrow) {
     spies.d3_mouse = jasmine.createSpy('d3_mouse');
 
-    var plot = require('../../../../src/plot/plot')(d3.svg.line, spies.d3_select),
-        plotMixin = require('../../../../src/plot/plotmixin')(d3.scale.linear, d3.functor, techan.scale.financetime, plot.dataSelector);
+    var plot = require('../../../../src/plot/plot')(d3.line, spies.d3_select),
+        plotMixin = require('../../../../src/plot/plotmixin')(d3.scaleLinear, d3.functor, techan.scale.financetime, plot.dataSelector);
 
     return tradearrow(d3.select, d3.functor, spies.d3_mouse, d3.dispatch, techan.accessor.trade, plot, plotMixin, techan.svg.arrow);
   };
@@ -113,7 +113,7 @@ techanModule('plot/tradearrow', function(specBuilder) {
           });
 
           it('Then highlighted will have choosen the nearest', function() {
-            expect(g[0][0].innerHTML).toEqual('<g class="data"><path class="tradearrow buy" d="M 0.2549019607843137 1.1 l -6 7.5 l 4 0 l 0 7.5 l 4 0 l 0 -7.5 l 4 0 z"></path><path class="tradearrow sell" d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z"></path><path class="highlight sell" d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z" style="pointer-events: none;"></path></g>');
+            expect(g.node().innerHTML).toEqual('<g class="data"><path class="tradearrow buy" d="M 0.2549019607843137 1.1 l -6 7.5 l 4 0 l 0 7.5 l 4 0 l 0 -7.5 l 4 0 z"></path><path class="tradearrow sell" d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z"></path><path class="highlight sell" d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z" style="pointer-events: none;"></path></g>');
           });
 
           describe('And the mouse out event is called', function() {
@@ -122,7 +122,7 @@ techanModule('plot/tradearrow', function(specBuilder) {
             });
 
             it('Then highlighted will be cleared', function() {
-              expect(g[0][0].innerHTML).toEqual('<g class="data"><path class="tradearrow buy" d="M 0.2549019607843137 1.1 l -6 7.5 l 4 0 l 0 7.5 l 4 0 l 0 -7.5 l 4 0 z"></path><path class="tradearrow sell" d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z"></path><path class="highlight" style="pointer-events: none;"></path></g>');
+              expect(g.node().innerHTML).toEqual('<g class="data"><path class="tradearrow buy" d="M 0.2549019607843137 1.1 l -6 7.5 l 4 0 l 0 7.5 l 4 0 l 0 -7.5 l 4 0 z"></path><path class="tradearrow sell" d="M 0.7450980392156863 1 l -6 -7.5 l 4 0 l 0 -7.5 l 4 0 l 0 7.5 l 4 0 z"></path><path class="highlight" style="pointer-events: none;"></path></g>');
             });
           });
         });

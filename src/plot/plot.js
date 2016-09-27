@@ -1,18 +1,19 @@
 'use strict';
 
-module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
+module.exports = function(d3_svg_line, d3_svg_area, d3_line_interpolate, d3_select) {
   var DataSelector = function(mapper) {
     var key,
         scope,
         classes = ['data'];
 
     function dataSelect(g) {
-      var selection = dataSelect.select(g).data(mapper, key);
+      var selection = dataSelect.select(g).data(mapper, key),
+          entry = selection.enter().append('g').attr('class',  arrayJoin(classes, ' '));
       selection.exit().remove();
 
       return {
-        selection: selection,
-        entry: selection.enter().append('g').attr('class',  arrayJoin(classes, ' '))
+        entry: entry,
+        selection: entry.merge(selection)
       };
     }
 
@@ -53,7 +54,7 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
   };
 
   function PathLine() {
-    var d3Line = d3_svg_line().interpolate('monotone');
+    var d3Line = d3_svg_line().curve(d3_line_interpolate);
 
     function line(data) {
       return d3Line(data);
@@ -73,7 +74,7 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
   }
 
   function PathArea() {
-    var d3Area = d3_svg_area().interpolate('monotone');
+    var d3Area = d3_svg_area().curve(d3_line_interpolate);
 
     function area(data) {
       return d3Area(data);
@@ -278,27 +279,27 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
         return function(selection) {
           return selection.on('mouseenter', function(d) {
             d3_select(this.parentNode).classed('mouseover', true);
-            dispatch.mouseenter(d);
+            dispatch.call('mouseenter', this, d);
           })
           .on('mouseleave', function(d) {
             var parentElement = d3_select(this.parentNode);
             if(!parentElement.classed('dragging')) {
               parentElement.classed('mouseover', false);
-              dispatch.mouseout(d);
+              dispatch.call('mouseout', this, d);
             }
           })
-          .on('mousemove', function(d) { dispatch.mousemove(d); });
+          .on('mousemove', function(d) { dispatch.call('mousemove', this, d); });
         };
       },
 
       dragStartEndDispatch: function(drag, dispatch) {
-        return drag.on('dragstart', function(d) {
+        return drag.on('start', function(d) {
           d3_select(this.parentNode.parentNode).classed('dragging', true);
-          dispatch.dragstart(d);
+          dispatch.call('dragstart', this, d);
         })
-        .on('dragend', function(d) {
+        .on('end', function(d) {
           d3_select(this.parentNode.parentNode).classed('dragging', false);
-          dispatch.dragend(d);
+          dispatch.call('dragend', this, d);
         });
       }
     },

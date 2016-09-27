@@ -38,7 +38,7 @@ techanModule('plot/volume', function(specBuilder) {
             });
 
             it('Then contain an empty volume path', function() {
-              expect(g[0][0].innerHTML).toBe('<g class="data"><path class="volume"></path></g>');
+              expect(g.node().innerHTML).toBe('<g class="data"><path class="volume"></path></g>');
             });
           });
         }
