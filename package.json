@@ -1,6 +1,6 @@
 {
   "name": "techan",
-  "version": "0.7.0-4",
+  "version": "0.7.0",
   "description": "A visual, technical analysis and charting (Candlestick, OHLC, indicators) library built on D3.",
   "keywords": [
     "technical analysis",
