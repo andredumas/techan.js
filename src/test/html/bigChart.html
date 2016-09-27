@@ -14,5 +14,13 @@
     <script src="../../dist/dependencies.js"></script>
     <script src="../../bower_components/techan/dist/techan.js"></script>
     <script src="../../build/dev.js"></script>
+    <script>
+        (function(window, d3, techanSite) {
+            d3.select('div#bigChart').call(techanSite.bigchart);
+            window.onresize = function() {
+                d3.select('div#bigChart').call(techanSite.bigchart.resize);
+            };
+        })(window, d3, techanSite);
+    </script>
 </body>
 </html>

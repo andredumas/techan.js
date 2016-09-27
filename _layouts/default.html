@@ -23,4 +23,12 @@
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
     <script src="js/site.js"></script>
+    <script>
+        (function(window, d3, techanSite) {
+            d3.select('div#bigChart').call(techanSite.bigchart);
+            window.onresize = function() {
+                d3.select('div#bigChart').call(techanSite.bigchart.resize);
+            };
+        })(window, d3, techanSite);
+    </script>
 </html>

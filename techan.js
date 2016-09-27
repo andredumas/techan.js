@@ -1,9 +1,9 @@
 /*
- TechanJS v0.7.0
+ TechanJS v0.8.0-0
  (c) 2014 - 2016 Andre Dumas | https://github.com/andredumas/techan.js
 */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.techan = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';module.exports='0.7.0';
+'use strict';module.exports='0.8.0-0';
 },{}],2:[function(require,module,exports){
 'use strict';
 
@@ -2013,15 +2013,16 @@ function refresh(selection, upLine, downLine) {
 /**
  * TODO Refactor this to techan.plot.annotation.axis()?
  */
-module.exports = function(d3_svg_axis, accessor_value, plot, plotMixin) {  // Injected dependencies
+module.exports = function(d3_svg_axis, d3_scale_linear, accessor_value, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
     var p = {},
-        axis = d3_svg_axis(),
+        axis = d3_svg_axis(d3_scale_linear()),
         format,
         point = 4,
         height = 14,
         width = 50,
-        translate = [0, 0];
+        translate = [0, 0],
+        orient = 'bottom';
 
     function annotation(g) {
       var group = p.dataSelector.mapper(filterInvalidValues(p.accessor, axis.scale()))(g);
@@ -2034,12 +2035,18 @@ module.exports = function(d3_svg_axis, accessor_value, plot, plotMixin) {  // In
 
     annotation.refresh = function(g) {
       var fmt = format ? format : (axis.tickFormat() ? axis.tickFormat() : axis.scale().tickFormat());
-      refresh(p.dataSelector.select(g), p.accessor, axis, fmt, height, width, point, translate);
+      refresh(p.dataSelector.select(g), p.accessor, axis, orient, fmt, height, width, point, translate);
     };
 
     annotation.axis = function(_) {
       if(!arguments.length) return axis;
       axis = _;
+      return annotation;
+    };
+
+    annotation.orient = function(_) {
+      if(!arguments.length) return orient;
+      orient = _;
       return annotation;
     };
 
@@ -2073,12 +2080,12 @@ module.exports = function(d3_svg_axis, accessor_value, plot, plotMixin) {  // In
   };
 };
 
-function refresh(selection, accessor, axis, format, height, width, point, translate) {
-  var neg = axis.orient() === 'left' || axis.orient() === 'top' ? -1 : 1;
+function refresh(selection, accessor, axis, orient, format, height, width, point, translate) {
+  var neg = orient === 'left' || orient === 'top' ? -1 : 1;
 
   selection.attr('transform', 'translate(' + translate[0] + ',' + translate[1] + ')');
-  selection.select('path').attr('d', backgroundPath(accessor, axis, height, width, point, neg));
-  selection.select('text').text(textValue(accessor, format)).call(textAttributes, accessor, axis, neg);
+  selection.select('path').attr('d', backgroundPath(accessor, axis, orient, height, width, point, neg));
+  selection.select('text').text(textValue(accessor, format)).call(textAttributes, accessor, axis, orient, neg);
 }
 
 function filterInvalidValues(accessor, scale) {
@@ -2097,25 +2104,23 @@ function filterInvalidValues(accessor, scale) {
   };
 }
 
-function textAttributes(text, accessor, axis, neg) {
+function textAttributes(text, accessor, axis, orient, neg) {
   var scale = axis.scale();
 
-  switch(axis.orient()) {
+  switch(orient) {
     case 'left':
     case 'right':
-      text.attr({
-        x: neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()),
-        y: textPosition(accessor, scale),
-        dy: '.32em'
-      }).style('text-anchor', neg < 0 ? 'end' : 'start');
+      text.attr('x', neg*(Math.max(axis.tickSizeInner(), 0) + axis.tickPadding()))
+          .attr('y', textPosition(accessor, scale))
+          .attr('dy', '.32em')
+          .style('text-anchor', neg < 0 ? 'end' : 'start');
       break;
     case 'top':
     case 'bottom':
-      text.attr({
-        x: textPosition(accessor, scale),
-        y: neg*(Math.max(axis.innerTickSize(), 0) + axis.tickPadding()),
-        dy: neg < 0 ? '0em' : '.72em'
-      }).style('text-anchor', 'middle');
+      text.attr('x', textPosition(accessor, scale))
+          .attr('y', neg*(Math.max(axis.tickSizeInner(), 0) + axis.tickPadding()))
+          .attr('dy', neg < 0 ? '0em' : '.72em')
+          .style('text-anchor', 'middle');
       break;
   }
 }
@@ -2132,13 +2137,13 @@ function textValue(accessor, format) {
   };
 }
 
-function backgroundPath(accessor, axis, height, width, point, neg) {
+function backgroundPath(accessor, axis, orient, height, width, point, neg) {
   return function(d) {
     var scale = axis.scale(),
         value = scale(accessor(d)),
         pt = point;
 
-    switch(axis.orient()) {
+    switch(orient) {
       case 'left':
       case 'right':
         var h = 0;
@@ -2146,7 +2151,7 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
         if(height/2 < point) pt = height/2;
         else h = height/2-point;
 
-        return 'M 0 ' + value + ' l ' + (neg*Math.max(axis.innerTickSize(), 1)) + ' ' + (-pt) +
+        return 'M 0 ' + value + ' l ' + (neg*Math.max(axis.tickSizeInner(), 1)) + ' ' + (-pt) +
           ' l 0 ' + (-h) + ' l ' + (neg*width) + ' 0 l 0 ' + height +
           ' l ' + (neg*-width) + ' 0 l 0 ' + (-h);
       case 'top':
@@ -2156,10 +2161,10 @@ function backgroundPath(accessor, axis, height, width, point, neg) {
         if(width/2 < point) pt = width/2;
         else w = width/2-point;
 
-        return 'M ' + value + ' 0 l ' + (-pt) + ' ' + (neg*Math.max(axis.innerTickSize(), 1)) +
+        return 'M ' + value + ' 0 l ' + (-pt) + ' ' + (neg*Math.max(axis.tickSizeInner(), 1)) +
           ' l ' + (-w) + ' 0 l 0 ' + (neg*height) + ' l ' + width + ' 0 l 0 ' + (neg*-height) +
           ' l ' + (-w) + ' 0';
-      default: throw "Unsupported axis.orient() = " + axis.orient();
+      default: throw "Unsupported orient value: axisannotation.orient(" + orient + "). Set to one of: 'top', 'bottom', 'left', 'right'";
     }
   };
 }
@@ -2309,7 +2314,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, accessor_c
       group.entry.append('g').attr('class', 'axisannotation x').call(xAnnotationComposer);
       group.entry.append('g').attr('class', 'axisannotation y').call(yAnnotationComposer);
 
-      g.selectAll('rect').data([undefined]).enter().append('rect').style({ fill: 'none', 'pointer-events': 'all' });
+      g.selectAll('rect').data([undefined]).enter().append('rect').style('fill', 'none').style('pointer-events', 'all');
 
       crosshair.refresh(g);
     }
@@ -2323,17 +2328,16 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, accessor_c
           xAnnotationSelection = group.select('g.axisannotation.x'),
           yAnnotationSelection = group.select('g.axisannotation.y');
 
-      g.selectAll('rect').attr({
-          x: Math.min.apply(null, xRange),
-          y: Math.min.apply(null, yRange),
-          height: Math.abs(yRange[yRange.length-1] - yRange[0]),
-          width: Math.abs(xRange[xRange.length-1] - xRange[0])
-        })
+      g.selectAll('rect')
+        .attr('x', Math.min.apply(null, xRange))
+        .attr('y', Math.min.apply(null, yRange))
+        .attr('height', Math.abs(yRange[yRange.length-1] - yRange[0]))
+        .attr('width', Math.abs(xRange[xRange.length-1] - xRange[0]))
         .on('mouseenter', function() {
-          dispatcher.enter();
+          dispatcher.call('enter', this);
         })
         .on('mouseout', function() {
-          dispatcher.out();
+          dispatcher.call('out', this);
           // Redraw with null values to ensure when we enter again, there is nothing cached when redisplayed
           delete group.node().__coord__;
           initialiseWire(group.datum()); // Mutating data, don't need to manually pass down
@@ -2366,7 +2370,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, accessor_c
 
         p.accessor.xv(d, xNew);
         p.accessor.yv(d, yNew);
-        if(dispatch) dispatcher.move(d);
+        if(dispatch) dispatcher.call('move', selection.node(), d);
       }
 
       // Just before draw, convert the coords to
@@ -2464,7 +2468,7 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, accessor_c
 },{}],43:[function(require,module,exports){
 'use strict';
 
-module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  // Injected dependencies
+module.exports = function(d3_svg_area, d3_line_interpolate, accessor_ichimoku, plot, plotMixin) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
         kumoClip = kumoClipArea(),
@@ -2480,10 +2484,10 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
           clipUpId = 'kumoclipup-' + randomID(),
           clipDownId = 'kumoclipdown-' + randomID();
 
-      group.entry.append('clipPath').attr({ id: clipDownId, class: 'kumoclipdown' }).append('path');
-      group.entry.append('clipPath').attr({ id: clipUpId, class: 'kumoclipup' }).append('path');
-      group.entry.append('path').attr({ class: 'kumo down', 'clip-path': 'url(#' + clipDownId + ')' });
-      group.entry.append('path').attr({ class: 'kumo up', 'clip-path':'url(#' + clipUpId + ')' });
+      group.entry.append('clipPath').attr('id', clipDownId).attr('class', 'kumoclipdown').append('path');
+      group.entry.append('clipPath').attr('id', clipUpId).attr('class', 'kumoclipup').append('path');
+      group.entry.append('path').attr('class', 'kumo down').attr('clip-path', 'url(#' + clipDownId + ')');
+      group.entry.append('path').attr('class', 'kumo up').attr('clip-path', 'url(#' + clipUpId + ')');
       group.entry.append('path').attr('class', 'senkouspanb');
       group.entry.append('path').attr('class', 'senkouspana');
 
@@ -2520,14 +2524,14 @@ module.exports = function(d3_svg_area, accessor_ichimoku, plot, plotMixin) {  //
     }
 
     function kumoClipArea() {
-      return d3_svg_area().interpolate('monotone')
+      return d3_svg_area().curve(d3_line_interpolate)
         .defined(function(d) { return p.accessor.sb(d) !== null; })
         .x(function(d) { return p.xScale(p.accessor.d(d), p.accessor.pks(d)); } )
         .y0(function(d) { return p.yScale(p.accessor.sb(d)); } );
     }
 
     function kumoPathArea() {
-      return d3_svg_area().interpolate('monotone')
+      return d3_svg_area().curve(d3_line_interpolate)
         .defined(function(d) { return p.accessor.sa(d) !== null && p.accessor.sb(d) !== null; })
         .x(function(d) { return p.xScale(p.accessor.d(d), p.accessor.pks(d)); } )
         .y0(function(d) { return p.yScale(p.accessor.sa(d)); } )
@@ -2557,15 +2561,16 @@ function randomID() {
 module.exports = function(d3) {
   var scale = require('../scale')(d3),
       accessor = require('../accessor')(),
-      plot = require('./plot')(d3.svg.line, d3.svg.area, d3.select),
-      plotMixin = require('./plotmixin')(d3.scale.linear, d3.functor, scale.financetime, plot.dataSelector, plot.barWidth),
-      candlestick = require('./candlestick')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
+      plot = require('./plot')(d3.line, d3.area, d3.curveMonotoneX, d3.select),
+      d3_functor = require('../util')().functor,
+      plotMixin = require('./plotmixin')(d3.scaleLinear, d3_functor, scale.financetime, plot.dataSelector, plot.barWidth),
+      candlestick = require('./candlestick')(d3.scaleLinear, d3.extent, accessor.ohlc, plot, plotMixin),
       line = require('./line'),
-      axisannotation = require('./axisannotation')(d3.svg.axis, accessor.value, plot, plotMixin),
+      axisannotation = require('./axisannotation')(d3.axisTop, d3.scaleLinear, accessor.value, plot, plotMixin),
       svg = require('../svg')(d3);
 
   return {
-    tradearrow: require('./tradearrow')(d3.select, d3.functor, d3.mouse, d3.dispatch, accessor.trade, plot, plotMixin, svg.arrow),
+    tradearrow: require('./tradearrow')(d3.select, d3_functor, d3.mouse, d3.dispatch, accessor.trade, plot, plotMixin, svg.arrow),
     atr: line(accessor.value, plot, plotMixin),
     atrtrailingstop: require('./atrtrailingstop')(accessor.atrtrailingstop, plot, plotMixin),
     axisannotation: axisannotation,
@@ -2573,9 +2578,9 @@ module.exports = function(d3) {
     crosshair: require('./crosshair')(d3.select, d3_event, d3.mouse, d3.dispatch, accessor.crosshair, plot, plotMixin),
     ema: line(accessor.value, plot, plotMixin),
     heikinashi: candlestick,
-    ichimoku: require('./ichimoku')(d3.svg.area, accessor.ichimoku, plot, plotMixin),
-    ohlc: require('./ohlc')(d3.scale.linear, d3.extent, accessor.ohlc, plot, plotMixin),
-    tick: require('./tick')(d3.scale.linear, d3.extent, accessor.tick, plot, plotMixin),
+    ichimoku: require('./ichimoku')(d3.area, d3.curveMonotoneX, accessor.ichimoku, plot, plotMixin),
+    ohlc: require('./ohlc')(d3.scaleLinear, d3.extent, accessor.ohlc, plot, plotMixin),
+    tick: require('./tick')(d3.scaleLinear, d3.extent, accessor.tick, plot, plotMixin),
     close: line(accessor.ohlc, plot, plotMixin),
     volume: require('./volume')(accessor.volume, plot, plotMixin),
     rsi: require('./rsi')(accessor.rsi, plot, plotMixin),
@@ -2583,8 +2588,8 @@ module.exports = function(d3) {
     momentum: line(accessor.value, plot, plotMixin, true),
     moneyflow: line(accessor.value, plot, plotMixin, true),
     sma: line(accessor.value, plot, plotMixin),
-    supstance: require('./supstance')(d3.behavior.drag, d3_event, d3.select, d3.dispatch, accessor.supstance, plot, plotMixin),
-    trendline: require('./trendline')(d3.behavior.drag, d3_event, d3.select, d3.dispatch, accessor.trendline, plot, plotMixin),
+    supstance: require('./supstance')(d3.drag, d3_event, d3.select, d3.dispatch, accessor.supstance, plot, plotMixin),
+    trendline: require('./trendline')(d3.drag, d3_event, d3.select, d3.dispatch, accessor.trendline, plot, plotMixin),
     wilderma: line(accessor.value, plot, plotMixin),
     adx: require('./adx')(accessor.adx, plot, plotMixin),
     aroon: require('./aroon')(accessor.aroon, plot, plotMixin),
@@ -2599,7 +2604,7 @@ function d3_event() {
   return d3.event;
 }
 
-},{"../accessor":8,"../scale":59,"../svg":62,"./adx":36,"./aroon":37,"./atrtrailingstop":38,"./axisannotation":39,"./bollinger":40,"./candlestick":41,"./crosshair":42,"./ichimoku":43,"./line":45,"./macd":46,"./ohlc":47,"./plot":48,"./plotmixin":49,"./rsi":50,"./stochastic":51,"./supstance":52,"./tick":53,"./tradearrow":54,"./trendline":55,"./volume":56,"./williams":57}],45:[function(require,module,exports){
+},{"../accessor":8,"../scale":59,"../svg":62,"../util":64,"./adx":36,"./aroon":37,"./atrtrailingstop":38,"./axisannotation":39,"./bollinger":40,"./candlestick":41,"./crosshair":42,"./ichimoku":43,"./line":45,"./macd":46,"./ohlc":47,"./plot":48,"./plotmixin":49,"./rsi":50,"./stochastic":51,"./supstance":52,"./tick":53,"./tradearrow":54,"./trendline":55,"./volume":56,"./williams":57}],45:[function(require,module,exports){
 'use strict';
 
 module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injected dependencies
@@ -2757,19 +2762,20 @@ module.exports = function(d3_scale_linear, d3_extent, accessor_ohlc, plot, plotM
 },{}],48:[function(require,module,exports){
 'use strict';
 
-module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
+module.exports = function(d3_svg_line, d3_svg_area, d3_line_interpolate, d3_select) {
   var DataSelector = function(mapper) {
     var key,
         scope,
         classes = ['data'];
 
     function dataSelect(g) {
-      var selection = dataSelect.select(g).data(mapper, key);
+      var selection = dataSelect.select(g).data(mapper, key),
+          entry = selection.enter().append('g').attr('class',  arrayJoin(classes, ' '));
       selection.exit().remove();
 
       return {
-        selection: selection,
-        entry: selection.enter().append('g').attr('class',  arrayJoin(classes, ' '))
+        entry: entry,
+        selection: entry.merge(selection)
       };
     }
 
@@ -2810,7 +2816,7 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
   };
 
   function PathLine() {
-    var d3Line = d3_svg_line().interpolate('monotone');
+    var d3Line = d3_svg_line().curve(d3_line_interpolate);
 
     function line(data) {
       return d3Line(data);
@@ -2830,7 +2836,7 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
   }
 
   function PathArea() {
-    var d3Area = d3_svg_area().interpolate('monotone');
+    var d3Area = d3_svg_area().curve(d3_line_interpolate);
 
     function area(data) {
       return d3Area(data);
@@ -3035,27 +3041,27 @@ module.exports = function(d3_svg_line, d3_svg_area, d3_select) {
         return function(selection) {
           return selection.on('mouseenter', function(d) {
             d3_select(this.parentNode).classed('mouseover', true);
-            dispatch.mouseenter(d);
+            dispatch.call('mouseenter', this, d);
           })
           .on('mouseleave', function(d) {
             var parentElement = d3_select(this.parentNode);
             if(!parentElement.classed('dragging')) {
               parentElement.classed('mouseover', false);
-              dispatch.mouseout(d);
+              dispatch.call('mouseout', this, d);
             }
           })
-          .on('mousemove', function(d) { dispatch.mousemove(d); });
+          .on('mousemove', function(d) { dispatch.call('mousemove', this, d); });
         };
       },
 
       dragStartEndDispatch: function(drag, dispatch) {
-        return drag.on('dragstart', function(d) {
+        return drag.on('start', function(d) {
           d3_select(this.parentNode.parentNode).classed('dragging', true);
-          dispatch.dragstart(d);
+          dispatch.call('dragstart', this, d);
         })
-        .on('dragend', function(d) {
+        .on('end', function(d) {
           d3_select(this.parentNode.parentNode).classed('dragging', false);
-          dispatch.dragend(d);
+          dispatch.call('dragend', this, d);
         });
       }
     },
@@ -3267,7 +3273,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
 
       group.entry.append('g').attr('class', 'axisannotation y').call(annotationComposer);
 
-      var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
+      var interaction = group.entry.append('g').attr('class', 'interaction').style('opacity', 0).style('fill', 'none' )
         .call(plot.interaction.mousedispatch(dispatch));
 
       interaction.append('path').style('stroke-width', '16px');
@@ -3308,7 +3314,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
   }
 
   function dragBody(dispatch, accessor, x, y, annotationComposer) {
-    var drag = d3_behavior_drag().origin(function(d) {
+    var drag = d3_behavior_drag().subject(function(d) {
       return { x: 0, y: y(accessor(d)) };
     })
     .on('drag', function(d) {
@@ -3317,7 +3323,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
 
       accessor.v(d, value);
       refresh(g, accessor, x, y, annotationComposer);
-      dispatch.drag(d);
+      dispatch.call('drag', this, d);
     });
 
     return plot.interaction.dragStartEndDispatch(drag, dispatch);
@@ -3415,19 +3421,19 @@ module.exports = function(d3_select, d3_functor, d3_mouse, d3_dispatch, accessor
           classes = typesToClasses(g.datum());
 
       plot.appendPathsGroupBy(group.selection, p.accessor, 'tradearrow', classes);
-      group.entry.append('path').attr('class', 'highlight').style({ 'pointer-events': 'none' }); // Do not want mouse events on the highlight
+      group.entry.append('path').attr('class', 'highlight').style('pointer-events', 'none'); // Do not want mouse events on the highlight
 
       group.selection.selectAll('path.tradearrow')
         .on('mouseenter', function(data) {
           var nearest = findNearest(data, d3_mouse(this)[0]);
           // Watch out here, not using generator as this is single element, not grouped
           // Done purely to get this node correctly classed and technically only 1 node can be selected for the moment
-          d3_select(this.parentNode).select('path.highlight').datum(nearest.d).attr('d', svgArrow).classed(classes);
-          dispatch.mouseenter(nearest.d, nearest.i);
+          d3_select(this.parentNode).select('path.highlight').datum(nearest.d).attr('d', svgArrow).call(classed, classes);
+          dispatch.call('mouseenter', this, nearest.d, nearest.i);
         }).on('mouseout', function(data) {
           d3_select(this.parentNode).selectAll('path.highlight').datum([]).attr('d', null).attr('class', 'highlight');
           var nearest = findNearest(data, d3_mouse(this)[0]);
-          dispatch.mouseout(nearest.d, nearest.i);
+          dispatch.call('mouseout', this, nearest.d, nearest.i);
         });
 
       tradearrow.refresh(g);
@@ -3498,6 +3504,13 @@ module.exports = function(d3_select, d3_functor, d3_mouse, d3_dispatch, accessor
     return tradearrow;
   };
 };
+
+// d3 v4 no longer takes classed(Object), shim to convert Object and add classes to the selection
+function classed(selection, classes) {
+  Object.keys(classes).forEach(function(clazz) {
+    selection.classed(clazz, classes[clazz]);
+  });
+}
 },{}],55:[function(require,module,exports){
 'use strict';
 
@@ -3511,15 +3524,15 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
           trendlineGroup = group.entry.append('g').attr('class', 'trendline');
 
       trendlineGroup.append('path').attr('class', 'body');
-      trendlineGroup.append('circle').attr({ class: 'start', r: 1 });
-      trendlineGroup.append('circle').attr({ class: 'end', r: 1 });
+      trendlineGroup.append('circle').attr('class', 'start').attr('r', 1);
+      trendlineGroup.append('circle').attr('class', 'end').attr('r', 1);
 
-      var interaction = group.entry.append('g').attr('class', 'interaction').style({ opacity: 0, fill: 'none' })
+      var interaction = group.entry.append('g').attr('class', 'interaction').style('opacity', 0).style('fill', 'none')
         .call(plot.interaction.mousedispatch(dispatch));
 
       interaction.append('path').attr('class', 'body').style('stroke-width', '16px');
-      interaction.append('circle').attr({ class: 'start', r: 8 });
-      interaction.append('circle').attr({ class: 'end', r: 8 });
+      interaction.append('circle').attr('class', 'start').attr('r', 8);
+      interaction.append('circle').attr('class', 'end').attr('r', 8);
 
       trendline.refresh(g);
     }
@@ -3549,13 +3562,13 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
   function dragEnd(dispatch, accessor, accessor_x, x, accessor_y, y) {
     var drag = d3_behavior_drag();
 
-    drag.origin(function(d) {
+    drag.subject(function(d) {
       return { x: x(accessor_x(d)), y: y(accessor_y(d)) };
     })
     .on('drag', function(d) {
       updateEnd(accessor_x, x, d3_event().x, accessor_y, y, d3_event().y, d);
       refresh(d3_select(this.parentNode.parentNode.parentNode), accessor, x, y);
-      dispatch.drag(d);
+      dispatch.call('drag', this, d);
     });
 
     return plot.interaction.dragStartEndDispatch(drag, dispatch);
@@ -3565,7 +3578,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
     var dragStart = {}, // State information, grabs the start coords of the line
         drag = d3_behavior_drag();
 
-    drag.origin(function(d) {
+    drag.subject(function(d) {
       dragStart.start = { date: x(accessor.sd(d)), value: y(accessor.sv(d)) };
       dragStart.end = { date: x(accessor.ed(d)), value: y(accessor.ev(d)) };
       return { x: 0, y: 0 };
@@ -3578,7 +3591,7 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
         accessor.ev, y, d3_event().y + dragStart.end.value,
         d);
       refresh(d3_select(this.parentNode.parentNode.parentNode), accessor, x, y);
-      dispatch.drag(d);
+      dispatch.call('drag', this, d);
     });
 
     return plot.interaction.dragStartEndDispatch(drag, dispatch);
@@ -3594,12 +3607,9 @@ module.exports = function(d3_behavior_drag, d3_event, d3_select, d3_dispatch, ac
 };
 
 function refresh(selection, accessor, x, y) {
-  selection.selectAll('.trendline path.body').attr('d', trendlinePath(accessor, x, y));
-  selection.selectAll('.trendline circle.start').attr(trendlineEnd(accessor.sd, x, accessor.sv, y));
-  selection.selectAll('.trendline circle.end').attr(trendlineEnd(accessor.ed, x, accessor.ev, y));
-  selection.selectAll('.interaction path.body').attr('d', trendlinePath(accessor, x, y));
-  selection.selectAll('.interaction circle.start').attr(trendlineEnd(accessor.sd, x, accessor.sv, y));
-  selection.selectAll('.interaction circle.end').attr(trendlineEnd(accessor.ed, x, accessor.ev, y));
+  selection.selectAll('path.body').attr('d', trendlinePath(accessor, x, y));
+  selection.selectAll('circle.start').attr('cx', trendlineEndCX(accessor.sd, x)).attr('cy', trendlineEndCY(accessor.sv, y));
+  selection.selectAll('circle.end').attr('cx', trendlineEndCX(accessor.ed, x)).attr('cy', trendlineEndCY(accessor.ev, y));
 }
 
 function trendlinePath(accessor, x, y) {
@@ -3609,11 +3619,12 @@ function trendlinePath(accessor, x, y) {
   };
 }
 
-function trendlineEnd(accessor_x, x, accessor_y, y) {
-  return {
-    cx: function(d) { return x(accessor_x(d)); },
-    cy: function(d) { return y(accessor_y(d)); }
-  };
+function trendlineEndCX(accessor_x, x) {
+  return function(d) { return x(accessor_x(d)); };
+}
+
+function trendlineEndCY(accessor_y, y) {
+  return function(d) { return y(accessor_y(d)); };
 }
 },{}],56:[function(require,module,exports){
 'use strict';
@@ -3708,8 +3719,8 @@ module.exports = function(accessor_williams, plot, plotMixin) {  // Injected dep
  generally contains data points on days where a market is open but no points when closed, such as weekday
  and weekends respectively. When plot, is done so without weekend gaps.
  */
-module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, scale_widen, zoomable) {  // Injected dependencies
-  function financetime(tickMethods, genericFormat, index, domain, padding, outerPadding, zoomLimit, closestTicks) {
+module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebindCallback, scale_widen, techan_scale_zoomable) {  // Injected dependencies
+  function financetime(tickMethods, genericFormat, index, domain, padding, outerPadding, zoomLimit, closestTicks, zoomable) {
     var dateIndexMap,
         tickState = { tickFormat: tickMethods.daily[tickMethods.daily.length-1][2] },
         band = 3;
@@ -3718,8 +3729,9 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     domain = domain || [new Date(0), new Date(1)];
     padding = padding === undefined ? 0.2 : padding;
     outerPadding = outerPadding === undefined ? 0.65 : outerPadding;
-    zoomLimit = zoomLimit || index.domain();
+    zoomLimit = zoomLimit || { domain: index.domain() }; // Wrap in object to carry onto zoomable
     closestTicks = closestTicks || false;
+    zoomable = zoomable || techan_scale_zoomable(index, zoomed, zoomLimit);
 
     /**
      * Scales the value to domain. If the value is not within the domain, will currently brutally round the data:
@@ -3811,12 +3823,12 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
       zoomed();
       // Apply outerPadding and widen the outer edges by pulling the domain in to ensure start and end bands are fully visible
       index.domain(index.range().map(scale_widen(outerPadding, band)).map(index.invert));
-      zoomLimit = index.domain(); // Capture the zoom limit after the domain has been applied
+      zoomLimit.domain = index.domain(); // Capture the zoom limit after the domain has been applied
       return zoomed();
     }
 
     scale.copy = function() {
-      return financetime(tickMethods, genericFormat, index.copy(), domain, padding, outerPadding, zoomLimit, closestTicks);
+      return financetime(tickMethods, genericFormat, index.copy(), domain, padding, outerPadding, zoomLimit, closestTicks, zoomable);
     };
 
     /**
@@ -3844,7 +3856,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     };
 
     scale.zoomable = function() {
-      return zoomable(index, zoomed, zoomLimit);
+      return zoomable;
     };
 
     /*
@@ -3879,7 +3891,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
         steps = method[1];
       }
 
-      var intervalRange = interval.range(visibleDomain[0], +visibleDomain[visibleDomain.length-1]+1, steps);
+      var intervalRange = interval.every(steps).range(visibleDomain[0], +visibleDomain[visibleDomain.length-1]+1);
 
       return intervalRange                                // Interval, possibly contains values not in domain
         .map(domainTicks(visibleDomain, closestTicks))    // Line up interval ticks with domain, possibly adding duplicates
@@ -3999,86 +4011,86 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
         864e5   // 1-day
       ];
 
-  var dayFormat = d3_time.format('%b %e'),
-      yearFormat = d3_time.format.multi([
-        ['%b %Y', function(d) { return d.getMonth(); }],
-        ['%Y', function() { return true; }]
+  var dayFormat = d3_time.timeFormat('%b %e'),
+      yearFormat = d3_v3_multi_shim([
+        [d3_time.timeFormat('%b %Y'), function(d) { return d.getMonth(); }],
+        [d3_time.timeFormat('%Y'), function() { return true; }]
       ]),
-      intradayFormat = d3_time.format.multi([
-        [":%S", function(d) { return d.getSeconds(); }],
-        ["%I:%M", function(d) { return d.getMinutes(); }],
-        ["%I %p", function () { return true; }]
+      intradayFormat = d3_v3_multi_shim([
+        [d3_time.timeFormat(':%S'), function(d) { return d.getSeconds(); }],
+        [d3_time.timeFormat('%I:%M'), function(d) { return d.getMinutes(); }],
+        [d3_time.timeFormat('%I %p'), function () { return true; }]
       ]),
-      genericFormat = [d3_time.second, 1, d3_time.format.multi([
-          [":%S", function(d) { return d.getSeconds(); }],
-          ["%I:%M", function(d) { return d.getMinutes(); }],
-          ["%I %p", function(d) { return d.getHours(); }],
-          ['%b %e', function() { return true; }]
+      genericFormat = [d3_time.timeSecond, 1, d3_v3_multi_shim([
+          [d3_time.timeFormat(':%S'), function(d) { return d.getSeconds(); }],
+          [d3_time.timeFormat('%I:%M'), function(d) { return d.getMinutes(); }],
+          [d3_time.timeFormat('%I %p'), function(d) { return d.getHours(); }],
+          [d3_time.timeFormat('%b %e'), function() { return true; }]
         ])
       ];
 
-  var dayFormatUtc = d3_time.format.utc('%b %e'),
-      yearFormatUtc = d3_time.format.utc.multi([
-        ['%b %Y', function(d) { return d.getUTCMonth(); }],
-        ['%Y', function() { return true; }]
+  var dayFormatUtc = d3_time.utcFormat('%b %e'),
+      yearFormatUtc = d3_v3_multi_shim([
+        [d3_time.utcFormat('%b %Y'), function(d) { return d.getUTCMonth(); }],
+        [d3_time.utcFormat('%Y'), function() { return true; }]
       ]),
-      intradayFormatUtc = d3_time.format.utc.multi([
-        [":%S", function(d) { return d.getUTCSeconds(); }],
-        ["%I:%M", function(d) { return d.getUTCMinutes(); }],
-        ["%I %p", function () { return true; }]
+      intradayFormatUtc = d3_v3_multi_shim([
+        [d3_time.utcFormat(':%S'), function(d) { return d.getUTCSeconds(); }],
+        [d3_time.utcFormat('%I:%M'), function(d) { return d.getUTCMinutes(); }],
+        [d3_time.utcFormat('%I %p'), function () { return true; }]
       ]),
-      genericFormatUtc = [d3_time.second, 1, d3_time.format.utc.multi([
-          [":%S", function(d) { return d.getUTCSeconds(); }],
-          ["%I:%M", function(d) { return d.getUTCMinutes(); }],
-          ["%I %p", function(d) { return d.getUTCHours(); }],
-          ['%b %e', function() { return true; }]
+      genericFormatUtc = [d3_time.timeSecond, 1, d3_v3_multi_shim([
+          [d3_time.utcFormat(':%S'), function(d) { return d.getUTCSeconds(); }],
+          [d3_time.utcFormat('%I:%M'), function(d) { return d.getUTCMinutes(); }],
+          [d3_time.utcFormat('%I %p'), function(d) { return d.getUTCHours(); }],
+          [d3_time.utcFormat('%b %e'), function() { return true; }]
         ])
       ];
 
   var dailyTickMethod = [
-      [d3_time.day, 1, dayFormat],
-      [d3_time.monday, 1, dayFormat],
-      [d3_time.month, 1, yearFormat],
-      [d3_time.month, 3, yearFormat],
-      [d3_time.year, 1, yearFormat]
+      [d3_time.timeDay, 1, dayFormat],
+      [d3_time.timeMonday, 1, dayFormat],
+      [d3_time.timeMonth, 1, yearFormat],
+      [d3_time.timeMonth, 3, yearFormat],
+      [d3_time.timeYear, 1, yearFormat]
     ],
     intradayTickMethod = [
-      [d3_time.second, 1, intradayFormat],
-      [d3_time.second, 5, intradayFormat],
-      [d3_time.second, 15, intradayFormat],
-      [d3_time.second, 30, intradayFormat],
-      [d3_time.minute, 1, intradayFormat],
-      [d3_time.minute, 5, intradayFormat],
-      [d3_time.minute, 15, intradayFormat],
-      [d3_time.minute, 30, intradayFormat],
-      [d3_time.hour, 1, intradayFormat],
-      [d3_time.hour, 3, intradayFormat],
-      [d3_time.hour, 6, intradayFormat],
-      [d3_time.hour, 12, intradayFormat],
-      [d3_time.day, 1, dayFormat]
+      [d3_time.timeSecond, 1, intradayFormat],
+      [d3_time.timeSecond, 5, intradayFormat],
+      [d3_time.timeSecond, 15, intradayFormat],
+      [d3_time.timeSecond, 30, intradayFormat],
+      [d3_time.timeMinute, 1, intradayFormat],
+      [d3_time.timeMinute, 5, intradayFormat],
+      [d3_time.timeMinute, 15, intradayFormat],
+      [d3_time.timeMinute, 30, intradayFormat],
+      [d3_time.timeHour, 1, intradayFormat],
+      [d3_time.timeHour, 3, intradayFormat],
+      [d3_time.timeHour, 6, intradayFormat],
+      [d3_time.timeHour, 12, intradayFormat],
+      [d3_time.timeDay, 1, dayFormat]
     ];
 
   var dailyTickMethodUtc = [
-      [d3_time.day.utc, 1, dayFormatUtc],
-      [d3_time.monday.utc, 1, dayFormatUtc],
-      [d3_time.month.utc, 1, yearFormatUtc],
-      [d3_time.month.utc, 3, yearFormatUtc],
-      [d3_time.year.utc, 1, yearFormatUtc]
+      [d3_time.utcDay, 1, dayFormatUtc],
+      [d3_time.utcMonday, 1, dayFormatUtc],
+      [d3_time.utcMonth, 1, yearFormatUtc],
+      [d3_time.utcMonth, 3, yearFormatUtc],
+      [d3_time.utcYear, 1, yearFormatUtc]
     ],
     intradayTickMethodUtc = [
-      [d3_time.second.utc, 1, intradayFormatUtc],
-      [d3_time.second.utc, 5, intradayFormatUtc],
-      [d3_time.second.utc, 15, intradayFormatUtc],
-      [d3_time.second.utc, 30, intradayFormatUtc],
-      [d3_time.minute.utc, 1, intradayFormatUtc],
-      [d3_time.minute.utc, 5, intradayFormatUtc],
-      [d3_time.minute.utc, 15, intradayFormatUtc],
-      [d3_time.minute.utc, 30, intradayFormatUtc],
-      [d3_time.hour.utc, 1, intradayFormatUtc],
-      [d3_time.hour.utc, 3, intradayFormatUtc],
-      [d3_time.hour.utc, 6, intradayFormatUtc],
-      [d3_time.hour.utc, 12, intradayFormatUtc],
-      [d3_time.day.utc, 1, dayFormatUtc]
+      [d3_time.utcSecond, 1, intradayFormatUtc],
+      [d3_time.utcSecond, 5, intradayFormatUtc],
+      [d3_time.utcSecond, 15, intradayFormatUtc],
+      [d3_time.utcSecond, 30, intradayFormatUtc],
+      [d3_time.utcMinute, 1, intradayFormatUtc],
+      [d3_time.utcMinute, 5, intradayFormatUtc],
+      [d3_time.utcMinute, 15, intradayFormatUtc],
+      [d3_time.utcMinute, 30, intradayFormatUtc],
+      [d3_time.utcHour, 1, intradayFormatUtc],
+      [d3_time.utcHour, 3, intradayFormatUtc],
+      [d3_time.utcHour, 6, intradayFormatUtc],
+      [d3_time.utcHour, 12, intradayFormatUtc],
+      [d3_time.utcDay, 1, dayFormatUtc]
     ];
 
   function techan_scale_financetime() {
@@ -4092,6 +4104,13 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
   return techan_scale_financetime;
 };
 
+function d3_v3_multi_shim(multi) {
+  return function(d) {
+    for(var i = 0; i < multi.length; i++) {
+      if(multi[i][1](d)) return multi[i][0](d);
+    }
+  };
+}
 },{}],59:[function(require,module,exports){
 'use strict';
 
@@ -4099,18 +4118,18 @@ module.exports = function(d3) {
   var zoomable = require('./zoomable')(),
       util = require('../util')(),
       accessors = require('../accessor')(),
-      financetime = require('./financetime')(d3.scale.linear, d3.time, d3.bisect, util.rebindCallback, widen, zoomable);
+      financetime = require('./financetime')(d3.scaleLinear, d3, d3.bisect, util.rebindCallback, widen, zoomable);
 
   return {
     financetime: financetime,
 
     analysis: {
       supstance: function(data, accessor) {
-        return d3.scale.linear();
+        return d3.scaleLinear();
       },
 
       trendline: function(data, accessor) {
-        return d3.scale.linear();
+        return d3.scaleLinear();
       }
     },
 
@@ -4141,7 +4160,7 @@ module.exports = function(d3) {
           ];
         });
 
-        return d3.scale.linear()
+        return d3.scaleLinear()
           .domain(d3.extent(values).map(widen(0.02)))
           .range([1, 0]);
       },
@@ -4154,14 +4173,14 @@ module.exports = function(d3) {
 
       ohlc: function (data, accessor) {
         accessor = accessor || accessors.ohlc();
-        return d3.scale.linear()
+        return d3.scaleLinear()
           .domain([d3.min(data.map(accessor.low())), d3.max(data.map(accessor.high()))].map(widen(0.02)))
           .range([1, 0]);
       },
 
       volume: function (data, accessor) {
         accessor = accessor || accessors.ohlc().v;
-        return d3.scale.linear()
+        return d3.scaleLinear()
           .domain([0, d3.max(data.map(accessor))*1.15])
           .range([1, 0]);
       },
@@ -4170,12 +4189,12 @@ module.exports = function(d3) {
         accessor = accessor || accessors.atrtrailingstop();
 
         var values = mapReduceFilter(data, function(d) { return [accessor.up(d), accessor.dn(d)]; });
-        return d3.scale.linear().domain(d3.extent(values).map(widen(0.04)))
+        return d3.scaleLinear().domain(d3.extent(values).map(widen(0.04)))
           .range([1, 0]);
       },
 
       rsi: function () {
-        return d3.scale.linear().domain([0, 100])
+        return d3.scaleLinear().domain([0, 100])
           .range([1, 0]);
       },
 
@@ -4200,28 +4219,28 @@ module.exports = function(d3) {
       },
 
       adx: function () {
-         return d3.scale.linear().domain([0, 100])
+         return d3.scaleLinear().domain([0, 100])
           .range([1, 0]);
       },
 
       aroon: function () {
-        return d3.scale.linear().domain([-100, 100])
+        return d3.scaleLinear().domain([-100, 100])
           .range([1, 0]);
       },
 
       stochastic: function () {
-        return d3.scale.linear().domain([0, 100])
+        return d3.scaleLinear().domain([0, 100])
           .range([1, 0]);
       },
 
       williams: function () {
-        return d3.scale.linear().domain([0, 100])
+        return d3.scaleLinear().domain([0, 100])
           .range([1, 0]);
       },
 
       bollinger: function (data, accessor) {
          accessor = accessor || accessors.bollinger();
-         return d3.scale.linear()
+         return d3.scaleLinear()
               .domain([
                  d3.min(data.map(function(d){return accessor.lower(d);})),
                  d3.max(data.map(function(d){return accessor.upper(d);}))
@@ -4241,7 +4260,7 @@ function pathDomain(d3, data, accessor, widening) {
 }
 
 function pathScale(d3, data, accessor, widening) {
-  return d3.scale.linear().domain(pathDomain(d3, data, accessor, widening))
+  return d3.scaleLinear().domain(pathDomain(d3, data, accessor, widening))
     .range([1, 0]);
 }
 
@@ -4280,8 +4299,8 @@ function mapReduceFilter(data, map) {
  * NOTE: This is not a complete scale, it will throw errors if it is used for anything else but zooming
  */
 module.exports = function() {
-  function zoomable(linear, zoomed, domainLimit) {
-    var clamp = true;
+  function zoomable(linear, zoomed, domainLimit, clamp) {
+    clamp = clamp !== undefined ? clamp : true;
 
     /**
      * Delegates the scale call to the underlying linear scale
@@ -4295,7 +4314,7 @@ module.exports = function() {
     scale.domain = function(_) {
       if(!arguments.length) return linear.domain();
 
-      if(clamp) linear.domain([Math.max(domainLimit[0], _[0]), Math.min(domainLimit[1], _[1])]);
+      if(clamp) linear.domain([Math.max(domainLimit.domain[0], _[0]), Math.min(domainLimit.domain[1], _[1])]);
       else linear.domain(_);
 
       if(zoomed) zoomed(); // Callback to that we have been zoomed
@@ -4308,7 +4327,7 @@ module.exports = function() {
     };
 
     scale.copy = function() {
-      return zoomable(linear.copy(), zoomed, domainLimit);
+      return zoomable(linear.copy(), zoomed, domainLimit, clamp);
     };
 
     scale.clamp = function(_) {
@@ -4418,10 +4437,10 @@ module.exports = function(d3_functor) {  // Injected dependencies
 
 module.exports = function(d3) {
   return {
-    arrow: require('./arrow')(d3.functor)
+    arrow: require('./arrow')(require('../util')().functor)
   };
 };
-},{"./arrow":61}],63:[function(require,module,exports){
+},{"../util":64,"./arrow":61}],63:[function(require,module,exports){
 'use strict';
 
 var _d3;
@@ -4452,6 +4471,11 @@ module.exports = function() {
       var newArgs = Array.prototype.slice.call(arguments, 0);
       newArgs.splice(2, 0, undefined);
       return rebindCallback.apply(this, newArgs);
+    },
+
+    // https://github.com/d3/d3/blob/v3.5.17/src/core/functor.js
+    functor: function(v) {
+      return typeof v === "function" ? v : function() { return v; };
     }
   };
 };

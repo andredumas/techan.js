@@ -3,6 +3,6 @@
   "dependencies": {
     "bootstrap": "3.3.1",
     "jquery": "1.11.0",
-    "techan": "andredumas/techan.js#0.7.0"
+    "techan": "techan#b4b7c467dcba6040df964e3995bb2b5720f7f245"
   }
 }

@@ -1,9 +1,9 @@
 var techanSite = techanSite || {};
 
-(function(d3, techan) {
+techanSite.bigchart = (function(d3, techan) {
   'use strict';
 
-  techanSite.bigchart = function(stock) {
+  function BigChart(stock) {
 
     var dim = {
       width: null, height: null,
@@ -15,38 +15,38 @@ var techanSite = techanSite || {};
 
     var data = stock.ohlc,
         x = techan.scale.financetime(),
-        y = d3.scale.linear(),
+        y = d3.scaleLinear(),
         yPercent = y.copy(),
-        indicatorTop = d3.scale.linear(),
-        yVolume = d3.scale.linear(),
+        indicatorTop = d3.scaleLinear(),
+        yVolume = d3.scaleLinear(),
         candlestick = techan.plot.candlestick().xScale(x).yScale(y),
         sma0 = techan.plot.sma().xScale(x).yScale(y),
         sma1 = techan.plot.sma().xScale(x).yScale(y),
         ema2 = techan.plot.ema().xScale(x).yScale(y),
         volume = techan.plot.volume().accessor(candlestick.accessor()).xScale(x).yScale(yVolume),
-        xAxis = d3.svg.axis().scale(x).orient("bottom"),
-        xAxisTop = d3.svg.axis().scale(x).orient("top"),
-        timeAnnotation = techan.plot.axisannotation().axis(xAxis).format(d3.time.format('%Y-%m-%d')).width(65),
-        timeAnnotationTop = techan.plot.axisannotation().axis(xAxisTop).format(d3.time.format('%Y-%m-%d')).width(65),
-        yAxis = d3.svg.axis().scale(y).orient("right"),
-        ohlcAnnotation = techan.plot.axisannotation().axis(yAxis).format(d3.format(',.2fs')),
-        closeAnnotation = techan.plot.axisannotation().accessor(candlestick.accessor()).axis(yAxis).format(d3.format(',.2fs')),
-        percentAxis = d3.svg.axis().scale(yPercent).orient("left").tickFormat(d3.format('+.1%')),
-        percentAnnotation = techan.plot.axisannotation().axis(percentAxis),
-        volumeAxis = d3.svg.axis().scale(yVolume).orient("right").ticks(3).tickFormat(d3.format(",.3s")),
-        volumeAnnotation = techan.plot.axisannotation().axis(volumeAxis).width(35),
-        macdScale = d3.scale.linear(),
-        rsiScale = d3.scale.linear(),
+        xAxis = d3.axisBottom(x),
+        xAxisTop = d3.axisTop(x),
+        timeAnnotation = techan.plot.axisannotation().orient('bottom').axis(xAxis).format(d3.timeFormat('%Y-%m-%d')).width(65),
+        timeAnnotationTop = techan.plot.axisannotation().orient('top').axis(xAxisTop).format(d3.timeFormat('%Y-%m-%d')).width(65),
+        yAxis = d3.axisRight(y),
+        ohlcAnnotation = techan.plot.axisannotation().orient('right').axis(yAxis).format(d3.format(',.2f')),
+        closeAnnotation = techan.plot.axisannotation().orient('right').accessor(candlestick.accessor()).axis(yAxis).format(d3.format(',.2f')),
+        percentAxis = d3.axisLeft(yPercent).tickFormat(d3.format('+.1%')),
+        percentAnnotation = techan.plot.axisannotation().orient('left').axis(percentAxis),
+        volumeAxis = d3.axisRight(yVolume).ticks(3).tickFormat(d3.format(',.3s')),
+        volumeAnnotation = techan.plot.axisannotation().orient('right').axis(volumeAxis).width(35),
+        macdScale = d3.scaleLinear(),
+        rsiScale = d3.scaleLinear(),
         macd = techan.plot.macd().xScale(x).yScale(macdScale),
-        macdAxis = d3.svg.axis().scale(macdScale).ticks(3).orient("right"),
-        macdAnnotation = techan.plot.axisannotation().axis(macdAxis).format(d3.format(',.2fs')),
-        macdAxisLeft = d3.svg.axis().scale(macdScale).ticks(3).orient("left"),
-        macdAnnotationLeft = techan.plot.axisannotation().axis(macdAxisLeft).format(d3.format(',.2fs')),
+        macdAxis = d3.axisRight(macdScale).ticks(3),
+        macdAnnotation = techan.plot.axisannotation().orient('right').axis(macdAxis).format(d3.format(',.2s')),
+        macdAxisLeft = d3.axisLeft(macdScale).ticks(3),
+        macdAnnotationLeft = techan.plot.axisannotation().orient('left').axis(macdAxisLeft).format(d3.format(',.2s')),
         rsi = techan.plot.rsi().xScale(x).yScale(rsiScale),
-        rsiAxis = d3.svg.axis().scale(rsiScale).ticks(3).orient("right"),
-        rsiAnnotation = techan.plot.axisannotation().axis(rsiAxis).format(d3.format(',.2fs')),
-        rsiAxisLeft = d3.svg.axis().scale(rsiScale).ticks(3).orient("left"),
-        rsiAnnotationLeft = techan.plot.axisannotation().axis(rsiAxisLeft).format(d3.format(',.2fs')),
+        rsiAxis = d3.axisRight(rsiScale).ticks(3),
+        rsiAnnotation = techan.plot.axisannotation().orient('right').axis(rsiAxis).format(d3.format(',.2s')),
+        rsiAxisLeft = d3.axisLeft(rsiScale).ticks(3),
+        rsiAnnotationLeft = techan.plot.axisannotation().orient('left').axis(rsiAxisLeft).format(d3.format(',.2s')),
         ohlcCrosshair = techan.plot.crosshair().xScale(x).yScale(y).xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([ohlcAnnotation, percentAnnotation, volumeAnnotation]),
         macdCrosshair = techan.plot.crosshair().xScale(x).yScale(macdScale).xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([macdAnnotation, macdAnnotationLeft]),
         rsiCrosshair = techan.plot.crosshair().xScale(x).yScale(rsiScale).xAnnotation([timeAnnotation, timeAnnotationTop]).yAnnotation([rsiAnnotation, rsiAnnotationLeft]),
@@ -305,15 +305,8 @@ var techanSite = techanSite || {};
     }
 
     return bigchart;
-  };
+  }
 
-  // Randomly choose between item 0 or 1
-  var bigchart = techanSite.bigchart(techanSite.data.array[Math.round(Math.random())]);
-
-  d3.select('div#bigChart').call(bigchart);
-
-  window.onresize = function() {
-    d3.select('div#bigChart').call(bigchart.resize);
-  };
-
+  // Randomly choose between item 0 or 1, ready to be plotted
+  return BigChart(techanSite.data.array[Math.round(Math.random())]);
 }(d3, techan));
