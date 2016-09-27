@@ -162,8 +162,7 @@ var techanSite = techanSite || {};
         .attr("class", "trendlines analysis")
         .attr("clip-path", "url(#ohlcClip)");
       svg.append("g")
-        .attr("class", "supstances analysis")
-        .attr("clip-path", "url(#supstanceClip)");
+        .attr("class", "supstances analysis");
 
       var accessor = candlestick.accessor(),
           indicatorPreRoll = stock.preroll,
@@ -301,7 +300,8 @@ var techanSite = techanSite || {};
       svg.select("g.crosshair.macd").call(macdCrosshair.refresh);
       svg.select("g.crosshair.rsi").call(rsiCrosshair.refresh);
       svg.select("g.trendlines").call(trendline.refresh);
-      svg.select("g.supstances").call(supstance.refresh);
+      svg.select("g.supstances").call(supstance.refresh)
+        .selectAll("g.data .supstance").attr("clip-path", "url(#ohlcClip)"); // FIXME Component should do the clipping, too much internal knowledge here
     }
 
     return bigchart;
