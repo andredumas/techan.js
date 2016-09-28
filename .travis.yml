@@ -4,15 +4,23 @@ node_js:
 git:
   submodules: false
 deploy:
-  provider: releases
-  api_key:
-    secure: p5M9v2K55YHKq4GmBkP+Lgj/TlDcGUKlR0Cpl+Ne30iF6xXJrbQqLF8THB2ysWT5VaaYKq/4MMYBYLFABnpkLrUBjoGw+fDo3jJZ7h1lO3jrMlnvdNAjcmzGHVbsYi9wljSocaJE/JSgy4xb81IX8xkIdQY8IJnRNoi22Df2DkM=
-  file: dist/techan.zip
-  skip_cleanup: true
-  on:
-    tags: true
-    all_branches: true
-    repo: andredumas/techan.js
+  - provider: releases
+    api_key:
+      secure: p5M9v2K55YHKq4GmBkP+Lgj/TlDcGUKlR0Cpl+Ne30iF6xXJrbQqLF8THB2ysWT5VaaYKq/4MMYBYLFABnpkLrUBjoGw+fDo3jJZ7h1lO3jrMlnvdNAjcmzGHVbsYi9wljSocaJE/JSgy4xb81IX8xkIdQY8IJnRNoi22Df2DkM=
+    file: dist/techan.zip
+    skip_cleanup: true
+    on:
+      tags: true
+      all_branches: true
+      repo: andredumas/techan.js
+  - provider: npm
+    api_key:
+      secure: GRynIMGPvOkzIFGNZ1yfUIvZsrMqiLD6S6JG66QqnNSCRiOXe+aGIHLeZz3QOfwwGanRxJBQoo/kDvi5sVh/FirpeFj2gO+KiKOq2GwwMhVYARml3Vom2F/G4yJa5xVfvEpjmrWcw59H3l+/pFDtxYjMQ1sD9xVSzpLZVe0GM5c=
+    skip_cleanup: true
+    on:
+      tags: true
+      all_branches: true
+      repo: andredumas/techan.js
 
 # Use new Travis container infrastructure
 sudo: false
