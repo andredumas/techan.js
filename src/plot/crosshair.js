@@ -34,6 +34,9 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, accessor_c
           xAnnotationSelection = group.select('g.axisannotation.x'),
           yAnnotationSelection = group.select('g.axisannotation.y');
 
+      verticalPathGenerator = verticalPathLine();
+      horizontalPathGenerator = horizontalPathLine();
+
       g.selectAll('rect')
         .attr('x', Math.min.apply(null, xRange))
         .attr('y', Math.min.apply(null, yRange))
@@ -112,8 +115,6 @@ module.exports = function(d3_select, d3_event, d3_mouse, d3_dispatch, accessor_c
     };
 
     function binder() {
-      verticalPathGenerator = verticalPathLine();
-      horizontalPathGenerator = horizontalPathLine();
       xAnnotationComposer.accessor(p.accessor.xv).scale(p.xScale);
       yAnnotationComposer.accessor(p.accessor.yv).scale(p.yScale);
       return crosshair;
