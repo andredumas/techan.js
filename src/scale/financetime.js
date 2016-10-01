@@ -114,7 +114,7 @@ module.exports = function(d3_scale_linear, d3_time, d3_bisect, techan_util_rebin
     }
 
     scale.copy = function() {
-      return financetime(tickMethods, genericFormat, index.copy(), domain, padding, outerPadding, zoomLimit, closestTicks, zoomable);
+      return financetime(tickMethods, genericFormat, index.copy(), domain, padding, outerPadding, zoomLimit, closestTicks);
     };
 
     /**
