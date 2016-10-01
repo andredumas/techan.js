@@ -10,7 +10,8 @@ techanModule('scale', function(specBuilder) {
   var dataData = require('../_fixtures/data/ohlc').facebook.slice(0, 10).map(function(d) { return d.date; }),
       atrData = require('../_fixtures/data/atr').expected,
       atrtrailingstopData = require('../_fixtures/data/atrtrailingstop').plot,
-      ichimokuData = require('../_fixtures/data/ichimoku').expected;
+      ichimokuData = require('../_fixtures/data/ichimoku').expected,
+      trendlineData = require('../_fixtures/data/trendline');
 
   function optionalAccessorTest(name, object, accessor, d) {
     d = d || dataData;
@@ -34,17 +35,23 @@ techanModule('scale', function(specBuilder) {
         expect(scope.scale.financetime).toBeDefined();
       });
 
-      optionalAccessorTest('scale.plot.time', function() {
-        return scope.scale.plot.time;
-      }, techan.accessor.ohlc());
+      optionalAccessorTest('scale.plot.adx', function() {
+        return scope.scale.plot.adx;
+      }, techan.accessor.adx());
 
-      optionalAccessorTest('scale.plot.ohlc', function() {
-        return scope.scale.plot.ohlc;
-      }, techan.accessor.ohlc());
+      optionalAccessorTest('scale.plot.aroon', function() {
+        return scope.scale.plot.aroon;
+      }, techan.accessor.aroon());
 
-      optionalAccessorTest('scale.plot.volume', function() {
-        return scope.scale.plot.volume;
-      }, techan.accessor.ohlc().v);
+      optionalAccessorTest('scale.plot.atr', function() {
+        return scope.scale.plot.atr;
+      }, techan.accessor.value());
+
+      describe('And atr invoked using defaults', function() {
+        it('Then the domain should be correct and widened without nulls', function() {
+          expect(scope.scale.plot.atr(atrData).domain()).toEqual([1.8833083807820301, 2.20402476564293]);
+        });
+      });
 
       optionalAccessorTest('scale.plot.atrtrailingstop', function() {
         return scope.scale.plot.atrtrailingstop;
@@ -56,13 +63,21 @@ techanModule('scale', function(specBuilder) {
         });
       });
 
-      optionalAccessorTest('scale.plot.rsi', function() {
-        return scope.scale.plot.rsi;
-      }, techan.accessor.rsi());
+      optionalAccessorTest('scale.plot.bollinger', function() {
+        return scope.scale.plot.bollinger;
+      }, techan.accessor.bollinger());
 
-      optionalAccessorTest('scale.plot.adx', function() {
-        return scope.scale.plot.adx;
-      }, techan.accessor.adx());
+      optionalAccessorTest('scale.plot.candlestick', function() {
+        return scope.scale.plot.candlestick;
+      }, techan.accessor.ohlc());
+
+      optionalAccessorTest('scale.plot.close', function() {
+        return scope.scale.plot.close;
+      }, techan.accessor.value());
+
+      optionalAccessorTest('scale.plot.heikinashi', function() {
+        return scope.scale.plot.heikinashi;
+      }, techan.accessor.ohlc());
 
       optionalAccessorTest('scale.plot.ichimoku', function() {
         return scope.scale.plot.ichimoku;
@@ -74,15 +89,9 @@ techanModule('scale', function(specBuilder) {
         });
       });
 
-      optionalAccessorTest('scale.plot.atr', function() {
-        return scope.scale.plot.atr;
-      }, techan.accessor.value());
-
-      describe('And atr invoked using defaults', function() {
-        it('Then the domain should be correct and widened without nulls', function() {
-          expect(scope.scale.plot.atr(atrData).domain()).toEqual([1.8771407579962436, 2.2101923884287165]);
-        });
-      });
+      optionalAccessorTest('scale.plot.macd', function() {
+        return scope.scale.plot.macd;
+      }, techan.accessor.macd());
 
       optionalAccessorTest('scale.plot.momentum', function() {
         return scope.scale.plot.momentum;
@@ -92,21 +101,9 @@ techanModule('scale', function(specBuilder) {
         return scope.scale.plot.moneyflow;
       }, techan.accessor.value());
 
-      optionalAccessorTest('scale.plot.macd', function() {
-        return scope.scale.plot.macd;
-      }, techan.accessor.macd());
-
-      optionalAccessorTest('scale.plot.movingaverage', function() {
-        return scope.scale.plot.movingaverage;
-      }, techan.accessor.value());
-
-      optionalAccessorTest('scale.plot.roc', function() {
-        return scope.scale.plot.roc;
-      }, techan.accessor.value());
-
-      optionalAccessorTest('scale.plot.sroc', function() {
-        return scope.scale.plot.sroc;
-      }, techan.accessor.value());
+      optionalAccessorTest('scale.plot.ohlc', function() {
+        return scope.scale.plot.ohlc;
+      }, techan.accessor.ohlc());
 
       it('Then scale.plot.percent should be defined', function() {
         expect(scope.scale.plot.percent).toBeDefined();
@@ -136,7 +133,7 @@ techanModule('scale', function(specBuilder) {
 
       describe('And initialise the percent scale with reference value', function() {
         var y,
-            scale;
+          scale;
 
         beforeEach(function() {
           y = d3.scaleLinear().domain([100, 200]).range([100, 0]);
@@ -155,6 +152,58 @@ techanModule('scale', function(specBuilder) {
           expect(scale.invert(y(200))).toEqual(0.6);
         });
       });
+
+      optionalAccessorTest('scale.plot.roc', function() {
+        return scope.scale.plot.roc;
+      }, techan.accessor.value());
+
+      optionalAccessorTest('scale.plot.rsi', function() {
+        return scope.scale.plot.rsi;
+      }, techan.accessor.rsi());
+
+      optionalAccessorTest('scale.plot.sma', function() {
+        return scope.scale.plot.sma;
+      }, techan.accessor.value());
+
+      optionalAccessorTest('scale.plot.sroc', function() {
+        return scope.scale.plot.sroc;
+      }, techan.accessor.value());
+
+      optionalAccessorTest('scale.plot.stochastic', function() {
+        return scope.scale.plot.stochastic;
+      }, techan.accessor.value());
+
+      optionalAccessorTest('scale.plot.supstance', function() {
+        return scope.scale.plot.supstance;
+      }, techan.accessor.supstance());
+
+      optionalAccessorTest('scale.plot.time', function() {
+        return scope.scale.plot.time;
+      }, techan.accessor.ohlc());
+
+      optionalAccessorTest('scale.plot.tradearrow', function() {
+        return scope.scale.plot.tradearrow;
+      }, techan.accessor.trade());
+
+      optionalAccessorTest('scale.plot.trendline', function() {
+        return scope.scale.plot.trendline;
+      }, techan.accessor.trendline(), trendlineData);
+
+      optionalAccessorTest('scale.plot.volume', function() {
+        return scope.scale.plot.volume;
+      }, techan.accessor.ohlc().v);
+
+      optionalAccessorTest('scale.plot.vwap', function() {
+        return scope.scale.plot.vwap;
+      }, techan.accessor.value());
+
+      optionalAccessorTest('scale.plot.wilderma', function() {
+        return scope.scale.plot.wilderma;
+      }, techan.accessor.value());
+
+      optionalAccessorTest('scale.plot.williams', function() {
+        return scope.scale.plot.williams;
+      }, techan.accessor.value());
     });
   });
 });

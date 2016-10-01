@@ -6,29 +6,55 @@ module.exports = function(d3) {
       accessors = require('../accessor')(),
       financetime = require('./financetime')(d3.scaleLinear, d3, d3.bisect, util.rebindCallback, widen, zoomable);
 
+  function ohlc(data, accessor) {
+    accessor = accessor || accessors.ohlc();
+    return d3.scaleLinear()
+      .domain([d3.min(data.map(accessor.low())), d3.max(data.map(accessor.high()))].map(widen(0.02)));
+  }
+
+  function pathWithValueAccessor(data, accessor, widening) {
+    accessor = accessor || accessors.value();
+    widening = widening === undefined ? 0.02 : widening;
+    return pathScale(d3, data, accessor, widening);
+  }
+
   return {
     financetime: financetime,
 
-    analysis: {
-      supstance: function(data, accessor) {
-        return d3.scaleLinear();
-      },
-
-      trendline: function(data, accessor) {
-        return d3.scaleLinear();
-      }
-    },
-
     plot: {
-      time: function(data, accessor) {
-        accessor = accessor || accessors.value();
-        return financetime().domain(data.map(accessor.d));
+      adx: function () {
+        return d3.scaleLinear().domain([0, 100]);
       },
 
-      atr: function(data, accessor) {
-        accessor = accessor || accessors.value();
-        return pathScale(d3, data, accessor, 0.04);
+      aroon: function () {
+        return d3.scaleLinear().domain([-100, 100]);
       },
+
+      atr: pathWithValueAccessor,
+
+      atrtrailingstop: function (data, accessor) {
+        accessor = accessor || accessors.atrtrailingstop();
+
+        var values = mapReduceFilter(data, function(d) { return [accessor.up(d), accessor.dn(d)]; });
+        return d3.scaleLinear().domain(d3.extent(values).map(widen(0.04)));
+      },
+
+      bollinger: function (data, accessor) {
+        accessor = accessor || accessors.bollinger();
+        return d3.scaleLinear()
+          .domain([
+            d3.min(data.map(function(d){return accessor.lower(d);})),
+            d3.max(data.map(function(d){return accessor.upper(d);}))
+          ].map(widen(0.02)));
+      },
+
+      candlestick: ohlc,
+
+      close: pathWithValueAccessor,
+
+      ema: pathWithValueAccessor,
+
+      heikinashi: ohlc,
 
       ichimoku: function(data, accessor) {
         accessor = accessor || accessors.ichimoku();
@@ -47,9 +73,19 @@ module.exports = function(d3) {
         });
 
         return d3.scaleLinear()
-          .domain(d3.extent(values).map(widen(0.02)))
-          .range([1, 0]);
+          .domain(d3.extent(values).map(widen(0.02)));
       },
+
+      macd: function(data, accessor) {
+        accessor = accessor || accessors.macd();
+        return pathScale(d3, data, accessor, 0.02);
+      },
+
+      momentum: pathWithValueAccessor,
+
+      moneyflow: pathWithValueAccessor,
+
+      ohlc: ohlc,
 
       percent: function (scale, reference) {
         var domain = scale.domain();
@@ -57,96 +93,56 @@ module.exports = function(d3) {
         return scale.copy().domain([domain[0], domain[domain.length-1]].map(function(d) { return (d-reference)/reference; }));
       },
 
-      ohlc: function (data, accessor) {
-        accessor = accessor || accessors.ohlc();
-        return d3.scaleLinear()
-          .domain([d3.min(data.map(accessor.low())), d3.max(data.map(accessor.high()))].map(widen(0.02)))
-          .range([1, 0]);
+      roc: pathWithValueAccessor,
+
+      rsi: function () {
+        return d3.scaleLinear().domain([0, 100]);
+      },
+
+      sma: pathWithValueAccessor,
+
+      sroc: pathWithValueAccessor,
+
+      stochastic: function () {
+        return d3.scaleLinear().domain([0, 100]);
+      },
+
+      supstance: function(data, accessor) {
+        accessor = accessor || accessors.supstance();
+        return pathScale(d3, data, accessor.v, 0.02);
+      },
+
+      tick: ohlc,
+
+      time: function(data, accessor) {
+        accessor = accessor || accessors.value();
+        return financetime().domain(data.map(accessor.d));
+      },
+
+      tradearrow: function(data, accessor) {
+        accessor = accessor || accessors.trade();
+        return pathScale(d3, data, accessor.p, 0.02);
+      },
+
+      trendline: function(data, accessor) {
+        accessor = accessor || accessors.trendline();
+        var values = mapReduceFilter(data, function(d) { return [accessor.sv(d), accessor.ev(d)]; });
+        return d3.scaleLinear().domain(d3.extent(values).map(widen(0.04)));
       },
 
       volume: function (data, accessor) {
         accessor = accessor || accessors.ohlc().v;
         return d3.scaleLinear()
-          .domain([0, d3.max(data.map(accessor))*1.15])
-          .range([1, 0]);
+          .domain([0, d3.max(data.map(accessor))*1.15]);
       },
 
-      atrtrailingstop: function (data, accessor) {
-        accessor = accessor || accessors.atrtrailingstop();
+      vwap: pathWithValueAccessor,
 
-        var values = mapReduceFilter(data, function(d) { return [accessor.up(d), accessor.dn(d)]; });
-        return d3.scaleLinear().domain(d3.extent(values).map(widen(0.04)))
-          .range([1, 0]);
-      },
-
-      rsi: function () {
-        return d3.scaleLinear().domain([0, 100])
-          .range([1, 0]);
-      },
-
-      momentum: function(data, accessor) {
-        accessor = accessor || accessors.value();
-        return pathScale(d3, data, accessor, 0.04);
-      },
-
-      moneyflow: function(data, accessor) {
-        accessor = accessor || accessors.value();
-        return pathScale(d3, data, accessor, 0.04);
-      },
-
-      macd: function(data, accessor) {
-        accessor = accessor || accessors.macd();
-        return pathScale(d3, data, accessor, 0.04);
-      },
-
-      movingaverage: function(data, accessor) {
-        accessor = accessor || accessors.value();
-        return pathScale(d3, data, accessor);
-      },
-
-      roc: function(data, accessor) {
-        accessor = accessor || accessors.value();
-        return pathScale(d3, data, accessor, 0.04);
-      },
-
-      sroc: function(data, accessor) {
-        accessor = accessor || accessors.value();
-        return pathScale(d3, data, accessor, 0.04);
-      },
-
-      adx: function () {
-         return d3.scaleLinear().domain([0, 100])
-          .range([1, 0]);
-      },
-
-      aroon: function () {
-        return d3.scaleLinear().domain([-100, 100])
-          .range([1, 0]);
-      },
-
-      stochastic: function () {
-        return d3.scaleLinear().domain([0, 100])
-          .range([1, 0]);
-      },
+      wilderma: pathWithValueAccessor,
 
       williams: function () {
-        return d3.scaleLinear().domain([0, 100])
-          .range([1, 0]);
-      },
-
-      bollinger: function (data, accessor) {
-         accessor = accessor || accessors.bollinger();
-         return d3.scaleLinear()
-              .domain([
-                 d3.min(data.map(function(d){return accessor.lower(d);})),
-                 d3.max(data.map(function(d){return accessor.upper(d);}))
-                ].map(widen(0.02)))
-              .range([1, 0]);
+        return d3.scaleLinear().domain([0, 100]);
       }
-    },
-
-    position: {
-
     }
   };
 };
@@ -156,13 +152,12 @@ function pathDomain(d3, data, accessor, widening) {
 }
 
 function pathScale(d3, data, accessor, widening) {
-  return d3.scaleLinear().domain(pathDomain(d3, data, accessor, widening))
-    .range([1, 0]);
+  return d3.scaleLinear().domain(pathDomain(d3, data, accessor, widening));
 }
 
 /**
  * Only to be used on an array of 2 elements [min, max]
- * @param padding
+ * @param widening
  * @param width
  * @returns {Function}
  */
