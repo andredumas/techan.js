@@ -88,3 +88,9 @@
 [submodule "examples/indicator/heikinashi"]
 	path = examples/indicator/heikinashi
 	url = https://gist.github.com/b0162d7d7a37dac058a78ee96d186a85.git
+[submodule "examples/indicator/roc"]
+	path = examples/indicator/roc
+	url = https://gist.github.com/b377bcddfd534ad6bb0f8a1abd518917.git
+[submodule "examples/indicator/sroc"]
+	path = examples/indicator/sroc
+	url = https://gist.github.com/c09b1ca94bd0ca1c5080a03e50c38aad.git

@@ -13,7 +13,7 @@ module.exports = function() {
         d.value = _;
         return accessor;
       },
-      zero = function(d) { return d.zero; };
+      zero = function(d) { return 0; };
 
   function accessor(d) {
     return accessor.v(d);

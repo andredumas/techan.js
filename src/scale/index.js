@@ -104,6 +104,16 @@ module.exports = function(d3) {
         return pathScale(d3, data, accessor);
       },
 
+      roc: function(data, accessor) {
+        accessor = accessor || accessors.value();
+        return pathScale(d3, data, accessor, 0.04);
+      },
+
+      sroc: function(data, accessor) {
+        accessor = accessor || accessors.value();
+        return pathScale(d3, data, accessor, 0.04);
+      },
+
       adx: function () {
          return d3.scaleLinear().domain([0, 100])
           .range([1, 0]);

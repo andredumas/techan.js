@@ -100,6 +100,14 @@ techanModule('scale', function(specBuilder) {
         return scope.scale.plot.movingaverage;
       }, techan.accessor.value());
 
+      optionalAccessorTest('scale.plot.roc', function() {
+        return scope.scale.plot.roc;
+      }, techan.accessor.value());
+
+      optionalAccessorTest('scale.plot.sroc', function() {
+        return scope.scale.plot.sroc;
+      }, techan.accessor.value());
+
       it('Then scale.plot.percent should be defined', function() {
         expect(scope.scale.plot.percent).toBeDefined();
       });

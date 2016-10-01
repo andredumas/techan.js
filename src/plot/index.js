@@ -38,7 +38,9 @@ module.exports = function(d3) {
     stochastic: require('./stochastic')(accessor.stochastic, plot, plotMixin),
     williams: require('./williams')(accessor.williams, plot, plotMixin),
     bollinger: require('./bollinger')(accessor.bollinger, plot, plotMixin),
-    vwap: line(accessor.value, plot, plotMixin)
+    vwap: line(accessor.value, plot, plotMixin),
+    roc: line(accessor.value, plot, plotMixin, true),
+    sroc: line(accessor.value, plot, plotMixin, true)
   };
 };
 

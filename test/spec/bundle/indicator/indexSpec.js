@@ -31,12 +31,24 @@ techanModule('indicator', function(specBuilder) {
         expect(scope.indicator.macd).toBeDefined();
       });
 
+      it('Then indicator.roc should be defined', function() {
+        expect(scope.indicator.roc).toBeDefined();
+      });
+
       it('Then indicator.rsi should be defined', function() {
         expect(scope.indicator.rsi).toBeDefined();
       });
 
+      it('Then indicator.roc should be defined', function() {
+        expect(scope.indicator.roc).toBeDefined();
+      });
+
       it('Then indicator.sma should be defined', function() {
         expect(scope.indicator.sma).toBeDefined();
+      });
+
+      it('Then indicator.sroc should be defined', function() {
+        expect(scope.indicator.sroc).toBeDefined();
       });
 
       it('Then indicator.wilderma should be defined', function() {

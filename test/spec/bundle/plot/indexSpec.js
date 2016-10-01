@@ -71,12 +71,20 @@ techanModule('plot', function(specBuilder) {
         expect(bucket.plot.ohlc).toBeDefined();
       });
 
+      it('Then plot.roc should be defined', function() {
+        expect(bucket.plot.roc).toBeDefined();
+      });
+
       it('Then plot.rsi should be defined', function() {
         expect(bucket.plot.rsi).toBeDefined();
       });
 
       it('Then plot.sma should be defined', function() {
         expect(bucket.plot.sma).toBeDefined();
+      });
+
+      it('Then plot.sroc should be defined', function() {
+        expect(bucket.plot.sroc).toBeDefined();
       });
 
       it('Then plot.stochastic should be defined', function() {

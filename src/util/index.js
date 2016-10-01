@@ -2,6 +2,8 @@
 
 module.exports = function() {
   return {
+    circularbuffer: require('./circularbuffer'),
+
     rebindCallback: rebindCallback,
 
     rebind: function(target, source) {

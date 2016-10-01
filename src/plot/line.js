@@ -12,9 +12,7 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
 
       group.entry.append('path').attr('class', 'line');
 
-      if(showZero) {
-        group.selection.append('path').attr('class', 'zero');
-      }
+      if(showZero) group.selection.append('path').attr('class', 'zero');
 
       line.refresh(g);
     }
@@ -38,7 +36,5 @@ module.exports = function(accessor_value, plot, plotMixin, showZero) {  // Injec
 function refresh(selection, accessor, x, y, plot, svgLine, showZero) {
   selection.select('path.line').attr('d', svgLine);
 
-  if(showZero) {
-    selection.select('path.zero').attr('d', plot.horizontalPathLine(x, accessor.z, y));
-  }
+  if(showZero) selection.select('path.zero').attr('d', plot.horizontalPathLine(accessor.d, x, accessor.z, y));
 }
