@@ -13,6 +13,8 @@ module.exports = function() {
         return source;
       };
 
+      source.preroll = function() { return priv.period; };
+
       return indicatorMixin;
     };
 
@@ -27,6 +29,15 @@ module.exports = function() {
       };
 
       return indicatorMixin;
+    };
+
+    indicatorMixin.preroll = function(pr) {
+      source.preroll = pr;
+      return indicatorMixin;
+    };
+
+    source.preroll = function() {
+      return 0;
     };
 
     return indicatorMixin;

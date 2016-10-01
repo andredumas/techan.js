@@ -3,14 +3,13 @@
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
-        period = 20,
         periodD = 3,
         overbought = 80,
         middle = 50,
         oversold = 20;
 
     function indicator(data) {
-      var periodLength = (parseInt(period)+parseInt(periodD));
+      var periodLength = indicator.preroll();
       return data.map(function(d, i) {
         if(i >= periodLength ){
           var max = [];
@@ -23,7 +22,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
           }
           var stochasticD = 0;
           for (var k = 0; k < periodD; k++) {
-            for (var j = 0; j < period; j++) {
+            for (var j = 0; j < p.period; j++) {
               if(p.accessor.h(data[i-j-k]) > max[k]){
                 max[k] = p.accessor.h(data[i-j-k]);
               }
@@ -47,14 +46,9 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
       }).filter(function(d) { return d.stochasticK; });
     }
 
-    indicator.period = function(_) {
-      if (!arguments.length) return period;
-      period = _;
-      return indicator;
-    };
     indicator.periodD = function(_) {
       if (!arguments.length) return periodD;
-      periodD = _;
+      periodD = +_;
       return indicator;
     };
 
@@ -77,7 +71,10 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
     };
 
     // Mixin 'superclass' methods and variables
-    indicatorMixin(indicator, p).accessor(accessor_ohlc());
+    indicatorMixin(indicator, p).accessor(accessor_ohlc()).period(20)
+      .preroll(function() {
+        return p.period+periodD;
+      });
 
     return indicator;
   };

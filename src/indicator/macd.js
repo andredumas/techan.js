@@ -47,7 +47,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_ema) {  // In
     };
 
     // Mixin 'superclass' methods and variables
-    indicatorMixin(indicator, p).accessor(accessor_ohlc());
+    indicatorMixin(indicator, p).accessor(accessor_ohlc()).preroll(indicator.slow);
 
     return indicator;
   };

@@ -3,19 +3,18 @@
 module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
-        period = 20,
         overbought = 70,
         middle = 0,
         oversold = 30;
 
     function indicator(data) {
       return data.map(function(d, i) {
-        if(i >= (period-1)){
+        if(i >= (p.period-1)){
           var max = 0;
           var maxi = 0;
           var min = 10000;
           var mini = 0;
-          for (var j = 0; j < period; j++) {
+          for (var j = 0; j < p.period; j++) {
             if( p.accessor.h(data[i-j]) > max){
               max = p.accessor.h(data[i-j]);
               maxi = j;
@@ -25,20 +24,14 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
               mini = j;
             }
           }
-          var up = ((period-maxi)/period)*100;
-          var down = ((period-mini)/period)*100;
+          var up = ((p.period-maxi)/p.period)*100;
+          var down = ((p.period-mini)/p.period)*100;
           var oscillator = up - down;
           return datum(p.accessor.d(d), up,down, oscillator, middle, overbought, oversold);
         }
         else return datum(p.accessor.d(d));
       }).filter(function(d) { return d.up; });
     }
-
-    indicator.period = function(_) {
-      if (!arguments.length) return period;
-      period = _;
-      return indicator;
-    };
 
     indicator.overbought = function(_) {
       if (!arguments.length) return overbought;
@@ -59,7 +52,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
     };
 
     // Mixin 'superclass' methods and variables
-    indicatorMixin(indicator, p).accessor(accessor_ohlc());
+    indicatorMixin(indicator, p).accessor(accessor_ohlc()).period(20);
 
     return indicator;
   };

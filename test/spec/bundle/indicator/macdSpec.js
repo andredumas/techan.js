@@ -17,6 +17,10 @@ techanModule('indicator/macd', function(specBuilder) {
           macd = scope.macd;
         });
 
+        it('Then preroll should equal the slow value', function() {
+          expect(macd.preroll()).toEqual(macd.slow());
+        });
+
         it('Then on default invoke, macd should calculate correct values', function() {
           macd(data.input).forEach(function(d, i) {
             expect(d).toEqual(data.expected[i]);

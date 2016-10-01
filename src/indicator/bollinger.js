@@ -3,21 +3,20 @@
 module.exports = function(indicatorMixin, accessor_ohlc, indicator_sma) {  // Injected dependencies
   return function() { // Closure function
     var p = {},  // Container for private, direct access mixed in variables
-        period = 20,
-        sdMultiplication = 2;
-    var sd;
+        sdMultiplication = 2,
+        sd;
 
     function indicator(data) {
-        var signalLine = indicator_sma().accessor(indicator.accessor()).period(period).init();
+        var signalLine = indicator_sma().accessor(indicator.accessor()).period(p.period).init();
         var j;
       return data.map(function(d, i) {
         var middleBand = signalLine.average(p.accessor(d));
-        if(i >= period) {
+        if(i >= p.period) {
             var sum = 0;
-            for(j = 0;j<period;j++){
+            for(j = 0;j<p.period;j++){
                 sum += (Math.pow(   (p.accessor.c(data[i-j]) - middleBand)  ,2 ) );
             }
-            sd = Math.sqrt( sum/period );
+            sd = Math.sqrt( sum/p.period );
             var upperBand = middleBand+sdMultiplication*sd,
                 lowerBand = middleBand-sdMultiplication*sd;
             return datum(p.accessor.d(d), middleBand, upperBand, lowerBand);
@@ -27,12 +26,6 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_sma) {  // In
       }).filter(function(d) { return d.middleBand; });
     }
 
-    indicator.period = function(_) {
-      if (!arguments.length) return period;
-      period = _;
-      return indicator;
-    };
-
     indicator.sdMultiplication = function(_) {
       if (!arguments.length) return sdMultiplication;
         sdMultiplication = _;
@@ -40,7 +33,7 @@ module.exports = function(indicatorMixin, accessor_ohlc, indicator_sma) {  // In
     };
 
     // Mixin 'superclass' methods and variables
-    indicatorMixin(indicator, p).accessor(accessor_ohlc());
+    indicatorMixin(indicator, p).accessor(accessor_ohlc()).period(20);
 
     return indicator;
   };
