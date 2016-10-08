@@ -1,8 +1,8 @@
 module.exports = {
     plot: [
-        { date: new Date(2014, 03, 05), stochasticK: 21.294498381877336, stochasticD:16.88836565330361, middle:50, overbought:80 , oversold:20},
-        { date: new Date(2014, 03, 06), stochasticK: 4.069767441860778, stochasticD:9.073561800175478, middle:50, overbought:80 , oversold:20},
-        { date: new Date(2014, 03, 07), stochasticK: 9.132420091324274, stochasticD:11.498895305020795, middle:50, overbought:80 , oversold:20}
+        { date: new Date(2014, 03, 05), stochasticK: 21.294498381877336, stochasticD:16.88836565330361, overbought:80 , oversold:20},
+        { date: new Date(2014, 03, 06), stochasticK: 4.069767441860778, stochasticD:9.073561800175478, overbought:80 , oversold:20},
+        { date: new Date(2014, 03, 07), stochasticK: 9.132420091324274, stochasticD:11.498895305020795, overbought:80 , oversold:20}
     ],
     input: [
         { date: new Date(1), high: 1.329675, low:1.32207, close:1.3248},
@@ -44,20 +44,19 @@ module.exports = {
         { date: new Date(37), high: 1.2672, low:1.25007, close:1.252}
     ],
     expected: [
-        { date: new Date(24), stochasticK: 21.294498381877336, stochasticD:16.88836565330361, middle:50, overbought:80 , oversold:20},
-        { date: new Date(25), stochasticK: 4.069767441860778, stochasticD:9.073561800175478, middle:50, overbought:80 , oversold:20},
-        { date: new Date(26), stochasticK: 9.132420091324274, stochasticD:11.498895305020795, middle:50, overbought:80 , oversold:20},
-        { date: new Date(27), stochasticK: 15.174095650995856, stochasticD:9.458761061393636, middle:50, overbought:80 , oversold:20},
-        { date: new Date(28), stochasticK: 15.716027638531358, stochasticD:13.340847793617163, middle:50, overbought:80 , oversold:20},
-        { date: new Date(29), stochasticK: 1.0361352156455277, stochasticD:10.642086168390913, middle:50, overbought:80 , oversold:20},
-        { date: new Date(30), stochasticK: 11.671345281796315, stochasticD:9.474502711991066, middle:50, overbought:80 , oversold:20},
-        { date: new Date(31), stochasticK: 2.7250812283824755, stochasticD:5.144187241941439, middle:50, overbought:80 , oversold:20},
-        { date: new Date(32), stochasticK: 1.572079861656806, stochasticD:5.322835457278532, middle:50, overbought:80 , oversold:20},
-        { date: new Date(33), stochasticK: 8.211320754716517, stochasticD:4.169493948251933, middle:50, overbought:80 , oversold:20},
-        { date: new Date(34), stochasticK: 14.385096097158407, stochasticD:8.056165571177244, middle:50, overbought:80 , oversold:20},
-        { date: new Date(35), stochasticK: 11.083598632236642, stochasticD:11.226671828037189, middle:50, overbought:80 , oversold:20},
-        { date: new Date(36), stochasticK: 24.28958849192318, stochasticD:16.586094407106074, middle:50, overbought:80 , oversold:20},
-        { date: new Date(37), stochasticK: 3.904116516637992, stochasticD:13.092434546932603, middle:50, overbought:80 , oversold:20}
-
+        { date: new Date(24), stochasticK: 21.294498381877336, stochasticD:16.88836565330361, overbought:80 , oversold:20},
+        { date: new Date(25), stochasticK: 4.069767441860778, stochasticD:9.073561800175478, overbought:80 , oversold:20},
+        { date: new Date(26), stochasticK: 9.132420091324274, stochasticD:11.498895305020795, overbought:80 , oversold:20},
+        { date: new Date(27), stochasticK: 15.174095650995856, stochasticD:9.458761061393636, overbought:80 , oversold:20},
+        { date: new Date(28), stochasticK: 15.716027638531358, stochasticD:13.340847793617163, overbought:80 , oversold:20},
+        { date: new Date(29), stochasticK: 1.0361352156455277, stochasticD:10.642086168390913, overbought:80 , oversold:20},
+        { date: new Date(30), stochasticK: 11.671345281796315, stochasticD:9.474502711991066, overbought:80 , oversold:20},
+        { date: new Date(31), stochasticK: 2.7250812283824755, stochasticD:5.144187241941439, overbought:80 , oversold:20},
+        { date: new Date(32), stochasticK: 1.572079861656806, stochasticD:5.322835457278532, overbought:80 , oversold:20},
+        { date: new Date(33), stochasticK: 8.211320754716517, stochasticD:4.169493948251933, overbought:80 , oversold:20},
+        { date: new Date(34), stochasticK: 14.385096097158407, stochasticD:8.056165571177244, overbought:80 , oversold:20},
+        { date: new Date(35), stochasticK: 11.083598632236642, stochasticD:11.226671828037189, overbought:80 , oversold:20},
+        { date: new Date(36), stochasticK: 24.28958849192318, stochasticD:16.586094407106074, overbought:80 , oversold:20},
+        { date: new Date(37), stochasticK: 3.904116516637992, stochasticD:13.092434546932603, overbought:80 , oversold:20}
     ]
 };
