@@ -5,8 +5,7 @@ module.exports = function() {
       stochasticK = function(d) { return d.stochasticK; },
       stochasticD = function(d) { return d.stochasticD; },
       overbought = function(d) { return d.overbought; },
-      oversold = function(d) { return d.oversold; },
-      middle = function(d) { return d.middle; };
+      oversold = function(d) { return d.oversold; };
 
   function accessor(d) {
     return accessor.r(d);
@@ -41,19 +40,12 @@ module.exports = function() {
     return bind();
   };
 
-  accessor.middle = function(_) {
-    if (!arguments.length) return middle;
-    middle = _;
-    return bind();
-  };
-
   function bind() {
     accessor.d = date;
     accessor.k = stochasticK;
     accessor.sd = stochasticD;
     accessor.ob = overbought;
     accessor.os = oversold;
-    accessor.m = middle;
 
     return accessor;
   }

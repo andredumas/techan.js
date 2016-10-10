@@ -5,7 +5,6 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
     var p = {},  // Container for private, direct access mixed in variables
         periodD = 3,
         overbought = 80,
-        middle = 50,
         oversold = 20;
 
     function indicator(data) {
@@ -40,9 +39,9 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
           }
           var stochasticK =stochasticKBuffer[0];// ((d.close-min)/(max-min))*100;
           stochasticD /= periodD;
-          return datum(p.accessor.d(d), stochasticK,stochasticD, middle, overbought, oversold);
+          return datum(p.accessor.d(d), stochasticK,stochasticD, overbought, oversold);
         }
-        else return datum(p.accessor.d(d), null, null, middle,overbought,oversold);
+        else return datum(p.accessor.d(d), null, null, overbought, oversold);
       }).filter(function(d) { return d.stochasticK; });
     }
 
@@ -55,12 +54,6 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
     indicator.overbought = function(_) {
       if (!arguments.length) return overbought;
       overbought = _;
-      return indicator;
-    };
-
-    indicator.middle = function(_) {
-      if (!arguments.length) return middle;
-      middle = _;
       return indicator;
     };
 
@@ -80,7 +73,7 @@ module.exports = function(indicatorMixin, accessor_ohlc) {  // Injected dependen
   };
 };
 
-function datum(date, stochasticK,stochasticD, middle, overbought, oversold) {
-  if(stochasticK) return { date: date, stochasticK: stochasticK,stochasticD:stochasticD, middle: middle, overbought: overbought, oversold: oversold };
-  else return { date: date, stochasticK: null,stochasticD:null, middle: middle, overbought: overbought, oversold: oversold };
+function datum(date, stochasticK, stochasticD, overbought, oversold) {
+  if(stochasticK) return { date: date, stochasticK: stochasticK, stochasticD: stochasticD, overbought: overbought, oversold: oversold };
+  else return { date: date, stochasticK: null, stochasticD: null, overbought: overbought, oversold: oversold };
 }
